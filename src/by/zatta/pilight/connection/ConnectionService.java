@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -26,6 +30,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import by.zatta.pilight.MainActivity;
 import by.zatta.pilight.R;
+import by.zatta.pilight.model.Config;
 
 public class ConnectionService extends Service {
 
@@ -87,7 +92,7 @@ public class ConnectionService extends Service {
 			Log.d(TAG, "recieved connection!");
 			makeNotification(NotificationType.CONNECTED, null);
 			startForeground(35, builder.build());
-			ConnectionProvider.INSTANCE.getConfig();
+			getConfig();
 			if (t == null || !t.isAlive()){
 				t = new HeartBeat();
 			 	   t.start();
@@ -99,6 +104,26 @@ public class ConnectionService extends Service {
 			ConnectionProvider.INSTANCE.finishTheWork();
 			return false;
 		}
+	}
+	
+	private void getConfig(){
+		String jsonString = ConnectionProvider.INSTANCE.getConfig();
+		try {
+			JSONObject json = new JSONObject(jsonString);
+			if(json.has("config")) {
+				Log.e(TAG, "has config");
+				try {
+					Config.parse(json.getJSONObject("config"));
+					Config.print();
+				} catch(JSONException e) {}
+			
+			}
+			
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 	
 	private boolean dropConnection(){

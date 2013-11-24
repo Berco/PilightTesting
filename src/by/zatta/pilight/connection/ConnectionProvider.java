@@ -113,12 +113,12 @@ public enum ConnectionProvider {
 		}
 		try {
 			command_queue.put("HEART");
-			Thread.sleep(100);
+			Thread.sleep(500);
 		} catch (InterruptedException e) {
 			status = Status.NO_CONNECTION;
 			return false; 
 		}
-		if (timeHeart - timeBeat < 5000) {
+		if (timeHeart - timeBeat < 6000) {
 			return true;
 		}
 		status = Status.NO_CONNECTION;

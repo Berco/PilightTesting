@@ -1,59 +1,36 @@
 package by.zatta.pilight.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable{
-	
-    private String location;
-	private String name;
+    private String location_id;
+	private String name_id;
+	private int type;
 	public List<SettingEntry> settings = new ArrayList<SettingEntry>();
 	
-	
-		public String getName() {
-		return this.name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	public String getLocation() {
-		return this.location;
-	}
-
-	public void setLocation(String location) {
-		this.name = location;
-	}
-
-	public List<SettingEntry> getSettings() {
-		return this.settings;
-	}
-
-	public void setSettings(List<SettingEntry> settings) {
-		this.settings = settings;
-	}
-	
-    public DeviceEntry(){}
-    
-    public DeviceEntry(String name, String location, List<SettingEntry> settings) {
-    	this.name = name;
-    	this.location = location;
+	public DeviceEntry(){}
+    public DeviceEntry(String name_id, String location_id, List<SettingEntry> settings) {
+    	this.name_id = name_id;
+    	this.location_id = location_id;
     	this.settings = settings;
     }
-    
-    @Override public String toString() {
-        return this.name;
-    }
+	
+	public String getNameID() 				{ return this.name_id; 		}
+	public void setNameID(String name_id) 	{ this.name_id = name_id;	}
+	
+	public String getLocationID() 				{ return this.location_id;	}
+	public void setLocationID(String location_id) { this.location_id = location_id; }
+	
+	public int getType()					{ return this.type; }
+	public void setType(int type)			{ this.type = type; }
 
-   
+	public List<SettingEntry> getSettings() { return this.settings; }
+	public void setSettings(List<SettingEntry> settings) { this.settings = settings; }
+	
+    @Override public String toString() { return this.name_id; }
 
     public DeviceEntry(Parcel in) {
     	this();
@@ -67,20 +44,17 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable{
  
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(this.name);
-		dest.writeString(this.location);
+		dest.writeString(this.name_id);
+		dest.writeString(this.location_id);
 		dest.writeList(settings);
-		//writeMap(settings, dest);
 	}
 
 	@SuppressWarnings("unchecked")
 	private void readFromParcel(Parcel in) {
-		this.name = in.readString();
-		this.location = in.readString();
+		this.name_id = in.readString();
+		this.location_id = in.readString();
 		in.readTypedList(settings, SettingEntry.CREATOR);
-	}
-	
-	
+	}	
      
     @SuppressWarnings("rawtypes")
 	public static final Parcelable.Creator CREATOR =
@@ -89,7 +63,6 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable{
 			public DeviceEntry createFromParcel(Parcel in) {
                 return new DeviceEntry(in);
             }
- 
             @Override
 			public DeviceEntry[] newArray(int size) {
                 return new DeviceEntry[size];
@@ -98,13 +71,12 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable{
 
         @Override
     	public int compareTo(DeviceEntry o) {
-    		
-    			if(this.location != null && this.name != null){
-    				if ( this.location.compareTo(o.getLocation()) == 0   ){
-    					return o.getName().compareTo(this.name);
+    			if(this.location_id != null && this.name_id != null){
+    				if ( this.location_id.compareTo(o.getLocationID()) == 0   ){
+    					return o.getNameID().compareTo(this.name_id);
     					
     				}else{
-    					return o.getLocation().compareTo(this.location);
+    					return o.getLocationID().compareTo(this.location_id);
     				}
     			}
     			else 

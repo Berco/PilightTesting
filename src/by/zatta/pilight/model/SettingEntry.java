@@ -4,38 +4,22 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class SettingEntry implements Parcelable{
-	
     private String key;
 	private String value;
-
-	public String getKey() {
-		return this.key;
-	}
-
-	public void setKey(String key) {
-		this.key = key;
-	}
 	
-	public String getValue() {
-		return this.value;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
-	}
-
 	public SettingEntry(){}
-    
     public SettingEntry(String key, String value) {
     	this.key = key;
     	this.value = value;
     }
-    
-    @Override public String toString() {
-        return this.key + " = " + this.value;
-    }
 
-   
+	public String getKey() 				{ return this.key; }
+	public void setKey(String key)		{ this.key = key; }
+	
+	public String getValue()	 		{ return this.value; }
+	public void setValue(String value)	{ this.value = value; }
+    
+    @Override public String toString()	{ return this.key + " = " + this.value; }
 
     public SettingEntry(Parcel in) {
 		readFromParcel(in);
@@ -57,8 +41,6 @@ public class SettingEntry implements Parcelable{
 		this.value = in.readString();
 	}
 	
-	
-     
     @SuppressWarnings("rawtypes")
 	public static final Parcelable.Creator CREATOR =
     	new Parcelable.Creator() {
@@ -66,7 +48,6 @@ public class SettingEntry implements Parcelable{
 			public SettingEntry createFromParcel(Parcel in) {
                 return new SettingEntry(in);
             }
- 
             @Override
 			public SettingEntry[] newArray(int size) {
                 return new SettingEntry[size];

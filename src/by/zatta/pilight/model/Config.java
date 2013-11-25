@@ -1,10 +1,8 @@
 package by.zatta.pilight.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
-
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,10 +13,15 @@ public class Config {
 	
 	private static final String TAG = "Config";
 	
-	private static HashMap<String, Location> config = new HashMap<String, Location>();
+	private static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
 	
-	public static HashMap<String, Location> getConfig() {
-		return config;
+	public static List<DeviceEntry> getDevices() {
+		return mDevices;
+	}
+	
+	public static List<DeviceEntry> getDevices(JSONObject jloc) {
+		parse(jloc);
+		return mDevices;
 	}
 	
 	public static void parse(JSONObject jloc) {
@@ -27,47 +30,49 @@ public class Config {
 		/* Iterate through all locations */
 		while(lit.hasNext()) {
 
-			String lkey = (String)lit.next();
-			Log.d("lkey", lkey);
+			String locationID = (String)lit.next();
+			String locationName = "";
 
-			try {
-
-				/* Create new location object */
-				Location location = new Location();
-				HashMap<String, Device> devices = new HashMap<String, Device>();
-
-				JSONObject jdev = jloc.getJSONObject(lkey);
+			try {				
+				JSONObject jdev = jloc.getJSONObject(locationID);
+				if (jdev.has("name")) locationName = jdev.getString("name");
+				Log.e(TAG, locationID + " = " +locationName);
 				Iterator<?> dit = jdev.keys();
 
 				/* Iterate through all devices of this location */
 				while(dit.hasNext()) {
 					String dkey = (String)dit.next();
 					Log.d("dkey", dkey);
-					if(new String("name").equals(dkey)) {
-						location.setName(jdev.getString(dkey));
-					} else {
+					if(!dkey.equals("name")) {
 
 						try {
 
 							/* Create new device object for this location */
-							Device device = new Device();
-							HashMap<String, ArrayList<String>> settings = new HashMap<String, ArrayList<String>>();
+							DeviceEntry device = new DeviceEntry();
+							device.setNameID(dkey);
+							device.setLocationID(locationID);
 							
+							List<SettingEntry> settings = new ArrayList<SettingEntry>();
+							SettingEntry sentry = new SettingEntry();
+							sentry.setKey("locationName");
+							sentry.setValue(locationName);
+							settings.add(sentry);
+														
 							JSONObject jset = jdev.getJSONObject(dkey);
 							Iterator<?> sit = jset.keys();
 							
-							/* Iterate through all settings of this device */
+							/* Iterate through all settings of this device */							
 							while(sit.hasNext()) {
 								String skey = (String)sit.next();
 								
-								if(new String("name").equals(skey)) {
-									device.setName(jset.getString(skey));
+								if(skey.equals("type")) {
+									device.setType(Integer.valueOf(jset.getString(skey)));
 								} else {
 
 									try {
-
+										sentry = new SettingEntry();
+										sentry.setKey(skey);
 										/* Create new settings array for this device */
-										ArrayList<String> value = new ArrayList<String>();
 										
 										JSONArray jvalarr = jset.optJSONArray(skey);
 										String jvalstr = jset.optString(skey);
@@ -77,37 +82,42 @@ public class Config {
 										if(jvalarr != null) {
 											/* Iterate through all values for this setting */
 											for(Short i=0; i<jvalarr.length(); i++) {
-												value.add(jvalarr.get(i).toString());
+												sentry.setKey(skey);
+												sentry.setValue(jvalarr.get(i).toString());
 											}
 										} else if(jvalstr != null) {
-											value.add(jvalstr);
+											//Log.e(TAG, skey + "  string : " + jvalstr);
+											//sentry.setKey(skey);
+											sentry.setValue(jvalstr.toString());
 										} else if(jvaldbl != null) {
-											value.add(jvaldbl.toString());
+											Log.e(TAG, skey + "double : " + jvaldbl.toString());
+											//sentry.setKey(skey);
+											sentry.setValue(jvaldbl.toString());
 										} else if(jvallng != null) {
-											value.add(jvallng.toString());
+											Log.e(TAG, skey + "long : " + jvallng.toString());
+											//sentry.setKey(skey);
+											sentry.setValue(jvallng.toString());
 										}							
 
-										settings.put(skey, value);
-									
+										if (sentry != null) settings.add(sentry);
 									} catch (JSONException e) {
-							            Log.w(TAG, "1) The received config is of an incorrent format");
+							            Log.w(TAG, "The received SETTING is of an incorrent format");
 									}
 								}
 							}
+					
 							device.setSettings(settings);
-							devices.put(dkey, device);
+							mDevices.add(device);
 							
 						} catch (JSONException e) {
-				            Log.w(TAG, "2) The received config is of an incorrent format");
+				            Log.w(TAG, "The received DEVICE is of an incorrent format");
 				        }
 
 					}
 				}
-				location.setDevices(devices);
-				config.put(lkey, location);
 
 			} catch (JSONException e) {
-	            Log.w(TAG, "3) The received config is of an incorrent format");
+	            Log.w(TAG, "The received LOCATION is of an incorrent format");
 	        }
 		}
 		try {
@@ -118,27 +128,15 @@ public class Config {
 	}
 	
 	public static void print() {
-		int i = 0;
-		
-		for(Map.Entry<String, Location> lentry : config.entrySet()) {
-
-			Location location = (Location)lentry.getValue();
-			System.out.println(lentry.getKey()+" "+location.getName());
-
-			for(Map.Entry<String, Device> dentry : location.getDevices().entrySet()) {
-
-				Device device = (Device)dentry.getValue();
-				System.out.println("\t-"+dentry.getKey()+" "+device.getName());
-				
-				for(Map.Entry<String, ArrayList<String>> sentry : device.getSettings().entrySet()) {
-					ArrayList<String> val = (ArrayList<String>)sentry.getValue();
-					System.out.print("\t\t*"+sentry.getKey()+" ");
-					for(i=0; i<val.size(); i++) {
-						System.out.print(val.get(i).toString()+" ");
-					}
-					System.out.println();
+		System.out.println("________________");
+		for (DeviceEntry device : mDevices){
+			 System.out.println("-"+device.getNameID());
+			 System.out.println("-"+device.getLocationID());
+			 System.out.println("-"+device.getType());
+				for(SettingEntry sentry : device.getSettings()) {
+					System.out.println("*"+sentry.getKey()+" = " + sentry.getValue());
 				}
-			}
-		}
+			System.out.println("________________");
+		 }
 	}
 }

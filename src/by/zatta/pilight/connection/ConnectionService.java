@@ -31,6 +31,7 @@ import android.util.Log;
 import by.zatta.pilight.MainActivity;
 import by.zatta.pilight.R;
 import by.zatta.pilight.model.Config;
+import by.zatta.pilight.model.DeviceEntry;
 
 public class ConnectionService extends Service {
 
@@ -43,6 +44,7 @@ public class ConnectionService extends Service {
 	private static HeartBeat t = null;
 	private static NotificationManager mNotMan;
 	private static Notification.Builder builder;
+	private static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
 	private boolean isConnectionUp = false;
 		 	
 	private static List<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track of all current registered clients.
@@ -113,8 +115,7 @@ public class ConnectionService extends Service {
 			if(json.has("config")) {
 				Log.e(TAG, "has config");
 				try {
-					Config.parse(json.getJSONObject("config"));
-					Config.print();
+					mDevices = Config.getDevices(json.getJSONObject("config"));
 				} catch(JSONException e) {}
 			
 			}
@@ -384,6 +385,8 @@ public class ConnectionService extends Service {
 				Log.d(TAG, "Ontvangen van activity: "+ Integer.toString(msg.arg1));
 				switch (msg.arg1){
 				case 1:
+				    //{"message":"send","code":{"state":"off","device":"KastTV","location":"living"}}
+					//{"message":"send","code":{"state":"off","device":"KastTV","location":"living"}}
 					try {
 						Log.d(TAG, "heart-beat is null: " + (t == null));
 					} catch (Exception e) { Log.d(TAG, "writer nullness could not be determined");	}

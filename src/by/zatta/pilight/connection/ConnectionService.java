@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 import by.zatta.pilight.MainActivity;
@@ -41,6 +42,7 @@ public class ConnectionService extends Service {
 	private boolean boundToActivity;
 	private static Bitmap bmp;
 	private static Context ctx;
+	private static Context aCtx;
 	private static HeartBeat t = null;
 	private static NotificationManager mNotMan;
 	private static Notification.Builder builder;
@@ -74,6 +76,7 @@ public class ConnectionService extends Service {
 		super.onCreate();
 		
 		ctx = this;
+		aCtx = getApplicationContext();
 		
 		this.registerReceiver(mMessageReceiver, new IntentFilter("my-event"));
 				
@@ -428,7 +431,14 @@ public class ConnectionService extends Service {
 
 				// Send data as a String
 				Bundle bundle = new Bundle();
+				bundle.setClassLoader(aCtx.getClassLoader());
+				
+				if (!mDevices.isEmpty())
+					Log.d(TAG, "putting mDevices");
+					bundle.putParcelableArrayList("config", (ArrayList<? extends Parcelable>) mDevices);
+				
 				bundle.putString("str1", message);
+					
 				Message msg = Message.obtain(null, MSG_SET_STRING_VALUE);
 				msg.setData(bundle);
 				messenger.send(msg);

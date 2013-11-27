@@ -1,5 +1,8 @@
 package by.zatta.pilight;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -8,6 +11,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -16,16 +20,35 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
+
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+
 import by.zatta.pilight.connection.ConnectionService;
+import by.zatta.pilight.model.DeviceEntry;
+import by.zatta.pilight.model.SettingEntry;
 
 public class MainActivity extends Activity implements View.OnClickListener, ServiceConnection {
 	private Button btnStart, btnStop, btnBind, btnUnbind, btnUpby1, btnUpby10;
 	private TextView textStatus, textIntValue, textStrValue;
+	
+	private ListView mDrawerList;
+    private DrawerLayout mDrawer;
+    private CustomActionBarDrawerToggle mDrawerToggle;
+    private int mCurrentTitle=R.string.app_name;
+	
 	private Messenger mServiceMessenger = null;
 	boolean mIsBound;
+	static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
 
 	private static final String TAG = "Zatta::MainActivity";
 	private final Messenger mMessenger = new Messenger(new IncomingMessageHandler());
@@ -71,6 +94,17 @@ public class MainActivity extends Activity implements View.OnClickListener, Serv
 		btnUpby1.setOnClickListener(this);
 		btnUpby10.setOnClickListener(this);
 
+		getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+        
+        mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        mDrawer.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+
+        _initMenu();
+        mDrawerToggle = new CustomActionBarDrawerToggle(this, mDrawer);
+        mDrawer.setDrawerListener(mDrawerToggle);
+		
 		automaticBind();
 		
 	}
@@ -94,10 +128,131 @@ public class MainActivity extends Activity implements View.OnClickListener, Serv
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.base, menu);
-		return true;
-	}
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        mDrawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    /* Called whenever we call invalidateOptionsMenu() */
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        // If the nav drawer is open, hide action items related to the content view
+        //boolean drawerOpen = mDrawer.isDrawerOpen(mDrawerList);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        /*
+		 * The action bar home/up should open or close the drawer.
+		 * ActionBarDrawerToggle will take care of this.
+		 */
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+        switch (item.getItemId()) {
+
+            case R.id.menu_about:
+                return true;
+            case R.id.menu_settings:
+                return true;
+            default:
+                break;
+        }
+
+
+        // Handle your other action bar items...
+        return super.onOptionsItemSelected(item);
+    }
+
+    private class CustomActionBarDrawerToggle extends ActionBarDrawerToggle {
+
+        public CustomActionBarDrawerToggle(Activity mActivity, DrawerLayout mDrawerLayout) {
+            super(
+                    mActivity,
+                    mDrawerLayout,
+                    R.drawable.ic_navigation_drawer,
+                    R.string.app_name,
+                    mCurrentTitle);
+        }
+
+        @Override
+        public void onDrawerClosed(View view) {
+            getActionBar().setTitle(getString(mCurrentTitle));
+            invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+        }
+
+        @Override
+        public void onDrawerOpened(View drawerView) {
+            getActionBar().setTitle(getString(R.string.app_name));
+            invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+        }
+    }
+
+    private class DrawerItemClickListener implements ListView.OnItemClickListener {
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position,
+                                long id) {
+
+            // Highlight the selected item, update the title, and close the drawer
+            // update selected item and title, then close the drawer
+            mDrawerList.setItemChecked(position, true);
+//            mBaseFragment = selectFragment(position);
+//            mSelectedFragment = position;
+//
+//            if (mBaseFragment != null)
+//                openFragment(mBaseFragment);
+            mDrawer.closeDrawer(mDrawerList);
+        }
+    }
+    
+    public static final String[] options = {
+        "All",
+        "Living",
+        "BathRoom",
+        "Kitchen",
+        "Alleyway",
+        "Toilet",
+        "Stairway",
+        "Master bedroom",
+        "Bedroom son",
+        "Bedroom daughter",
+        "Basement" ,
+        "Storage",
+        "Front garden",
+        "Drive way",
+        "Back garden",
+        "Garage",
+        "Lawn"
+};
+
+
+private void _initMenu() {
+    mDrawerList = (ListView) findViewById(R.id.drawer);
+
+    if (mDrawerList != null) {
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1, options));
+
+        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+    }
+
+}
 
 	/**
 	 * Check if the service is running. If the service is running 
@@ -238,12 +393,31 @@ public class MainActivity extends Activity implements View.OnClickListener, Serv
 				textIntValue.setText("Int Message: " + msg.arg1);
 				break;
 			case ConnectionService.MSG_SET_STRING_VALUE:
-				String str1 = msg.getData().getString("str1");
+				Bundle bundle = msg.getData();
+				bundle.setClassLoader(getApplicationContext().getClassLoader());
+				
+				String str1 = bundle.getString("str1");
 				textStrValue.setText("Str Message: " + str1);
+								
+				mDevices = bundle.getParcelableArrayList("config");
+				print();
 				break;
 			default:
 				super.handleMessage(msg);
 			}
 		}
-	}	
+	}
+	
+	public static void print() {
+		System.out.println("________________");
+		for (DeviceEntry device : mDevices){
+			 System.out.println("-"+device.getNameID());
+			 System.out.println("-"+device.getLocationID());
+			 System.out.println("-"+device.getType());
+				for(SettingEntry sentry : device.getSettings()) {
+					System.out.println("*"+sentry.getKey()+" = " + sentry.getValue());
+				}
+			System.out.println("________________");
+		 }
+	}
 }

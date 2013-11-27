@@ -25,7 +25,6 @@ public class Config {
 	}
 	
 	public static void parse(JSONObject jloc) {
-
 		Iterator<?> lit = jloc.keys();
 		/* Iterate through all locations */
 		while(lit.hasNext()) {
@@ -138,5 +137,20 @@ public class Config {
 				}
 			System.out.println("________________");
 		 }
+	}
+	
+	public static List<DeviceEntry> update(OriginEntry originEntry) {
+		for (DeviceEntry device : mDevices){
+			if (device.getNameID().equals(originEntry.getNameID())){
+				Log.d(TAG, "updating: " + device.getNameID());
+				for(SettingEntry sentry : device.getSettings()) {
+					if (sentry.getKey().equals(originEntry.getChange())){
+						sentry.setValue(originEntry.getValue());
+						Log.d(TAG, "updating: " + sentry.getKey());
+					}
+				}
+			}
+		}
+		return mDevices;
 	}
 }

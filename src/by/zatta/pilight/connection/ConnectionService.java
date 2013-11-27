@@ -33,6 +33,8 @@ import by.zatta.pilight.MainActivity;
 import by.zatta.pilight.R;
 import by.zatta.pilight.model.Config;
 import by.zatta.pilight.model.DeviceEntry;
+import by.zatta.pilight.model.Origin;
+import by.zatta.pilight.model.OriginEntry;
 
 public class ConnectionService extends Service {
 
@@ -120,26 +122,33 @@ public class ConnectionService extends Service {
 				try {
 					mDevices = Config.getDevices(json.getJSONObject("config"));
 				} catch(JSONException e) {}
-			
 			}
-			
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+		} catch (JSONException e) { Log.w(TAG, "problems in JSONning"); }
 	}
 	
 	private boolean dropConnection(){
 		Log.d(TAG, "dropConnection called");
-		ConnectionProvider.INSTANCE.finishTheWork();
 		try {t.finalize();}	catch (Throwable e) { Log.w(TAG, "couldnt finalize the heart-beat"); }
+		ConnectionProvider.INSTANCE.finishTheWork();
 		isConnectionUp = false;
 		return false;
 	}
 	
 	public static void postUpdate(String update){
 		sendMessageToUI(java.text.DateFormat.getTimeInstance().format(Calendar.getInstance().getTime()) + update);
+		if (update.contains("origin\":\"config")){
+			try {
+				OriginEntry originEntry = Origin.getOriginEntry(new JSONObject(update));
+				//Config.print();
+				mDevices = Config.update(originEntry);
+				update = originEntry.toString();
+				Log.e(TAG, originEntry.toString());
+			} catch (JSONException e) {Log.d(TAG, "iets mis met het jsonObject?");
+				e.printStackTrace();
+			}
+		}
+		
+		
 		if (update.contains("Lost Connection"))
 			makeNotification(NotificationType.LOST_CONNECTION, null);
 		else if (update.contains("Reconnection failed"))

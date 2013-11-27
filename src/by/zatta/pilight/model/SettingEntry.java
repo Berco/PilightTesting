@@ -22,6 +22,7 @@ public class SettingEntry implements Parcelable{
     @Override public String toString()	{ return this.key + " = " + this.value; }
 
     public SettingEntry(Parcel in) {
+    	this();
 		readFromParcel(in);
 	}
   

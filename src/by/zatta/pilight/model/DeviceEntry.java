@@ -6,6 +6,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable{
+	
     private String location_id;
 	private String name_id;
 	private int type;
@@ -46,14 +47,17 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable{
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(this.name_id);
 		dest.writeString(this.location_id);
-		dest.writeList(settings);
+		dest.writeInt(this.type);
+		dest.writeList(this.settings);
+		
 	}
 
 	@SuppressWarnings("unchecked")
 	private void readFromParcel(Parcel in) {
 		this.name_id = in.readString();
 		this.location_id = in.readString();
-		in.readTypedList(settings, SettingEntry.CREATOR);
+		this.type = in.readInt();
+		this.settings = in.readArrayList(SettingEntry.class.getClassLoader());		
 	}	
      
     @SuppressWarnings("rawtypes")

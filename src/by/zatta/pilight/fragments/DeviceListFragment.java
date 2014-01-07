@@ -74,7 +74,7 @@ public class DeviceListFragment extends BaseFragment {
 
 	@Override
 	public int getTitleResourceId() {
-		return R.string.carddemo_title_list_base;
+		return R.string.title_list_base;
 	}
 
 	@Override

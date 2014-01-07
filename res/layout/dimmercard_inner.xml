@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ /********************************************************************************
+  ~  * 
+  ~  * Copyright (C) 2013 Zatta
+  ~  * 
+  ~  * This file is part of pilight for android.
+  ~  * 
+  ~  * pilight for android is free software: you can redistribute it and/or modify 
+  ~  * it under the terms of the GNU General Public License as published by the 
+  ~  * Free Software Foundation, either version 3 of the License, or (at your option)
+  ~  * any later version.
+  ~  * 
+  ~  * pilight for android is distributed in the hope that it will be useful, but 
+  ~  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+  ~  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
+  ~  * for more details.
+  ~  * 
+  ~  * You should have received a copy of the GNU General Public License along 
+  ~  * with pilightfor android.
+  ~  * If not, see <http://www.gnu.org/licenses/>
+  ~  * 
+  ~  * Copyright (c) 2013 pilight project
+  ~  ********************************************************************************/
+-->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <ImageView
+        android:id="@+id/colorBorder"
+        android:layout_width="10dp"
+        android:layout_height="@dimen/card_base_empty_height"
+        android:layout_marginTop="2dp"
+        android:background="@drawable/rectangle" />
+
+    <!-- Use same ID to use built-in features -->
+
+    <TextView
+        android:id="@+id/card_main_inner_simple_title"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@id/colorBorder"
+        android:gravity="center" />
+
+    <!-- Used as foregound for the togglebutton -->
+
+    <ImageView
+        android:id="@+id/front_button"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="15dp"
+        android:gravity="center"
+        android:src="@drawable/toggle_light_off" />
+
+    <ToggleButton
+        android:id="@+id/card_inner_tb"
+        style="@style/ToggleButton.LightBulb"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="15dp"
+        android:gravity="center" />
+
+    <SeekBar
+        android:id="@+id/card_inner_seekbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/card_main_inner_simple_title"
+        android:layout_marginBottom="15dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="15dp"
+        android:layout_toLeftOf="@id/card_inner_tb"
+        android:max="16"
+        android:progress="0" />
+
+</RelativeLayout>

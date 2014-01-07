@@ -52,7 +52,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:layout_marginRight="5dp"
-        android:background="@drawable/btn_cab_done_carddemo"
+        android:background="@drawable/btn_cab_done"
         android:drawableLeft="@drawable/btn_screen_up"
         android:gravity="center"
         android:text="Up" />
@@ -64,7 +64,7 @@
         android:layout_alignParentBottom="true"
         android:layout_marginRight="5dp"
         android:layout_toLeftOf="@id/card_inner_btnUp"
-        android:background="@drawable/btn_cab_done_carddemo"
+        android:background="@drawable/btn_cab_done"
         android:drawableRight="@drawable/btn_screen_down"
         android:gravity="center"
         android:text="Down" />

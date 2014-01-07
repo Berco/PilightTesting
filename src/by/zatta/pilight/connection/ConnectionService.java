@@ -68,7 +68,7 @@ import by.zatta.pilight.model.OriginEntry;
 
 public class ConnectionService extends Service {
 
-	public static NotificationType mCurrentNotif;
+	public static NotificationType mCurrentNotif = NotificationType.DESTROYED;
 
 	public static final int MSG_REGISTER_CLIENT = 1912376432;
 	public static final int MSG_SET_BUNDLE = 1927364723;

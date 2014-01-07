@@ -1,20 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ /********************************************************************************
+  ~  * 
+  ~  * Copyright (C) 2013 Zatta
+  ~  * with al lot of thanks to Gabriele Mariotti, who's work this is based on
+  ~  * 
+  ~  * This file is part of pilight for android.
+  ~  * 
+  ~  * pilight for android is free software: you can redistribute it and/or modify 
+  ~  * it under the terms of the GNU General Public License as published by the 
+  ~  * Free Software Foundation, either version 3 of the License, or (at your option)
+  ~  * any later version.
+  ~  * 
+  ~  * pilight for android is distributed in the hope that it will be useful, but 
+  ~  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+  ~  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
+  ~  * for more details.
+  ~  * 
+  ~  * You should have received a copy of the GNU General Public License along 
+  ~  * with pilightfor android.
+  ~  * If not, see <http://www.gnu.org/licenses/>
+  ~  * 
+  ~  * Copyright (c) 2013 pilight project
+  ~  ********************************************************************************/
+-->
+
 <resources>
 
-    <!--
-        Base application theme, dependent on API level. This theme is replaced
-        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
-    -->
-    <style name="AppBaseTheme" parent="android:Theme.Light">
-        <!--
-            Theme customizations available in newer API levels can go in
-            res/values-vXX/styles.xml, while customizations related to
-            backward-compatibility can go here.
-        -->
+    <style name="AppTheme" parent="@android:style/Theme.Holo.Light">
+        <item name="android:actionBarItemBackground">@drawable/selectable_background</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Solid.AppTheme</item>
+        <item name="android:actionModeBackground">@drawable/cab_background_top</item>
+        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom</item>
+        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.AppTheme</item>
     </style>
 
-    <!-- Application theme. -->
-    <style name="AppTheme" parent="AppBaseTheme">
-        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+    <style name="ActionBar.Solid.AppTheme" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
+        <item name="android:background">@drawable/ab_solid</item>
+        <item name="android:backgroundStacked">@drawable/ab_stacked_solid</item>
+        <item name="android:backgroundSplit">@drawable/ab_bottom_solid</item>
+    </style>
+
+    <style name="ActionButton.CloseMode.AppTheme" parent="@android:style/Widget.Holo.Light.ActionButton.CloseMode">
+        <item name="android:background">@drawable/btn_cab_done</item>
+    </style>
+    
+    
+    <!-- Text for sections -->
+    <style name="AppTheme.TitleText">
+        <item name="android:textSize">@dimen/demo_title_section_textsize</item>
+        <item name="android:layout_marginLeft">@dimen/demo_title_section_margin</item>
+        <item name="android:layout_marginRight">@dimen/demo_title_section_margin</item>
+        <item name="android:layout_marginBottom">@dimen/demo_title_section_margin_bottom</item>
+        <item name="android:layout_marginTop">@dimen/demo_title_section_margin_top</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/demo_title_section_textcolor</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+    </style>
+    
+    <style name="ToggleButton.LightBulb" parent="@android:style/Widget.Holo.Light.Button.Toggle">
+        <item name="android:background">@drawable/toggle_light_bg</item>
+        <item name="android:disabledAlpha">?android:attr/disabledAlpha</item>
+    </style>
+  
+    <style name="ToggleButton.Relay" parent="@android:style/Widget.Holo.Light.Button.Toggle">
+        <item name="android:background">@drawable/toggle_relay_bg</item>
+        <item name="android:disabledAlpha">?android:attr/disabledAlpha</item>
     </style>
 
 </resources>

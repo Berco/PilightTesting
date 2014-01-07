@@ -75,7 +75,7 @@ public class OverviewFragment extends BaseFragment implements OnClickListener {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.main, container, false);
+		View v = inflater.inflate(R.layout.debugging_layout, container, false);
 
 		btnStart = (Button) v.findViewById(R.id.btnStart);
 		btnStop = (Button) v.findViewById(R.id.btnStop);

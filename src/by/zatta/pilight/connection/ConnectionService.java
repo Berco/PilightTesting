@@ -1,7 +1,31 @@
+/******************************************************************************************
+ * 
+ * Copyright (C) 2013 Zatta
+ * 
+ * This file is part of pilight for android.
+ * 
+ * pilight for android is free software: you can redistribute it and/or modify 
+ * it under the terms of the GNU General Public License as published by the 
+ * Free Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ * 
+ * pilight for android is distributed in the hope that it will be useful, but 
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
+ * for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along 
+ * with pilightfor android.
+ * If not, see <http://www.gnu.org/licenses/>
+ * 
+ * Copyright (c) 2013 pilight project
+ ********************************************************************************************/
+
 package by.zatta.pilight.connection;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -17,10 +41,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -28,7 +56,9 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Toast;
 import by.zatta.pilight.MainActivity;
 import by.zatta.pilight.R;
 import by.zatta.pilight.model.Config;
@@ -38,345 +68,349 @@ import by.zatta.pilight.model.OriginEntry;
 
 public class ConnectionService extends Service {
 
-	private static final String TAG = "Zatta::ConnectionService";
-	
-	@SuppressWarnings("unused")
-	private boolean boundToActivity;
-	private static Bitmap bmp;
-	private static Context ctx;
+	public static NotificationType mCurrentNotif;
+
+	public static final int MSG_REGISTER_CLIENT = 1912376432;
+	public static final int MSG_SET_BUNDLE = 1927364723;
+	public static final int MSG_SET_STATUS = 1098378957;
+	public static final int MSG_SWITCH_DEVICE = 1755547587;
+	public static final int MSG_UNREGISTER_CLIENT = 1873487903;
 	private static Context aCtx;
-	private static HeartBeat t = null;
+	private static Context ctx;
+
+	public static List<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track of all current registered clients (activities, widget:))
+	private static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
 	private static NotificationManager mNotMan;
 	private static Notification.Builder builder;
-	private static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
+	private static HeartBeat t = null;
+	private static final String TAG = "Zatta::ConnectionService";
 	private boolean isConnectionUp = false;
-		 	
-	private static List<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track of all current registered clients.
-	public static final int MSG_REGISTER_CLIENT = 1;
-	public static final int MSG_UNREGISTER_CLIENT = 2;
-	public static final int MSG_SET_INT_VALUE = 3;
-	public static final int MSG_SET_STRING_VALUE = 4;
-	public static final int MSG_SET_DEVICE = 5;
-	public static final int MSG_SET_CONFIG = 6;
-	private final Messenger mMessenger = new Messenger(new IncomingMessageHandler()); // Target we publish for clients to send messages to IncomingHandler.
 	
-	private static NotificationType mCurrentNotif;
-	private enum NotificationType {
-		DESTROYED,
-		CONNECTING,
-		FAILED,
-		CONNECTED,
-		LOST_CONNECTION,
-		LEFT_NETWORK,
-		UPDATE,
-	}
-	
-	
-	@Override
-	public void onCreate() {
-		Log.v(TAG, "onCreate");
-		super.onCreate();
-		
-		ctx = this;
-		aCtx = getApplicationContext();
-		
-		this.registerReceiver(mMessageReceiver, new IntentFilter("my-event"));
-				
-		bmp = BitmapFactory.decodeResource(getResources(),R.drawable.eye);
-				int height = (int) getResources().getDimension(android.R.dimen.notification_large_icon_height);
-				int width = (int) getResources().getDimension(android.R.dimen.notification_large_icon_width);
-		bmp = Bitmap.createScaledBitmap(bmp, width, height, false); 
-		
-		mNotMan = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		
-		isConnectionUp = makeConnection();
-			
-	}
-	
-	private boolean makeConnection(){
-		Log.d(TAG, "makeConnection called");
-		if (ConnectionProvider.INSTANCE.doConnect()) {
-			Log.d(TAG, "recieved connection!");
-			makeNotification(NotificationType.CONNECTED, null);
-			startForeground(35, builder.build());
-			getConfig();
-			if (t == null || !t.isAlive()){
-				t = new HeartBeat();
-			 	   t.start();
-			}
-			return true;
-		}else{
-			Log.d(TAG, "received connection failure");
-			makeNotification(NotificationType.FAILED, null);
-			ConnectionProvider.INSTANCE.finishTheWork();
-			return false;
-		}
-	}
-	
-	private void getConfig(){
-		String jsonString = ConnectionProvider.INSTANCE.getConfig();
-		try {
-			JSONObject json = new JSONObject(jsonString);
-			if(json.has("config")) {
-				Log.e(TAG, "has config");
-				try {
-					mDevices = Config.getDevices(json.getJSONObject("config"));
-				} catch(JSONException e) {}
-			}
-		} catch (JSONException e) { Log.w(TAG, "problems in JSONning"); }
-	}
-	
-	private boolean dropConnection(){
-		Log.d(TAG, "dropConnection called");
-		try {t.finalize();}	catch (Throwable e) { Log.w(TAG, "couldnt finalize the heart-beat"); }
-		ConnectionProvider.INSTANCE.finishTheWork();
-		isConnectionUp = false;
-		return false;
-	}
-	
-	public static void postUpdate(String update){
-		sendMessageToUI(java.text.DateFormat.getTimeInstance().format(Calendar.getInstance().getTime()) + update);
-		if (update.contains("origin\":\"config")){
-			try {
-				OriginEntry originEntry = Origin.getOriginEntry(new JSONObject(update));
-				//Config.print();
-				mDevices = Config.update(originEntry);
-				update = originEntry.toString();
-				Log.e(TAG, originEntry.toString());
-			} catch (JSONException e) {Log.d(TAG, "iets mis met het jsonObject?");
-				e.printStackTrace();
-			}
-		}
-		
-		
-		if (update.contains("Lost Connection"))
-			makeNotification(NotificationType.LOST_CONNECTION, null);
-		else if (update.contains("Reconnection failed"))
-			makeNotification(NotificationType.LOST_CONNECTION, null);
-		else if (update.contains("Reconnection attempt"))
-			makeNotification(NotificationType.CONNECTING, update);
-		else
-			makeNotification(NotificationType.UPDATE, update);
-	}
-	
-	private static void makeNotification(NotificationType type, String message){
-		Intent main;
-		PendingIntent sentBroadcast;
-		PendingIntent startMainActivity;
-		
-		String myDate = java.text.DateFormat.getTimeInstance().format(Calendar.getInstance().getTime());
-				
-		if (type != mCurrentNotif){
-			switch (type){
-				case DESTROYED:
-					builder = new Notification.Builder(ctx);
-					builder
-						.setSmallIcon(R.drawable.eye)
-						.setLargeIcon(bmp)
-						.setContentTitle("Pilight")
-						.setContentText("service destroyed");
-				mCurrentNotif = NotificationType.DESTROYED;
-					break;
-				case CONNECTING:
-					builder = new Notification.Builder(ctx)
-		        		.setContentTitle("pilight")
-		        		.setContentText("Connecting " + myDate)
-		        		.setSmallIcon(R.drawable.eye)
-		        		.setLargeIcon(bmp);
-					mCurrentNotif = NotificationType.CONNECTING;
-					break;
-				case CONNECTED:
-					main = new Intent(ctx, MainActivity.class);
-					main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-					startMainActivity = PendingIntent.getActivity(ctx, 0, main,	PendingIntent.FLAG_UPDATE_CURRENT);
-					
-					builder = new Notification.Builder(ctx)
-		        		.setContentTitle("pilight")
-		        		.setContentText("Connected " + myDate)
-		        		.setContentIntent(startMainActivity)
-		        		.setSmallIcon(R.drawable.eye)
-		        		.setLargeIcon(bmp);
-					mCurrentNotif = NotificationType.CONNECTED;
-					break;
-				case FAILED:
-					main = new Intent("my-event");
-					sentBroadcast = PendingIntent.getBroadcast(ctx, 0, main,	PendingIntent.FLAG_UPDATE_CURRENT);
-					
-					builder = new Notification.Builder(ctx)
-		        		.setContentTitle("pilight")
-		        		.setContentText("Failed " + myDate)
-		        		.addAction(R.drawable.refresh, "Try to connect again", sentBroadcast)
-		        		.setSmallIcon(R.drawable.eye)
-		        		.setLargeIcon(bmp);	
-					mCurrentNotif = NotificationType.FAILED;
-					break;	
-				case LOST_CONNECTION:
-					main = new Intent("my-event");
-					sentBroadcast = PendingIntent.getBroadcast(ctx, 0, main,	PendingIntent.FLAG_UPDATE_CURRENT);
-					
-					builder = new Notification.Builder(ctx)
-		        		.setContentTitle("pilight")
-		        		.setContentText("Lost Connection")
-		        		.addAction(R.drawable.refresh, "Try to reconnect", sentBroadcast)
-		        		.setSmallIcon(R.drawable.eye)
-		        		.setLargeIcon(bmp);
-					mCurrentNotif = NotificationType.LOST_CONNECTION;
-					break;
-				case UPDATE:
-					main = new Intent(ctx, MainActivity.class);
-					main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-					startMainActivity = PendingIntent.getActivity(ctx, 0, main,	PendingIntent.FLAG_UPDATE_CURRENT);
-					
-					builder = new Notification.Builder(ctx)
-		        		.setContentTitle(myDate)
-		        		.setContentText(message)
-		        		.setStyle(new Notification.BigTextStyle().bigText(message))
-		        		.setContentIntent(startMainActivity)
-		        		.setSmallIcon(R.drawable.eye)
-		        		.setLargeIcon(bmp);
-					mCurrentNotif = NotificationType.UPDATE;
-					break;
-				default:
-					break;
-			}
-		} else {
-			builder
-				.setContentTitle(myDate)
-				.setContentText(message)
-				.setStyle(new Notification.BigTextStyle().bigText(message));
-		}
-		mNotMan.notify(35, builder.build());
-		
-	}
-	
-	boolean isNetworkConnectionAvailable() { 
-		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo info = cm.getActiveNetworkInfo();
-        if (info == null) return false;
-        Log.d(TAG, "network: " + info.getTypeName()+  " + " + info.getExtraInfo());
-        return (info.isConnectedOrConnecting());
-    }
-
-	@Override
-	public void onDestroy() {
-		Log.v(TAG, "onDestroy");
-		this.unregisterReceiver(mMessageReceiver);
-		dropConnection();
-		makeNotification(NotificationType.DESTROYED, null);
-		stopForeground(false);
-		super.onDestroy();
+	public enum NotificationType {
+		CONNECTED, CONNECTING, DESTROYED, FAILED, LOST_CONNECTION, UPDATE,
 	}
 
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		Log.e(TAG, "onStartCommand");		
-		return START_STICKY;
-	}
-	
+	private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// Extract data included in the Intent
+			String action = intent.getAction();
+			//Log.v("receiver", "Got inent action: " + action);
+
+			if (action.equals("pilight-kill-service")) {
+				//Log.v(TAG, "kill recieved");
+				stopSelf();
+			} else if (action.equals("pilight-reconnect")) {
+				//Log.v(TAG, "kill recieved");
+				makeNotification(NotificationType.CONNECTING, "reconnecting...");
+				if (isConnectionUp)
+					dropConnection();
+				else
+					isConnectionUp = makeConnection();
+			}
+		}
+	};
+	private final Messenger mMessenger = new Messenger(new IncomingMessageHandler()); // Target we publish for clients to send messages to
+																						// IncomingHandler.
+
 	/**
-	 * When binding to the service, we return an interface to our messenger for
-	 * sending messages to the service.
+	 * When binding to the service, we return an interface to our messenger for sending messages to the service.
 	 */
 	@Override
 	public IBinder onBind(Intent intent) {
-		Log.v(TAG, "onBind");
-		boundToActivity = true;
+		//Log.v(TAG, "onBind");
 		return mMessenger.getBinder();
 	}
 
 	@Override
+	public void onCreate() {
+		// Log.v(TAG, "onCreate");
+		super.onCreate();
+		ctx = this;
+		aCtx = getApplicationContext();
+
+		IntentFilter filter = new IntentFilter();
+		filter.addAction("pilight-reconnect");
+		filter.addAction("pilight-kill-service");
+		this.registerReceiver(mMessageReceiver, filter);
+
+		mNotMan = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+		isConnectionUp = makeConnection();
+
+	}
+
+	@Override
+	public void onDestroy() {
+		//Log.e(TAG, "onDestroy");
+		this.unregisterReceiver(mMessageReceiver);
+		sendMessageToUI(MSG_SET_STATUS, NotificationType.DESTROYED.name());
+		dropConnection();
+		mNotMan.cancel(35);
+		Toast.makeText(aCtx, "service destroyed", Toast.LENGTH_LONG).show();
+		super.onDestroy();
+	}
+
+	@Override
 	public void onRebind(Intent intent) {
-		Log.v(TAG, "onRebind");
-		boundToActivity=true;
+		//Log.v(TAG, "onRebind");
 		super.onRebind(intent);
 	}
 
 	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		//Log.v(TAG, "onStartCommand");
+		if ((mCurrentNotif == NotificationType.FAILED || mCurrentNotif == NotificationType.LOST_CONNECTION)
+				&& !(mCurrentNotif == NotificationType.CONNECTING)) {
+			isConnectionUp = makeConnection();
+		}
+		return START_STICKY;
+	}
+
+	@Override
 	public boolean onUnbind(Intent intent) {
-		Log.v(TAG, "onUnbind");
-		boundToActivity = false;
+		//Log.v(TAG, "onUnbind");
 		super.onUnbind(intent);
 		return true;
 	}
-		
-	public class HeartBeat extends Thread {
-		boolean lostConnection = false;
-		boolean fromProvider;
-		long runs = 0;
-		
-		@Override
-		protected void finalize() throws Throwable {
-			Log.d(TAG, "Finalize the HEARTBEAT");
-			this.interrupt();
-			super.finalize();
+
+	private boolean dropConnection() {
+		//Log.v(TAG, "dropConnection called");
+		ConnectionProvider.INSTANCE.finishTheWork();
+		try {
+			t.finalize();
+		} catch (Throwable e) {
+			//Log.w(TAG, "couldnt finalize the heart-beat");
 		}
-		
-		@Override
-		public void interrupt(){
-			Log.d(TAG, "interrupted HEARTBEAT");
-			super.interrupt();
-		}
-		
-		@Override
-		public void run() {
-			try {
-				while(!lostConnection) {
-					fromProvider= ConnectionProvider.INSTANCE.stillConnected();
-					Log.d(TAG, "fromProvider: stillConnected= " + fromProvider);
-					if(!fromProvider){
-						Log.w(TAG, "Lost Connection!!");
-						postUpdate("Lost Connection");
-						ConnectionProvider.INSTANCE.finishTheWork();
-						isConnectionUp = false;
-						Log.d(TAG, "dropped connection");
-						int attempts = 0;
-						while(attempts < 3 && !isConnectionUp){
-							Log.d(TAG, "should reconnect");
-							postUpdate("Reconnection attempt " + Integer.toString(attempts+1));
-							isConnectionUp = makeConnection();
-							attempts++;
-						}
-						Log.d(TAG, "hopefully reconnected");
-						attempts = 0;
-						if (isConnectionUp){
-							postUpdate("Reconnection succesfull");
-							lostConnection = false;
-						}else{
-							postUpdate("Reconnection failed");
-							lostConnection = true;
-						}
-						lostConnection = !isConnectionUp;		
-					}
-					//runs++; //for testing purposes
-					if (runs > 3){
-						runs = 0;
-						ConnectionProvider.INSTANCE.disturbConnetion();
-					}else{
-					Thread.sleep(15000);
-					}
-				} Log.d(TAG, "ended timer thread for heart-beat");
-			} catch(Exception e) {
-				Log.d(TAG, "something wrong in the heart-beat \n" + e);
+		isConnectionUp = false;
+		return false;
+	}
+
+	private void getConfig() {
+		String jsonString = ConnectionProvider.INSTANCE.getConfig();
+		try {
+			JSONObject json = new JSONObject(jsonString);
+			if (json.has("config")) {
+				// Log.e(TAG, "has config");
+				try {
+					mDevices = Config.getDevices(json.getJSONObject("config"));
+					Collections.sort(mDevices);
+				} catch (JSONException e) {
+				}
 			}
-			Log.w(TAG, "ended heart-beat");
+		} catch (JSONException e) {
+			Log.w(TAG, "problems in JSONning");
 		}
 	}
+
+	private boolean addedToPreferences() {
+		String currentNetwork = null;
+		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo info = cm.getActiveNetworkInfo();
+		if (!(info == null)) {
+			//Log.d(TAG, "networkInfo: " + info.getExtraInfo());
+			currentNetwork = info.getExtraInfo();
+		}
+
+		WifiManager wifiManager = (WifiManager) ctx.getSystemService(Context.WIFI_SERVICE);
+		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+		if (!(wifiInfo == null)) {
+			//Log.d(TAG, "wifiInfo:" + wifiInfo.getSSID());
+			currentNetwork = wifiInfo.getSSID();
+		}
+		if (currentNetwork == null)
+			return false;
+
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(aCtx);
+		String previous = prefs.getString("networks_known", "");
+		//Log.d(TAG, previous);
+		currentNetwork = currentNetwork.replace("\"", "");
+		if (previous.contains(currentNetwork)) {
+			//Log.d(TAG, previous + " did contain " + currentNetwork);
+			return false;
+		} else {
+			previous = previous + "|&|" + currentNetwork;
+			//Log.d(TAG, previous);
+			Editor edit = prefs.edit();
+			edit.putString("networks_known", previous);
+			edit.commit();
+			return true;
+		}
+	}
+
+	private boolean makeConnection() {
+		// makeNotification(NotificationType.CONNECTING, null);
+		//Log.v(TAG, "makeConnection called");
+		if (ConnectionProvider.INSTANCE.doConnect()) {
+			//Log.v(TAG, "recieved connection!");
+			addedToPreferences();
+			makeNotification(NotificationType.CONNECTED, "Connected");
+			startForeground(35, builder.build());
+			getConfig();
+			if (t == null || !t.isAlive()) {
+				t = new HeartBeat();
+				t.start();
+			}
+			return true;
+		} else {
+			//Log.w(TAG, "received connection failure");
+			makeNotification(NotificationType.FAILED, "Connecting Failed");
+			ConnectionProvider.INSTANCE.finishTheWork();
+			return false;
+		}
+	}
+
+	public static void postUpdate(String update) {
+		if (update.contains("origin\":\"config")) {
+			try {
+				OriginEntry originEntry = Origin.getOriginEntry(new JSONObject(update));
+				mDevices = Config.update(originEntry);
+				update = Config.getLastUpdateString();
+				Log.v(TAG, update.replace("\n", " "));
+			} catch (JSONException e) {
+				Log.w(TAG, "iets mis met het jsonObject?");
+			}
+		}
+		makeNotification(NotificationType.UPDATE, makeNiceUpdate(update));
+		sendMessageToUI(MSG_SET_BUNDLE, java.text.DateFormat.getTimeInstance().format(Calendar.getInstance().getTime()) + update);
+	}
 	
-	// handler for received Intents for the "my-event" event 
-	private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
-	  @Override
-	  public void onReceive(Context context, Intent intent) {
-	    // Extract data included in the Intent
-	    String message = intent.getStringExtra("message");
-	    Log.d("receiver", "Got message: " + message);
-	    
-	    makeNotification(NotificationType.CONNECTING, null);
-	    
-	    if (isConnectionUp) dropConnection();
-	    else isConnectionUp = makeConnection();	    
-	  }
-	};
-	
+	private static String makeNiceUpdate(String update){
+		if (update.contains("temperature") || update.contains("humidity")){
+			
+		}
+		return update;
+	}
+
+	private static Bitmap bigPic(int png) {
+		Bitmap mBitmap = BitmapFactory.decodeResource(aCtx.getResources(), png);
+		int height = (int) aCtx.getResources().getDimension(android.R.dimen.notification_large_icon_height);
+		int width = (int) aCtx.getResources().getDimension(android.R.dimen.notification_large_icon_width);
+		mBitmap = Bitmap.createScaledBitmap(mBitmap, width / 3, height / 3, false);
+		return mBitmap;
+	}
+
+	private static void makeNotification(NotificationType type, String message) {
+		Intent main;
+		Intent kill;
+		PendingIntent sentBroadcast;
+		PendingIntent startMainActivity;
+		PendingIntent killService;
+
+		String myDate = java.text.DateFormat.getTimeInstance().format(Calendar.getInstance().getTime());
+
+		// Log.v(TAG, "setting notification: " + type.name());
+		if (type != mCurrentNotif) {
+			//Log.v(TAG, "setting NEW notification: " + type.name());
+			sendMessageToUI(MSG_SET_STATUS, type.name());
+			switch (type) {
+			case DESTROYED:
+				builder = new Notification.Builder(ctx);
+				builder.setSmallIcon(R.drawable.eye_black).setLargeIcon(bigPic(R.drawable.eye_black)).setContentTitle("pilight")
+						.setContentText(message);
+				mCurrentNotif = NotificationType.DESTROYED;
+				break;
+			case CONNECTING:
+				kill = new Intent("pilight-kill-service");
+				killService = PendingIntent.getBroadcast(ctx, 0, kill, PendingIntent.FLAG_UPDATE_CURRENT);
+
+				builder = new Notification.Builder(ctx).setContentTitle("pilight").setContentText(message)
+						.setDeleteIntent(killService).setSmallIcon(R.drawable.eye_trans)
+						.setLargeIcon(bigPic(R.drawable.eye_trans));
+				mCurrentNotif = NotificationType.CONNECTING;
+				break;
+			case CONNECTED:
+				main = new Intent(ctx, MainActivity.class);
+				main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+				startMainActivity = PendingIntent.getActivity(ctx, 0, main, PendingIntent.FLAG_UPDATE_CURRENT);
+
+				builder = new Notification.Builder(ctx).setContentTitle("pilight").setContentText(message + "\n" + myDate)
+						.setContentIntent(startMainActivity).setSmallIcon(R.drawable.eye_white)
+						.setLargeIcon(bigPic(R.drawable.eye_white));
+				mCurrentNotif = NotificationType.CONNECTED;
+				break;
+			case FAILED:
+				main = new Intent("pilight-reconnect");
+				sentBroadcast = PendingIntent.getBroadcast(ctx, 0, main, PendingIntent.FLAG_UPDATE_CURRENT);
+				kill = new Intent("pilight-kill-service");
+				killService = PendingIntent.getBroadcast(ctx, 0, kill, PendingIntent.FLAG_UPDATE_CURRENT);
+
+				builder = new Notification.Builder(ctx).setContentTitle("pilight").setContentText("Failed " + "\n" + myDate)
+						.setDeleteIntent(killService).addAction(R.drawable.action_refresh, "Try to connect again", sentBroadcast)
+						.setSmallIcon(R.drawable.eye_trans).setLargeIcon(bigPic(R.drawable.eye_trans));
+				mCurrentNotif = NotificationType.FAILED;
+				break;
+			case LOST_CONNECTION:
+				main = new Intent("pilight-reconnect");
+				sentBroadcast = PendingIntent.getBroadcast(ctx, 0, main, PendingIntent.FLAG_UPDATE_CURRENT);
+				kill = new Intent("pilight-kill-service");
+				killService = PendingIntent.getBroadcast(ctx, 0, kill, PendingIntent.FLAG_UPDATE_CURRENT);
+
+				builder = new Notification.Builder(ctx).setContentTitle("pilight").setContentText("Lost Connection")
+						.setDeleteIntent(killService).addAction(R.drawable.action_refresh, "Try to reconnect", sentBroadcast)
+						.setSmallIcon(R.drawable.eye_trans).setLargeIcon(bigPic(R.drawable.eye_trans));
+				mCurrentNotif = NotificationType.LOST_CONNECTION;
+				break;
+			case UPDATE:
+				main = new Intent(ctx, MainActivity.class);
+				main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+				startMainActivity = PendingIntent.getActivity(ctx, 0, main, PendingIntent.FLAG_UPDATE_CURRENT);
+
+				builder = new Notification.Builder(ctx).setContentTitle(myDate).setContentText(message)
+						.setStyle(new Notification.BigTextStyle().bigText(message)).setContentIntent(startMainActivity)
+						.setSmallIcon(R.drawable.eye_white).setLargeIcon(bigPic(R.drawable.eye_white));
+				mCurrentNotif = NotificationType.UPDATE;
+				break;
+			default:
+				break;
+			}
+		} else {
+			if (message != null){
+				builder.setContentTitle(myDate).setStyle(new Notification.BigTextStyle().bigText(message));
+				builder.setContentText(message);
+			}
+		}
+		mNotMan.notify(35, builder.build());
+	}
+
+	/**
+	 * Send the data to all clients.
+	 * 
+	 * @param message
+	 *            The message to send.
+	 */
+	private static void sendMessageToUI(int what, String message) {
+		//Log.v(TAG, "sent message called, clients attached: " + Integer.toString(mClients.size()));
+		Iterator<Messenger> messengerIterator = mClients.iterator();
+		while (messengerIterator.hasNext()) {
+			Messenger messenger = messengerIterator.next();
+			try {
+				Bundle bundle = new Bundle();
+				bundle.setClassLoader(aCtx.getClassLoader());
+				switch (what) {
+				case MSG_SET_STATUS:
+					//Log.v(TAG, "setting status: " + message);
+					bundle.putString("status", message);
+					Message msg_string = Message.obtain(null, MSG_SET_STATUS);
+					msg_string.setData(bundle);
+					messenger.send(msg_string);
+					break;
+				case MSG_SET_BUNDLE:
+					if (!mDevices.isEmpty()) {
+						//Log.v(TAG, "putting mDevices");
+						bundle.putParcelableArrayList("config", (ArrayList<? extends Parcelable>) mDevices);
+						Message msg = Message.obtain(null, MSG_SET_BUNDLE);
+						msg.setData(bundle);
+						messenger.send(msg);
+					}
+					break;
+				}
+			} catch (RemoteException e) {
+				Log.w(TAG, "mClients.remove called");
+				mClients.remove(messenger);
+			}
+		}
+	}
 	/**
 	 * Handle incoming messages from MainActivity
 	 */
@@ -384,79 +418,90 @@ public class ConnectionService extends Service {
 	private class IncomingMessageHandler extends Handler { // Handler of incoming messages from clients.
 		@Override
 		public void handleMessage(Message msg) {
-			Log.d(TAG,"handleMessage: " + msg.what);
+			//Log.v(TAG, "handleMessage: " + msg.what);
 			switch (msg.what) {
 			case MSG_REGISTER_CLIENT:
+				mClients.clear(); //Bit hackery, I admit
 				mClients.add(msg.replyTo);
+				sendMessageToUI(MSG_SET_STATUS, mCurrentNotif.name());
+				if (!mDevices.isEmpty())
+					sendMessageToUI(MSG_SET_BUNDLE, null);
 				break;
 			case MSG_UNREGISTER_CLIENT:
 				mClients.remove(msg.replyTo);
 				break;
-			case MSG_SET_INT_VALUE:
-				//incrementBy = msg.arg1;
-				Log.d(TAG, "Ontvangen van activity: "+ Integer.toString(msg.arg1));
-				switch (msg.arg1){
-				case 1:
-				    //{"message":"send","code":{"state":"off","device":"KastTV","location":"living"}}
-					//{"message":"send","code":{"state":"off","device":"KastTV","location":"living"}}
-					try {
-						Log.d(TAG, "heart-beat is null: " + (t == null));
-					} catch (Exception e) { Log.d(TAG, "writer nullness could not be determined");	}
-					try {
-						Log.d(TAG, "heart-beat is alive: " + (t.isAlive()));
-					} catch (Exception e) { Log.d(TAG, "writer aliveliness could not be determined");	}
-					
-					
-					break;
-				case 10:
-					if (t == null || !t.isAlive()){
-						t = new HeartBeat();
-							Log.d(TAG, "starting haert-beat");
-					 	   t.start();
-					} else {
-						Log.d(TAG, "hart-beat not null & alive");
-					}
-					break;
-				}
+			case MSG_SWITCH_DEVICE:
+				ConnectionProvider.INSTANCE.sendCommand(msg.getData().getString("command"));
 				break;
 			default:
 				super.handleMessage(msg);
 			}
 		}
 	}
-	
-	/**
-	 * Send the data to all clients.
-	 * @param message The message to send.
-	 */
-	private static void sendMessageToUI(String message) {
-		//Log.d(TAG, "sent message called, clients attached: " + Integer.toString(mClients.size()));
-		Iterator<Messenger> messengerIterator = mClients.iterator();		
-		while(messengerIterator.hasNext()) {
-			Messenger messenger = messengerIterator.next();
+
+	public class HeartBeat extends Thread {
+		boolean fromProvider;
+		boolean lostConnection = false;
+		long runs = 0;
+
+		@Override
+		public void interrupt() {
+			//Log.v(TAG, "interrupted HEARTBEAT");
+			super.interrupt();
+		}
+
+		@Override
+		public void run() {
 			try {
-				// Send data as an Integer				
-				messenger.send(Message.obtain(null, MSG_SET_INT_VALUE, 1337, 0));
-
-				// Send data as a String
-				Bundle bundle = new Bundle();
-				bundle.setClassLoader(aCtx.getClassLoader());
-				
-				if (!mDevices.isEmpty())
-					Log.d(TAG, "putting mDevices");
-					bundle.putParcelableArrayList("config", (ArrayList<? extends Parcelable>) mDevices);
-				
-				bundle.putString("str1", message);
-					
-				Message msg = Message.obtain(null, MSG_SET_STRING_VALUE);
-				msg.setData(bundle);
-				messenger.send(msg);
-
-			} catch (RemoteException e) {
-				//Log.d(TAG, "mClients.remove called");
-				mClients.remove(messenger);
+				while (!lostConnection) {
+					fromProvider = ConnectionProvider.INSTANCE.stillConnected();
+					//Log.v(TAG, "fromProvider: stillConnected= " + fromProvider);
+					if (!fromProvider) {
+						Log.d(TAG, "HEART-BEAT Lost Connection!!");
+						ConnectionProvider.INSTANCE.finishTheWork();
+						isConnectionUp = false;
+						//Log.d(TAG, "dropped connection");
+						int attempts = 0;
+						while (attempts < 3 && !isConnectionUp) {
+							//Log.v(TAG, "should reconnect");
+							makeNotification(NotificationType.CONNECTING, "Reconnection attempt " + Integer.toString(attempts));
+							isConnectionUp = makeConnection();
+							attempts++;
+						}
+						//Log.d(TAG, "hopefully reconnected");
+						attempts = 0;
+						if (isConnectionUp) {
+							makeNotification(NotificationType.CONNECTED, "connected");
+							lostConnection = false;
+						} else {
+							stopForeground(true);
+							makeNotification(NotificationType.FAILED, "Reconnection failed");
+							isConnectionUp = false;
+							lostConnection = true;
+						}
+						lostConnection = !isConnectionUp;
+					}
+					// runs++; //for testing purposes
+					if (runs > 5) {
+						runs = 0;
+						ConnectionProvider.INSTANCE.disturbConnetion();
+					} else {
+						Thread.sleep(15000);
+					}
+				}
+				//Log.v(TAG, "ended timer thread for heart-beat");
+			} catch (Exception e) {
+				Log.w(TAG, "something wrong in the heart-beat \n" + e);
 			}
+			//Log.w(TAG, "ended heart-beat");
+			mNotMan.cancel(35);
+		}
+
+		@Override
+		protected void finalize() throws Throwable {
+			//Log.v(TAG, "Finalize the HEARTBEAT");
+			this.interrupt();
+			super.finalize();
 		}
 	}
-	
 }

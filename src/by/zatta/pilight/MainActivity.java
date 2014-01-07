@@ -1,16 +1,46 @@
+/******************************************************************************************
+ * 
+ * Copyright (C) 2013 Zatta
+ * 
+ * This file is part of pilight for android.
+ * 
+ * pilight for android is free software: you can redistribute it and/or modify 
+ * it under the terms of the GNU General Public License as published by the 
+ * Free Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ * 
+ * pilight for android is distributed in the hope that it will be useful, but 
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
+ * for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along 
+ * with pilightfor android.
+ * If not, see <http://www.gnu.org/licenses/>
+ * 
+ * Copyright (c) 2013 pilight project
+ ********************************************************************************************/
+
 package by.zatta.pilight;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,6 +48,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,238 +56,244 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TextView;
-
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 
 import by.zatta.pilight.connection.ConnectionService;
+import by.zatta.pilight.dialogs.AboutDialog;
+import by.zatta.pilight.dialogs.StatusDialog;
+import by.zatta.pilight.dialogs.StatusDialog.OnChangedStatusListener;
+import by.zatta.pilight.fragments.BaseFragment;
+import by.zatta.pilight.fragments.DeviceListFragment;
+import by.zatta.pilight.fragments.DeviceListFragment.DeviceListListener;
+import by.zatta.pilight.fragments.OverviewFragment;
+import by.zatta.pilight.fragments.OverviewFragment.OverViewListener;
+import by.zatta.pilight.fragments.PrefFragment;
 import by.zatta.pilight.model.DeviceEntry;
 import by.zatta.pilight.model.SettingEntry;
 
-public class MainActivity extends Activity implements View.OnClickListener, ServiceConnection {
-	private Button btnStart, btnStop, btnBind, btnUnbind, btnUpby1, btnUpby10;
-	private TextView textStatus, textIntValue, textStrValue;
-	
-	private ListView mDrawerList;
-    private DrawerLayout mDrawer;
-    private CustomActionBarDrawerToggle mDrawerToggle;
-    private int mCurrentTitle=R.string.app_name;
-	
-	private Messenger mServiceMessenger = null;
-	boolean mIsBound;
-	static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
+public class MainActivity extends Activity implements ServiceConnection, OverViewListener, DeviceListListener,
+		OnChangedStatusListener {
 
 	private static final String TAG = "Zatta::MainActivity";
-	private final Messenger mMessenger = new Messenger(new IncomingMessageHandler());
-
+	private static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
+	private Map<String, String> allLocations = new LinkedHashMap<String, String>();
+	private BaseFragment mBaseFragment;
 	private ServiceConnection mConnection = this;
-	
+	private String mCurrentTitle;
+	private DrawerLayout mDrawer;
+	private ListView mDrawerList;
+	private CustomActionBarDrawerToggle mDrawerToggle;
+	private final Messenger mMessenger = new Messenger(new IncomingMessageHandler());
+	private Messenger mServiceMessenger = null;
+	boolean mIsBound;
+
 	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		outState.putString("textStatus", textStatus.getText().toString());
-		outState.putString("textIntValue", textIntValue.getText().toString());
-		outState.putString("textStrValue", textStrValue.getText().toString());
+	public void deviceListListener(int what, String action) {
+		//Log.d(TAG, "deviceListListener called");
+		switch (what) {
+		case ConnectionService.MSG_SWITCH_DEVICE:
+			sendMessageToService(action);
+			break;
+		case 2004:
+			break;
+		}
 	}
 
 	@Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		if (savedInstanceState != null) {
-			textStatus.setText(savedInstanceState.getString("textStatus"));
-			textIntValue.setText(savedInstanceState.getString("textIntValue"));
-			textStrValue.setText(savedInstanceState.getString("textStrValue"));
+	public void onChangedStatusListener(int what) {
+		switch (what) {
+		case StatusDialog.DISMISS:
+			closeDialogFragments();
+			break;
+		case StatusDialog.FINISH:
+			closeDialogFragments();
+			doUnbindService();
+			stopService(new Intent(MainActivity.this, ConnectionService.class));
+			finish();
+			break;
+		case StatusDialog.RECONNECT:
+			this.sendBroadcast(new Intent("pilight-reconnect"));
+			//TODO after a reconnection it takes a while before a new mDevices is received..
+			break;
 		}
-		super.onRestoreInstanceState(savedInstanceState);
 	}
 	
+
+	@Override
+	public void overViewListener(int buttonPressed) {
+		switch (buttonPressed) {
+		case R.id.btnStart:
+			automaticBind();
+			break;
+		case R.id.btnStop:
+			doUnbindService();
+			stopService(new Intent(MainActivity.this, ConnectionService.class));
+			break;
+		case R.id.btnBind:
+			doBindService();
+			break;
+		case R.id.btnUnbind:
+			doUnbindService();
+			break;
+		case R.id.btnUpby1:
+			sendMessageToService("switch a device");
+			break;
+		case R.id.btnUpby10:
+			sendMessageToService("switch another device");
+			break;
+		}
+
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		mDrawerToggle.onConfigurationChanged(newConfig);
+	}
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
-		btnStart = (Button)findViewById(R.id.btnStart);
-		btnStop = (Button)findViewById(R.id.btnStop);
-		btnBind = (Button)findViewById(R.id.btnBind);
-		btnUnbind = (Button)findViewById(R.id.btnUnbind);
-		textStatus = (TextView)findViewById(R.id.textStatus);
-		textIntValue = (TextView)findViewById(R.id.textIntValue);
-		textStrValue = (TextView)findViewById(R.id.textStrValue);
-		btnUpby1 = (Button)findViewById(R.id.btnUpby1);
-		btnUpby10 = (Button)findViewById(R.id.btnUpby10);
+		
+		setContentView(R.layout.mainactivity_layout);
+		mCurrentTitle = getString(R.string.app_name);
 
-		btnStart.setOnClickListener(this);
-		btnStop.setOnClickListener(this);
-		btnBind.setOnClickListener(this);
-		btnUnbind.setOnClickListener(this);
-		btnUpby1.setOnClickListener(this);
-		btnUpby10.setOnClickListener(this);
+		mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+		mDrawer.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+		mDrawerToggle = new CustomActionBarDrawerToggle(this, mDrawer);
+		mDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+
+		openDialogFragment(StatusDialog.newInstance("starting"));
+		automaticBind();
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.main, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		/*
+		 * The action bar home/up should open or close the drawer. ActionBarDrawerToggle will take care of this.
+		 */
+		if (mDrawerToggle.onOptionsItemSelected(item)) {
+			return true;
+		}
+		FragmentManager fm = getFragmentManager();
+		FragmentTransaction ft = fm.beginTransaction();
+		switch (item.getItemId()) {
+		case R.id.menu_about:
+			openDialogFragment(AboutDialog.newInstance());
+			return true;
+		case R.id.menu_settings:			
+			Fragment pref = fm.findFragmentByTag("prefs");
+			if (pref == null) {
+				ft.replace(R.id.fragment_main, new PrefFragment(), "prefs");
+				fm.popBackStack();
+				ft.addToBackStack(null);
+				ft.commit();
+			} else {
+				ft.remove(fm.findFragmentByTag("prefs"));
+				ft.commit();
+				fm.popBackStack();
+			}
+			return true;
+		case R.id.menu_debug:
+			Fragment debug = fm.findFragmentByTag("debug");
+			if (debug == null) {
+				ft.replace(R.id.fragment_main, new OverviewFragment(), "debug");
+				fm.popBackStack();
+				ft.addToBackStack(null);
+				ft.commit();
+			} else {
+				ft.remove(fm.findFragmentByTag("debug"));
+				ft.commit();
+				fm.popBackStack();
+			}
+			return true;
+		default:
+			break;
+		}
+		// Handle your other action bar items...
+		return super.onOptionsItemSelected(item);
+	}
+
+	/* Called whenever we call invalidateOptionsMenu() */
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		return super.onPrepareOptionsMenu(menu);
+	}
+
+	@Override
+	public void onServiceConnected(ComponentName name, IBinder service) {
+		mServiceMessenger = new Messenger(service);
+		try {
+			Message msg = Message.obtain(null, ConnectionService.MSG_REGISTER_CLIENT);
+			msg.replyTo = mMessenger;
+			mServiceMessenger.send(msg);
+		} catch (RemoteException e) {
+			// In this case the service has crashed before we could even do
+			// anything with it
+		}
+	}
+
+	@Override
+	public void onServiceDisconnected(ComponentName name) {
+		// This is called when the connection with the service has been
+		// unexpectedly disconnected - process crashed.
+		mServiceMessenger = null;
+		// textStatus.setText("Disconnected.");
+	}
+
+	private void initMenu() {
+		//Log.v(TAG, "calling initMenu");
+		mDrawerList = (ListView) findViewById(R.id.drawer);
+		if (mDrawerList != null) {
+			mDrawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, makeLocationList()));
+			mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+		}
 
 		getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
-        
-        mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-
-        mDrawer.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-
-        _initMenu();
-        mDrawerToggle = new CustomActionBarDrawerToggle(this, mDrawer);
-        mDrawer.setDrawerListener(mDrawerToggle);
+		getActionBar().setHomeButtonEnabled(true);
 		
-		automaticBind();
+		String location = allLocations.values().toArray(new String[allLocations.size()])[1];
+		mCurrentTitle = allLocations.keySet().toArray(new String[allLocations.size()])[1];
+		mBaseFragment = DeviceListFragment.newInstance(mDevices, location);
+		openFragment(mBaseFragment);
 		
+		mDrawer.setDrawerListener(mDrawerToggle);
+		mDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+		mDrawer.openDrawer(mDrawerList);
+		
+		closeDialogFragments();
 	}
-	
-	@Override
-	protected void onPause() {
-		Log.d(TAG, "onPause");
-		super.onPause();
-		if (mIsBound){
-			Log.d(TAG, "onPause::unbinding");
-			doUnbindService();
+
+	private String[] makeLocationList() {
+		allLocations.clear();
+		allLocations.put("All", null);
+		if (mDevices != null) {
+			for (DeviceEntry dentry : mDevices) {
+				if (!allLocations.containsValue(dentry.getLocationID())) {
+					for (SettingEntry sentry : dentry.getSettings()) {
+						if (sentry.getKey().equals("locationName"))
+							allLocations.put(sentry.getValue(), dentry.getLocationID());
+					}
+				}
+			}
 		}
-		
+		String[] locationNames = new String[allLocations.size()];
+		locationNames = allLocations.keySet().toArray(locationNames);
+		return locationNames;
 	}
-	
-	@Override
-	protected void onResume() {
-		Log.d(TAG, "onResume");
-		automaticBind();
-		super.onResume();
-	}
-
-	@Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        // Sync the toggle state after onRestoreInstanceState has occurred.
-        mDrawerToggle.syncState();
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        mDrawerToggle.onConfigurationChanged(newConfig);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    /* Called whenever we call invalidateOptionsMenu() */
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        // If the nav drawer is open, hide action items related to the content view
-        //boolean drawerOpen = mDrawer.isDrawerOpen(mDrawerList);
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        /*
-		 * The action bar home/up should open or close the drawer.
-		 * ActionBarDrawerToggle will take care of this.
-		 */
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-        switch (item.getItemId()) {
-
-            case R.id.menu_about:
-                return true;
-            case R.id.menu_settings:
-                return true;
-            default:
-                break;
-        }
-
-
-        // Handle your other action bar items...
-        return super.onOptionsItemSelected(item);
-    }
-
-    private class CustomActionBarDrawerToggle extends ActionBarDrawerToggle {
-
-        public CustomActionBarDrawerToggle(Activity mActivity, DrawerLayout mDrawerLayout) {
-            super(
-                    mActivity,
-                    mDrawerLayout,
-                    R.drawable.ic_navigation_drawer,
-                    R.string.app_name,
-                    mCurrentTitle);
-        }
-
-        @Override
-        public void onDrawerClosed(View view) {
-            getActionBar().setTitle(getString(mCurrentTitle));
-            invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-        }
-
-        @Override
-        public void onDrawerOpened(View drawerView) {
-            getActionBar().setTitle(getString(R.string.app_name));
-            invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-        }
-    }
-
-    private class DrawerItemClickListener implements ListView.OnItemClickListener {
-
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position,
-                                long id) {
-
-            // Highlight the selected item, update the title, and close the drawer
-            // update selected item and title, then close the drawer
-            mDrawerList.setItemChecked(position, true);
-//            mBaseFragment = selectFragment(position);
-//            mSelectedFragment = position;
-//
-//            if (mBaseFragment != null)
-//                openFragment(mBaseFragment);
-            mDrawer.closeDrawer(mDrawerList);
-        }
-    }
-    
-    public static final String[] options = {
-        "All",
-        "Living",
-        "BathRoom",
-        "Kitchen",
-        "Alleyway",
-        "Toilet",
-        "Stairway",
-        "Master bedroom",
-        "Bedroom son",
-        "Bedroom daughter",
-        "Basement" ,
-        "Storage",
-        "Front garden",
-        "Drive way",
-        "Back garden",
-        "Garage",
-        "Lawn"
-};
-
-
-private void _initMenu() {
-    mDrawerList = (ListView) findViewById(R.id.drawer);
-
-    if (mDrawerList != null) {
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, options));
-
-        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
-    }
-
-}
 
 	/**
-	 * Check if the service is running. If the service is running 
-	 * when the activity starts, we want to automatically bind to it.
+	 * Check if the service is running. If the service is running when the activity starts, we want to automatically bind to it.
 	 */
 	private void automaticBind() {
 		startService(new Intent(MainActivity.this, ConnectionService.class));
@@ -264,119 +301,189 @@ private void _initMenu() {
 			doBindService();
 		}
 	}
-	
-	boolean isConnectionServiceActive(){
-		ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (ConnectionService.class.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-	}
-
-	/**
-	 * Send data to the service
-	 * @param intvaluetosend The data to send
-	 */
-	private void sendMessageToService(int intvaluetosend) {
-		if (mIsBound) {
-			if (mServiceMessenger != null) {
-				try {
-					Message msg = Message.obtain(null, ConnectionService.MSG_SET_INT_VALUE, intvaluetosend, 0);
-					msg.replyTo = mMessenger;
-					mServiceMessenger.send(msg);
-				} catch (RemoteException e) {
-				}
-			}
-		}
-	}
 
 	/**
 	 * Bind this Activity to MyService
 	 */
 	private void doBindService() {
-		bindService(new Intent(this, ConnectionService.class), mConnection, Context.BIND_NOT_FOREGROUND);
+		bindService(new Intent(this, ConnectionService.class), mConnection, Context.BIND_ADJUST_WITH_ACTIVITY);
 		mIsBound = true;
-		textStatus.setText("Binding.");
 	}
 
 	/**
 	 * Un-bind this Activity to MyService
-	 */	
+	 */
 	private void doUnbindService() {
 		if (mIsBound) {
-			// If we have received the service, and hence registered with it, then now is the time to unregister.
+			// If we have received the service, and hence registered with it,
+			// then now is the time to unregister.
 			if (mServiceMessenger != null) {
 				try {
 					Message msg = Message.obtain(null, ConnectionService.MSG_UNREGISTER_CLIENT);
 					msg.replyTo = mMessenger;
 					mServiceMessenger.send(msg);
 				} catch (RemoteException e) {
-					// There is nothing special we need to do if the service has crashed.
+					// There is nothing special we need to do if the service has
+					// crashed.
 				}
 			}
-			// Detach our existing connection.
+			// Detach our existing connection
 			unbindService(mConnection);
 			mIsBound = false;
-			textStatus.setText("Unbinding.");
+		}
+	}
+
+	private void openDialogFragment(DialogFragment dialogStandardFragment) {
+		if (dialogStandardFragment != null) {
+			FragmentManager fm = getFragmentManager();
+			FragmentTransaction ft = fm.beginTransaction();
+			DialogFragment prev = (DialogFragment) fm.findFragmentByTag("dialog");
+			if (prev != null) {
+				prev.dismiss();
+			}
+			try {
+				dialogStandardFragment.show(ft, "dialog");
+			} catch (IllegalStateException e) {
+				Log.w(TAG, "activity wasn't yet made");
+			}
+		}
+	}
+
+	private void closeDialogFragments() {
+		FragmentManager fm = getFragmentManager();
+		DialogFragment prev = (DialogFragment) fm.findFragmentByTag("dialog");
+		if (prev != null) {
+			prev.dismiss();
+		}
+	}
+
+	private void openFragment(BaseFragment mBaseFragment2) {
+		if (mBaseFragment2 != null) {
+			FragmentManager fm = getFragmentManager();
+			FragmentTransaction ft = fm.beginTransaction();
+			fm.popBackStack();
+			ft.replace(R.id.fragment_main, mBaseFragment2, mBaseFragment2.getName());
+			ft.commit();
 		}
 	}
 
 	/**
-	 * Handle button clicks
+	 * Send data to the service
+	 * 
+	 * @param intvaluetosend
+	 *            The data to send
 	 */
-	@Override
-	public void onClick(View v) {
-		if(v.equals(btnStart)) {
-			automaticBind();
+	private void sendMessageToService(String switchCommand) {
+		if (mIsBound) {
+			if (mServiceMessenger != null) {
+				try {
+					Bundle bundle = new Bundle();
+					bundle.setClassLoader(this.getClassLoader());
+					bundle.putString("command", switchCommand);
+					Message msg_string = Message.obtain(null, ConnectionService.MSG_SWITCH_DEVICE);
+					msg_string.setData(bundle);
+					msg_string.replyTo = mMessenger;
+					mServiceMessenger.send(msg_string);
+				} catch (RemoteException e) {
+				}
+			}
 		}
-		else if(v.equals(btnStop)) {
-			doUnbindService();
-			stopService(new Intent(MainActivity.this, ConnectionService.class));
-		}
-		else if(v.equals(btnBind)) {
-			doBindService();
-		}
-		else if(v.equals(btnUnbind)) {
-			doUnbindService();
-		}
-		else if(v.equals(btnUpby1)) {
-			sendMessageToService(1);
-		}
-		else if(v.equals(btnUpby10)) {
-			sendMessageToService(10);
-		}
-	}
-
-	@Override
-	public void onServiceConnected(ComponentName name, IBinder service) {
-		mServiceMessenger = new Messenger(service);
-		textStatus.setText("Attached.");
-		try {
-			Message msg = Message.obtain(null, ConnectionService.MSG_REGISTER_CLIENT);
-			msg.replyTo = mMessenger;
-			mServiceMessenger.send(msg);
-		} 
-		catch (RemoteException e) {
-			// In this case the service has crashed before we could even do anything with it
-		} 
-	}
-
-	@Override
-	public void onServiceDisconnected(ComponentName name) {
-		// This is called when the connection with the service has been unexpectedly disconnected - process crashed.
-		mServiceMessenger = null;
-		textStatus.setText("Disconnected.");
 	}
 
 	@Override
 	protected void onDestroy() {
+		//Log.d(TAG, "onDestroy");
 		super.onDestroy();
 		try {
 			doUnbindService();
 		} catch (Throwable t) {
-			Log.e(TAG, "Failed to unbind from the service", t);
+			Log.w(TAG, "Failed to unbind from the service", t);
+		}
+		
+	}
+
+	@Override
+	protected void onPause() {
+		//Log.d(TAG, "onPause");
+		if (mIsBound) {
+			//Log.v(TAG, "onPause::unbinding");
+			doUnbindService();
+		}
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean useService = prefs.getBoolean("useService", true);
+		if (!useService){
+			stopService(new Intent(MainActivity.this, ConnectionService.class));
+		}
+		finish();
+		super.onPause();
+	}
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		//TODO implement this properly
+		//Log.d(TAG, "onSaveInstanceState");
+		super.onSaveInstanceState(outState);
+	}
+
+	@Override
+	protected void onPostCreate(Bundle savedInstanceState) {
+		super.onPostCreate(savedInstanceState);
+		//Log.v(TAG, "onPostCreate");
+		// Sync the toggle state after onRestoreInstanceState has occurred.
+		if (mDrawerToggle != null){
+			//Log.v(TAG, "mDrawerToggle sync state");
+			mDrawerToggle.syncState();
+		}
+	}
+
+	@Override
+	protected void onResume() {
+		//Log.v(TAG, "onResume");
+		automaticBind();
+		super.onResume();
+	}
+
+	boolean isConnectionServiceActive() {
+		ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+			if (ConnectionService.class.getName().equals(service.service.getClassName())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private class CustomActionBarDrawerToggle extends ActionBarDrawerToggle {
+
+		public CustomActionBarDrawerToggle(Activity mActivity, DrawerLayout mDrawerLayout) {
+			super(mActivity, mDrawerLayout, R.drawable.ic_navigation_drawer, R.string.app_name, R.string.app_name);
+		}
+
+		@Override
+		public void onDrawerClosed(View view) {
+			getActionBar().setTitle(mCurrentTitle);
+			invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+		}
+
+		@Override
+		public void onDrawerOpened(View drawerView) {
+			getActionBar().setTitle(getString(R.string.app_name));
+			invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+		}
+	}
+
+	private class DrawerItemClickListener implements ListView.OnItemClickListener {
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+			// Highlight the selected item, update the title, and close the
+			// drawer
+			// update selected item and title, then close the drawer
+			mDrawerList.setItemChecked(position, true);
+			String location = allLocations.values().toArray(new String[allLocations.size()])[position];
+			mBaseFragment = DeviceListFragment.newInstance(mDevices, location);
+			openFragment(mBaseFragment);
+			mCurrentTitle = allLocations.keySet().toArray(new String[allLocations.size()])[position];
+			mDrawer.closeDrawer(mDrawerList);
 		}
 	}
 
@@ -384,40 +491,64 @@ private void _initMenu() {
 	 * Handle incoming messages from ConnectionService
 	 */
 	@SuppressLint("HandlerLeak")
-	private class IncomingMessageHandler extends Handler {		
+	private class IncomingMessageHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
-			// Log.d(LOGTAG,"IncomingHandler:handleMessage");
+			//Log.v(TAG, "receiving a message");
+			Bundle bundle = msg.getData();
+			bundle.setClassLoader(getApplicationContext().getClassLoader());
+
 			switch (msg.what) {
-			case ConnectionService.MSG_SET_INT_VALUE:
-				textIntValue.setText("Int Message: " + msg.arg1);
-				break;
-			case ConnectionService.MSG_SET_STRING_VALUE:
-				Bundle bundle = msg.getData();
-				bundle.setClassLoader(getApplicationContext().getClassLoader());
+			case ConnectionService.MSG_SET_STATUS:
+				String status = bundle.getString("status", "no status received yet");
+				//Log.v(TAG, "status received in activity: " + status);
+				if (status.equals("UPDATE")) break;				
 				
-				String str1 = bundle.getString("str1");
-				textStrValue.setText("Str Message: " + str1);
-								
+				FragmentManager fm = getFragmentManager();
+				Fragment prev = fm.findFragmentByTag("dialog");
+				//Log.e(TAG, "prev was: " +Boolean.toString(prev==null));
+				
+				//Log.e(TAG, "pref : " +Boolean.toString(!(prev.getClass().equals(StatusDialog.class))));
+				
+				if (prev == null){
+					//Log.v(TAG, "there was not a fragment with tag dialog");
+					openDialogFragment(StatusDialog.newInstance(status));
+					break;
+				}else if (!(prev.getClass().equals(StatusDialog.class))){
+					//Log.v(TAG, "there was fragment with tag dialog not being StatusDialog");
+					openDialogFragment(StatusDialog.newInstance(status));
+					break;
+				}else{
+					//Log.v(TAG, "there was a statusdialog running");
+					StatusDialog.setChangedStatus(status);
+					break;
+				}
+				
+			case ConnectionService.MSG_SET_BUNDLE:
+
 				mDevices = bundle.getParcelableArrayList("config");
-				print();
+
+				if (allLocations.isEmpty())
+					initMenu();
+
+				// TODO replace this method for a findFragmentById like thing:
+				try {
+					bundle.putBoolean("bound", mIsBound);
+					OverviewFragment.updateUI(bundle);
+				} catch (Exception e) {
+					//Log.v(TAG, "OverViewFragment isn't made yet");
+				}
+				//Log.v(TAG, "sending to the List!!");
+				try {
+					DeviceListFragment.updateUI(mDevices);
+				} catch (Exception e) {
+					//Log.v(TAG, "ListBaseFragment isn't made yet");
+				}
 				break;
 			default:
 				super.handleMessage(msg);
 			}
 		}
 	}
-	
-	public static void print() {
-		System.out.println("________________");
-		for (DeviceEntry device : mDevices){
-			 System.out.println("-"+device.getNameID());
-			 System.out.println("-"+device.getLocationID());
-			 System.out.println("-"+device.getType());
-				for(SettingEntry sentry : device.getSettings()) {
-					System.out.println("*"+sentry.getKey()+" = " + sentry.getValue());
-				}
-			System.out.println("________________");
-		 }
-	}
+
 }

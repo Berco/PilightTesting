@@ -1,80 +1,111 @@
+/******************************************************************************************
+ * 
+ * Copyright (C) 2013 Zatta
+ * 
+ * This file is part of pilight for android.
+ * 
+ * pilight for android is free software: you can redistribute it and/or modify 
+ * it under the terms of the GNU General Public License as published by the 
+ * Free Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ * 
+ * pilight for android is distributed in the hope that it will be useful, but 
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
+ * for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along 
+ * with pilightfor android.
+ * If not, see <http://www.gnu.org/licenses/>
+ * 
+ * Copyright (c) 2013 pilight project
+ ********************************************************************************************/
+
 package by.zatta.pilight.model;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.Log;
-
 public class Origin {
-	
+
+	@SuppressWarnings("unused")
 	private static final String TAG = "Origin";
-	
+
 	private static OriginEntry originEntry = new OriginEntry();
-	
+
 	public static OriginEntry getOriginEntry() {
 		return originEntry;
 	}
-	
+
 	public static OriginEntry getOriginEntry(JSONObject jMessage) {
 		parse(jMessage);
 		return originEntry;
 	}
-	
+
 	public static void parse(JSONObject jMessage) {
-		//Log.d(TAG, jMessage.toString());
-		
+		// Log.v(TAG, jMessage.toString());
+
 		Iterator<?> fit = jMessage.keys();
 		/* Iterate through all entries */
-		while(fit.hasNext()) {
-			String firstKey = (String)fit.next();
-			try {				
+		while (fit.hasNext()) {
+			String firstKey = (String) fit.next();
+			try {
 				JSONObject jSecond = jMessage.getJSONObject(firstKey);
-				//Log.d(TAG, "firstKey: " + firstKey); //devices, values
-				//Log.d(TAG, "jSecond: "+ jSecond.toString()); // {"living":["KamerTemp"]}  &  {"temperature":"20062"}
+				// Log.v(TAG, "firstKey: " + firstKey); //devices, values
+				// Log.v(TAG, "jSecond: "+ jSecond.toString()); // {"living":["KamerTemp"]} & {"temperature":"20062"}
 
-				if(firstKey.equals("devices")) {
+				if (firstKey.equals("devices")) {
 					Iterator<?> sit = jSecond.keys();
-					while(sit.hasNext()){
-						String secondKey = (String)sit.next();
+					while (sit.hasNext()) {
+						String secondKey = (String) sit.next();
 						JSONArray jSecArr = jSecond.optJSONArray(secondKey);
 						String jSecStr = jSecond.optString(secondKey);
-					
-						if(jSecArr != null) {
+
+						if (jSecArr != null) {
 							/* Iterate through all values for this setting */
-							for(Short i=0; i<jSecArr.length(); i++) {
-								//Log.d(TAG, "Uit array:" + jSecArr.get(i).toString());
-								originEntry.setNameID(jSecArr.get(i).toString());			
+							for (Short i = 0; i < jSecArr.length(); i++) {
+								// Log.v(TAG, "Uit array:" + jSecArr.get(i).toString());
+								originEntry.setNameID(jSecArr.get(i).toString());
 							}
 						} else if (jSecStr != null) {
-							//Log.e(TAG, "Uit string: " + jSecStr);
+							// Log.v(TAG, "Uit string: " + jSecStr);
 							originEntry.setNameID(jSecStr);
 						}
 					}
 				}
-				if (firstKey.equals("values")){
+				if (firstKey.equals("values")) {
 					Iterator<?> sit = jSecond.keys();
-					while(sit.hasNext()){
-						String secondKey = (String)sit.next();
+					List<SettingEntry> settings = new ArrayList<SettingEntry>();
+
+					while (sit.hasNext()) {
+						String secondKey = (String) sit.next();
 						JSONArray jSecArr = jSecond.optJSONArray(secondKey);
 						String jSecStr = jSecond.optString(secondKey);
-					
-						if(jSecArr != null) {
+						SettingEntry sentry = new SettingEntry();
+
+						if (jSecArr != null) {
 							/* Iterate through all values for this setting */
-							for(Short i=0; i<jSecArr.length(); i++) {
-								//Log.d(TAG, "Uit array:" + jSecArr.get(i).toString());
-								originEntry.setValue(jSecArr.get(i).toString());
-								originEntry.setChange(secondKey);
+							for (Short i = 0; i < jSecArr.length(); i++) {
+								// Log.v(TAG, "Uit array:" + jSecArr.get(i).toString());
+								sentry.setKey(secondKey);
+								sentry.setValue(jSecArr.get(i).toString());
 							}
 						} else if (jSecStr != null) {
-							//Log.d(TAG, "Uit string: " + jSecStr);
-							originEntry.setValue(jSecStr);
-							originEntry.setChange(secondKey);
+							// Log.v(TAG, "Uit string: " + jSecStr);
+							sentry.setKey(secondKey);
+							sentry.setValue(jSecStr);
 						}
+						settings.add(sentry);
 					}
+					originEntry.setSettings(settings);
 				}
-			} catch (JSONException e) {}
+			} catch (JSONException e) {
+			}
 		}
 	}
 }

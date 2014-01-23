@@ -355,7 +355,7 @@ public class DeviceListFragment extends BaseFragment {
 		protected String mTemperature;
 		protected String mHumidity;
 		protected boolean showBattery = false;
-		protected boolean mBattery = true;
+		protected boolean mBattery = false;
 		protected String mTitleHeader;
 		protected String mTitleMain;
 		protected int decimals;
@@ -371,11 +371,9 @@ public class DeviceListFragment extends BaseFragment {
 				if (sentry.getKey().equals("locationName")) mTitleMain = sentry.getValue();
 				if (sentry.getKey().equals("temperature")) mTemperature = sentry.getValue();
 				if (sentry.getKey().equals("humidity")) mHumidity = sentry.getValue();
-				if (sentry.getKey().equals("battery")) {
-					showBattery = true;
-					if (sentry.getValue().equals("0")) mBattery = false;
-				}
+				if (sentry.getKey().equals("battery")&&(sentry.getValue().equals("1"))) mBattery = true;
 				if (sentry.getKey().equals("sett_decimals")) decimals = Integer.valueOf(sentry.getValue());
+				if (sentry.getKey().equals("sett_battery")&&(sentry.getValue().equals("1"))) showBattery = true;
 			}
 
 			DecimalFormat oneDigit = new DecimalFormat("#,##0.0");// format to 1
@@ -428,7 +426,13 @@ public class DeviceListFragment extends BaseFragment {
 					mHumidity = oneDigit.format(Integer.valueOf(sentry.getValue()) / (Math.pow(10, decimals))) + " %";
 				}
 				if (sentry.getKey().equals("battery")) {
-
+					if (sentry.getValue().equals("1")) {
+						mBattery = true;
+						mBatteryView.setImageResource(R.drawable.batt_full);
+					}else{
+						mBattery = false;
+						mBatteryView.setImageResource(R.drawable.batt_empty);
+					}
 				}
 			}
 		}

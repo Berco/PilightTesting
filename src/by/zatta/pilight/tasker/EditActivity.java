@@ -1,4 +1,4 @@
-package com.frostedkiwi.pilightplugin;
+package by.zatta.pilight.tasker;
 
 import android.os.Bundle;
 import android.view.View;
@@ -6,6 +6,7 @@ import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.app.Activity;
 import android.content.Intent;
+import by.zatta.pilight.R;
 
 public class EditActivity extends Activity {
 	
@@ -20,7 +21,7 @@ public class EditActivity extends Activity {
 		
 		final Bundle localeBundle = getIntent().getBundleExtra(com.twofortyfouram.locale.Intent.EXTRA_BUNDLE);
 		
-		setContentView(R.layout.activity_edit);
+		setContentView(R.layout.tasker_edit_activity_layout);
 		mServerText = (EditText) findViewById(R.id.editTServerAddress);
 		mPortText = (EditText) findViewById(R.id.editTPortNum);
 		mLocationText = (EditText) findViewById(R.id.editTLocation);

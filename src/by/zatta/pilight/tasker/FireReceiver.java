@@ -1,4 +1,4 @@
-package com.frostedkiwi.pilightplugin;
+package by.zatta.pilight.tasker;
 
 import java.io.IOException;
 import java.io.OutputStream;

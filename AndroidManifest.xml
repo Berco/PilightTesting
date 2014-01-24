@@ -64,6 +64,23 @@
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
             </intent-filter>
         </receiver>
+        
+        <!-- Tasker support based on FrostedKiwi's work -->
+        <activity
+            android:name="by.zatta.pilight.tasker.EditActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
+            </intent-filter>
+        </activity>
+        
+        <receiver android:name="by.zatta.pilight.tasker.FireReceiver" >
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING" />
+            </intent-filter>
+        </receiver>
+        <!-- End of tasker support -->
     
     </application>
 

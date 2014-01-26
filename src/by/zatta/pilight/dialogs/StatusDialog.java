@@ -37,6 +37,7 @@ import android.widget.TextView;
 public class StatusDialog extends DialogFragment implements OnClickListener {
 
 	static OnChangedStatusListener changedStatusListener;
+	private static String TAG = "Zatta::StatusDialog";
 	private static Button mBtnCancel;
 	private static Button mBtnSetup;
 	private String status;
@@ -70,7 +71,7 @@ public class StatusDialog extends DialogFragment implements OnClickListener {
 		status = getArguments().getString("status");
 		setStyle(DialogFragment.STYLE_NORMAL, 0);
 		setCancelable(false);
-		setRetainInstance(false);
+		//setRetainInstance(false);
 	}
 
 	@Override
@@ -82,10 +83,13 @@ public class StatusDialog extends DialogFragment implements OnClickListener {
 		mBtnSetup = (Button) v.findViewById(R.id.btnSetupConnection);
 		mBtnCancel.setOnClickListener(this);
 		mBtnSetup.setOnClickListener(this);
-		//tv.setText(status);
-		setChangedStatus(status);
-		//showButtons();
 		return v;
+	}
+
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		setChangedStatus(status);
 	}
 
 	public enum NotificationType {

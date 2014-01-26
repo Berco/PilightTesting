@@ -67,9 +67,9 @@
         
         <!-- Tasker support based on FrostedKiwi's work -->
         <activity
-            android:name="by.zatta.pilight.tasker.EditActivity"
+            android:name="by.zatta.pilight.tasker.ActionActivity"
             android:icon="@drawable/ic_launcher"
-            android:label="@string/app_name" >
+            android:label="PiTasker" >
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
             </intent-filter>

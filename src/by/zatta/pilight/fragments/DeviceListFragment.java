@@ -174,6 +174,7 @@ public class DeviceListFragment extends BaseFragment {
 	public class ListDimmerCard extends Card {
 		protected String who;
 		protected boolean mState;
+		protected boolean readwrite=true;
 		protected int mSeekValue;
 		protected int minSeekValue;
 		protected int maxSeekValue;
@@ -222,6 +223,7 @@ public class DeviceListFragment extends BaseFragment {
 				}
 				if (sentry.getKey().equals("sett_min")) minSeekValue = Integer.valueOf(sentry.getValue());
 				if (sentry.getKey().equals("sett_max")) maxSeekValue = Integer.valueOf(sentry.getValue());
+				if (sentry.getKey().equals("sett_readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}
@@ -255,6 +257,8 @@ public class DeviceListFragment extends BaseFragment {
 				mSeekBar.setProgress(mSeekValue - minSeekValue);
 				mSeekBar.setOnSeekBarChangeListener(seekListener);
 			}
+			mToggle.setClickable(readwrite);
+			mSeekBar.setClickable(readwrite);
 		}
 
 		public void update(DeviceEntry entry) {
@@ -288,6 +292,7 @@ public class DeviceListFragment extends BaseFragment {
 		protected TextView mTitleMainView;
 		protected ToggleButton mToggle;
 		protected boolean mState;
+		protected boolean readwrite=true;
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -308,6 +313,7 @@ public class DeviceListFragment extends BaseFragment {
 					if (sentry.getValue().equals("on")) mState = true;
 					if (sentry.getValue().equals("off")) mState = false;
 				}
+				if (sentry.getKey().equals("sett_readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}
@@ -331,6 +337,7 @@ public class DeviceListFragment extends BaseFragment {
 				mToggle.setChecked(mState);
 				mToggle.setOnCheckedChangeListener(toggleListener);
 			}
+			mToggle.setClickable(readwrite);
 		}
 
 		public void update(DeviceEntry entry) {
@@ -448,6 +455,8 @@ public class DeviceListFragment extends BaseFragment {
 		protected TextView mTitleMainView;
 		protected ToggleButton mToggle;
 		protected boolean mState;
+		protected boolean readwrite=true;
+		
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -468,6 +477,7 @@ public class DeviceListFragment extends BaseFragment {
 					if (sentry.getValue().equals("on")) mState = true;
 					if (sentry.getValue().equals("off")) mState = false;
 				}
+				if (sentry.getKey().equals("sett_readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}
@@ -491,6 +501,7 @@ public class DeviceListFragment extends BaseFragment {
 				mToggle.setChecked(mState);
 				mToggle.setOnCheckedChangeListener(toggleListener);
 			}
+			mToggle.setClickable(readwrite);
 		}
 
 		public void update(DeviceEntry entry) {
@@ -516,6 +527,8 @@ public class DeviceListFragment extends BaseFragment {
 		protected Button mBtnUp;
 		protected Button mBtnDown;
 		protected TextView mTitleMainView;
+		protected boolean readwrite=true;
+		
 		protected Button.OnClickListener clickListener = new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -538,6 +551,7 @@ public class DeviceListFragment extends BaseFragment {
 			for (SettingEntry sentry : entry.getSettings()) {
 				if (sentry.getKey().equals("name")) mTitleHeader = sentry.getValue();
 				if (sentry.getKey().equals("locationName")) mTitleMain = sentry.getValue();
+				if (sentry.getKey().equals("sett_readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}
@@ -559,6 +573,8 @@ public class DeviceListFragment extends BaseFragment {
 			mBtnDown = (Button) parent.findViewById(R.id.card_inner_btnDown);
 			mBtnUp.setOnClickListener(clickListener);
 			mBtnDown.setOnClickListener(clickListener);
+			mBtnDown.setClickable(readwrite);
+			mBtnUp.setClickable(readwrite);
 
 
 		}

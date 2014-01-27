@@ -21,10 +21,10 @@
   ~  * If not, see <http://www.gnu.org/licenses/>
   ~  * 
   ~  * Copyright (c) 2013 pilight project
-  ~  ********************************************************************************/
--->
-
+  ~  ********************************************************************************\-->
+  
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res/by.zatta.pilight"
     android:layout_width="match_parent"
     android:layout_height="wrap_content" >
 
@@ -45,41 +45,52 @@
         android:layout_toRightOf="@id/colorBorder"
         android:gravity="center" />
 
-    <!-- Used as foregound for the togglebutton -->
+    <RelativeLayout
+        android:layout_width="90dp"
+        android:layout_height="@dimen/card_base_empty_height"
+        android:layout_alignParentRight="true" 
+        android:gravity="center">
 
-    <ImageView
-        android:id="@+id/front_button"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="15dp"
-        android:layout_marginRight="15dp"
-        android:layout_marginTop="15dp"
-        android:gravity="center"
-        android:src="@drawable/toggle_light_off" />
+        <!-- Used as foregound for the togglebutton -->
+        <ImageView
+            android:id="@+id/front_button"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/toggle_light_off"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true" />
 
-    <ToggleButton
-        android:id="@+id/card_inner_tb"
-        style="@style/ToggleButton.LightBulb"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="15dp"
-        android:layout_marginRight="15dp"
-        android:layout_marginTop="15dp"
-        android:gravity="center" />
+        <ToggleButton
+            android:id="@+id/card_inner_tb"
+            style="@style/ToggleButton.LightBulb"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            android:textOff=""
+            android:textOn=""/>
 
-    <SeekBar
-        android:id="@+id/card_inner_seekbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/card_main_inner_simple_title"
-        android:layout_marginBottom="15dp"
-        android:layout_marginLeft="15dp"
-        android:layout_marginRight="15dp"
-        android:layout_marginTop="15dp"
-        android:layout_toLeftOf="@id/card_inner_tb"
-        android:max="16"
-        android:progress="0" />
-
+        <com.devadvance.circularseekbar.CircularSeekBar
+            android:id="@+id/circularSeekBar1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            app:maintain_equal_circle="false"
+            app:move_outside_circle="true"
+            app:use_custom_radii="true"
+            app:circle_x_radius="50"
+            app:circle_y_radius="50"
+            app:start_angle="160"
+            app:end_angle="20"
+            app:max="16"
+            app:pointer_alpha_ontouch="100"
+            app:pointer_color="#0174DF"
+            app:pointer_halo_color="#880174DF"
+            app:circle_color="#33b5e5"
+            app:circle_progress_color="#33b5e5"
+            app:progress="0"
+            
+            />
+    </RelativeLayout>
 </RelativeLayout>

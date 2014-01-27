@@ -414,7 +414,7 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 		if (!useService){
 			stopService(new Intent(MainActivity.this, ConnectionService.class));
 		}
-		finish();
+		//finish(); //ugly hack, I know
 		super.onPause();
 	}
 	

@@ -43,6 +43,9 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.devadvance.circularseekbar.CircularSeekBar;
+import com.devadvance.circularseekbar.CircularSeekBar.OnCircularSeekBarChangeListener;
+
 import by.zatta.pilight.R;
 import by.zatta.pilight.connection.ConnectionService;
 import by.zatta.pilight.model.DeviceEntry;
@@ -176,7 +179,7 @@ public class DeviceListFragment extends BaseFragment {
 		protected int maxSeekValue;
 		protected String mTitleHeader;
 		protected String mTitleMain;
-		protected SeekBar mSeekBar;
+		protected CircularSeekBar mSeekBar;
 		protected ToggleButton mToggle;
 		protected TextView mTitleMainView;
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
@@ -188,9 +191,9 @@ public class DeviceListFragment extends BaseFragment {
 				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
 			}
 		};
-		protected SeekBar.OnSeekBarChangeListener seekListener = new SeekBar.OnSeekBarChangeListener() {
+		protected CircularSeekBar.OnCircularSeekBarChangeListener seekListener = new CircularSeekBar.OnCircularSeekBarChangeListener() {
 			@Override
-			public void onStopTrackingTouch(SeekBar seekBar) {
+			public void onStopTrackingTouch(CircularSeekBar seekBar) {
 				mTitleMainView.setText(mTitleMain);
 				mToggle.setText(Integer.toString(mSeekValue));
 				String action = "\"state\":\"on\",\"values\":{\"dimlevel\":" + String.valueOf(mSeekValue) + "}";
@@ -198,11 +201,7 @@ public class DeviceListFragment extends BaseFragment {
 			}
 
 			@Override
-			public void onStartTrackingTouch(SeekBar seekBar) {
-			}
-
-			@Override
-			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+			public void onProgressChanged(CircularSeekBar seekBar, int progress, boolean fromUser) {
 				mSeekValue = progress + minSeekValue;
 				mToggle.setText(Integer.toString(mSeekValue));
 				mTitleMainView.setText("Dimmer setting: " + Integer.toString(mSeekValue));
@@ -239,7 +238,7 @@ public class DeviceListFragment extends BaseFragment {
 		public void setupInnerViewElements(ViewGroup parent, View view) {
 			// Retrieve elements
 			mTitleMainView = (TextView) parent.findViewById(R.id.card_main_inner_simple_title);
-			mSeekBar = (SeekBar) parent.findViewById(R.id.card_inner_seekbar);
+			mSeekBar = (CircularSeekBar) parent.findViewById(R.id.circularSeekBar1);
 			mToggle = (ToggleButton) parent.findViewById(R.id.card_inner_tb);
 
 			if (mTitleMainView != null) mTitleMainView.setText(mTitleMain);
@@ -269,11 +268,11 @@ public class DeviceListFragment extends BaseFragment {
 				}
 				if (sentry.getKey().equals("dimlevel")) {
 					mSeekValue = Integer.valueOf(sentry.getValue());
-					mToggle.setText(Integer.toString(mSeekValue));
 					this.mSeekBar.setProgress(mSeekValue - minSeekValue);
 				}
 			}
 			mSeekBar.setOnSeekBarChangeListener(seekListener);
+			mToggle.setText(Integer.toString(mSeekValue));
 			mToggle.setOnCheckedChangeListener(toggleListener);
 		}
 	}

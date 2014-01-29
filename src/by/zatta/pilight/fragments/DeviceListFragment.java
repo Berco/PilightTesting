@@ -259,6 +259,8 @@ public class DeviceListFragment extends BaseFragment {
 			}
 			mToggle.setClickable(readwrite);
 			mSeekBar.setClickable(readwrite);
+			if (!readwrite) mToggle.setAlpha((float) 0.5);
+			if (!readwrite) mSeekBar.setAlpha((float) 0.5);
 		}
 
 		public void update(DeviceEntry entry) {
@@ -338,6 +340,8 @@ public class DeviceListFragment extends BaseFragment {
 				mToggle.setOnCheckedChangeListener(toggleListener);
 			}
 			mToggle.setClickable(readwrite);
+			if (!readwrite) mToggle.setAlpha((float) 0.5);
+			
 		}
 
 		public void update(DeviceEntry entry) {
@@ -502,6 +506,7 @@ public class DeviceListFragment extends BaseFragment {
 				mToggle.setOnCheckedChangeListener(toggleListener);
 			}
 			mToggle.setClickable(readwrite);
+			if (!readwrite) mToggle.setAlpha((float) 0.5);
 		}
 
 		public void update(DeviceEntry entry) {

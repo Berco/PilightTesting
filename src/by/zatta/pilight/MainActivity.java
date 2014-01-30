@@ -73,6 +73,7 @@ import by.zatta.pilight.fragments.OverviewFragment.OverViewListener;
 import by.zatta.pilight.fragments.PrefFragment;
 import by.zatta.pilight.model.DeviceEntry;
 import by.zatta.pilight.model.SettingEntry;
+import by.zatta.pilight.tasker.ActionActivity;
 
 public class MainActivity extends Activity implements ServiceConnection, OverViewListener, DeviceListListener,
 		OnChangedStatusListener {
@@ -216,6 +217,10 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 				ft.commit();
 				fm.popBackStack();
 			}
+			return true;
+		case R.id.menu_tasker:
+			Intent i = new Intent(this, ActionActivity.class);
+			startActivity(i);
 			return true;
 		default:
 			break;

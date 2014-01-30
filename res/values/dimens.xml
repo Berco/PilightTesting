@@ -35,5 +35,7 @@
     <dimen name="card_base_empty_height">72dp</dimen>
 
     <!-- Grid -->
+    <dimen name="carddemo_base_grid_columnwidth">140dp</dimen>
+    <dimen name="carddemo_base_grid_columnwidth_card">125dp</dimen>
 
 </resources>

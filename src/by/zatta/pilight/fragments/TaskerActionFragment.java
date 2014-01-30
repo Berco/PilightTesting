@@ -52,25 +52,18 @@ import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.internal.CardGridArrayAdapter;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.view.CardGridView;
-import it.gmariotti.cardslib.library.view.CardListView;
 
-public class DeviceListFragment extends BaseFragment {
+public class TaskerActionFragment extends BaseFragment {
 
-	static DeviceListListener deviceListListener;
-	protected ScrollView mScrollView;
-	static ArrayList<Card> cards;
-	private static final String TAG = "ListBase";
+	private static final String TAG = "TaskerActionFragment";
 	static CardArrayAdapter mCardArrayAdapter;
 	static CardGridArrayAdapter mCardGridArrayAdapter;
 	static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
-	public final int GIMME_DEVICES = 1002;
-	private static String mFilter;
 
-	public static DeviceListFragment newInstance(List<DeviceEntry> list, String filter) {
-		DeviceListFragment f = new DeviceListFragment();
+	public static TaskerActionFragment newInstance(List<DeviceEntry> list) {
+		TaskerActionFragment f = new TaskerActionFragment();
 		Bundle args = new Bundle();
 		args.putParcelableArrayList("config", (ArrayList<? extends Parcelable>) list);
-		args.putString("filter", filter);
 		f.setArguments(args);
 		return f;
 	}
@@ -79,34 +72,27 @@ public class DeviceListFragment extends BaseFragment {
 	public int getTitleResourceId() {
 		return R.string.title_list_base;
 	}
-
 	@Override
 	public String getName() {
-		return "DeviceList";
+		return "piTasker";
 	}
-
+	
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		try {
-			deviceListListener = (DeviceListListener) activity;
-		} catch (ClassCastException e) {
-			throw new ClassCastException(activity.toString() + " must implement DeviceListListener");
-		}
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mDevices = getArguments().getParcelableArrayList("config");
-		mFilter = getArguments().getString("filter", null);
 		setRetainInstance(false);
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.devicelist_layout, container, false);
-		//return inflater.inflate(R.layout.demo_fragment_grid_base, container, false);
+		// return inflater.inflate(R.layout.devicelist_layout, container, false);
+		return inflater.inflate(R.layout.devicegrid_layout, container, false);
 	}
 
 	@Override
@@ -117,65 +103,35 @@ public class DeviceListFragment extends BaseFragment {
 
 	private void initCards() {
 		Log.v(TAG, "initCards");
-		cards = new ArrayList<Card>();
+		ArrayList<Card> cards = new ArrayList<Card>();
 		for (DeviceEntry device : mDevices) {
+			Log.w(TAG, Integer.toString(device.getType()));
 			Card card = null;
-			if (device.getLocationID().equals(mFilter) || mFilter == null) {
-				if (device.getType() == 1)
-					card = new ListSwitchCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 2)
-					card = new ListDimmerCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 3)
-					card = new ListWeatherCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 4)
-					card = new ListRelayCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 5) card = new ListScreenCard(getActivity().getApplicationContext(), device);
+			
+			if (device.getType() == 1)
+				card = new ListSwitchCard(getActivity().getApplicationContext(), device);
+			else if (device.getType() == 2)
+				card = new ListDimmerCard(getActivity().getApplicationContext(), device);
+			else if (device.getType() == 33)
+				card = new ListWeatherCard(getActivity().getApplicationContext(), device);
+			else if (device.getType() == 4)
+				card = new ListRelayCard(getActivity().getApplicationContext(), device);
+			else if (device.getType() == 52) 
+				card = new ListScreenCard(getActivity().getApplicationContext(), device);
+			
+			if (!(card == null)) {
+				cards.add(card);
 			}
-			if (!(card == null)) cards.add(card);
 		}
 
-		mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
-		mCardArrayAdapter.setInnerViewTypeCount(4);
+		mCardGridArrayAdapter = new CardGridArrayAdapter(getActivity(), cards);
+		mCardGridArrayAdapter.setInnerViewTypeCount(4);
 
-		CardListView listView = (CardListView) getActivity().findViewById(R.id.carddemo_list_base1);
-		if (listView != null) {
-			listView.setAdapter(mCardArrayAdapter);
+		CardGridView gridView = (CardGridView) getActivity().findViewById(R.id.carddemo_grid_base);
+		if (gridView != null) {
+			gridView.setAdapter(mCardGridArrayAdapter);
 		}
 		
-//		mCardGridArrayAdapter = new CardGridArrayAdapter(getActivity(), cards);
-//		mCardGridArrayAdapter.setInnerViewTypeCount(2);
-//
-//		CardGridView gridView = (CardGridView) getActivity().findViewById(R.id.carddemo_grid_base);
-//        if (gridView!=null){
-//            gridView.setAdapter(mCardGridArrayAdapter);
-//        }
-	}
-
-	public static void updateUI(List<DeviceEntry> list) {
-		mDevices = list;
-		int i = 0;
-		for (DeviceEntry device : mDevices) {
-			if (device.getLocationID().equals(mFilter) || mFilter == null) {
-				if (device.getType() == 1) {
-					((ListSwitchCard) cards.get(i)).update(device);
-				} else if (device.getType() == 2) {
-					((ListDimmerCard) cards.get(i)).update(device);
-				} else if (device.getType() == 3) {
-					((ListWeatherCard) cards.get(i)).update(device);
-				} else if (device.getType() == 4) {
-					((ListRelayCard) cards.get(i)).update(device);
-				} else if (device.getType() == 5) {
-					((ListScreenCard) cards.get(i)).update(device);
-				}
-				i++;
-			}
-		}
-		mCardArrayAdapter.notifyDataSetChanged();
-		//mCardGridArrayAdapter.notifyDataSetChanged();
-	}
-
-	public interface DeviceListListener {
-		public void deviceListListener(int what, String action);
 	}
 
 	/*
@@ -184,7 +140,7 @@ public class DeviceListFragment extends BaseFragment {
 	public class ListDimmerCard extends Card {
 		protected String who;
 		protected boolean mState;
-		protected boolean readwrite=true;
+		protected boolean readwrite = true;
 		protected int mSeekValue;
 		protected int minSeekValue;
 		protected int maxSeekValue;
@@ -199,7 +155,7 @@ public class DeviceListFragment extends BaseFragment {
 				String action = "\"state\":\"off\"";
 				if (isChecked) action = "\"state\":\"on\"";
 				mState = isChecked;
-				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
+				// deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
 			}
 		};
 		protected CircularSeekBar.OnCircularSeekBarChangeListener seekListener = new CircularSeekBar.OnCircularSeekBarChangeListener() {
@@ -208,7 +164,8 @@ public class DeviceListFragment extends BaseFragment {
 				mTitleMainView.setText(mTitleMain);
 				mToggle.setText(Integer.toString(mSeekValue));
 				String action = "\"state\":\"on\",\"values\":{\"dimlevel\":" + String.valueOf(mSeekValue) + "}";
-				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
+				
+				// deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
 			}
 
 			@Override
@@ -271,6 +228,13 @@ public class DeviceListFragment extends BaseFragment {
 			mSeekBar.setClickable(readwrite);
 			if (!readwrite) mToggle.setAlpha((float) 0.5);
 			if (!readwrite) mSeekBar.setAlpha((float) 0.5);
+			
+			ListDimmerCard card = this;
+			Log.w(TAG, card.getTitle());
+			Log.w(TAG, Integer.toString(card.getCardView().getId()));
+			Log.w(TAG, "parent: " + Integer.toString(parent.getId()));
+			card.getCardView().setId(R.id.list_cardId);
+			
 		}
 
 		public void update(DeviceEntry entry) {
@@ -304,14 +268,14 @@ public class DeviceListFragment extends BaseFragment {
 		protected TextView mTitleMainView;
 		protected ToggleButton mToggle;
 		protected boolean mState;
-		protected boolean readwrite=true;
+		protected boolean readwrite = true;
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 				String action = "\"state\":\"off\"";
 				if (isChecked) action = "\"state\":\"on\"";
 				mState = isChecked;
-				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
+				// deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
 			}
 		};
 
@@ -351,7 +315,7 @@ public class DeviceListFragment extends BaseFragment {
 			}
 			mToggle.setClickable(readwrite);
 			if (!readwrite) mToggle.setAlpha((float) 0.5);
-			
+
 		}
 
 		public void update(DeviceEntry entry) {
@@ -391,9 +355,9 @@ public class DeviceListFragment extends BaseFragment {
 				if (sentry.getKey().equals("locationName")) mTitleMain = sentry.getValue();
 				if (sentry.getKey().equals("temperature")) mTemperature = sentry.getValue();
 				if (sentry.getKey().equals("humidity")) mHumidity = sentry.getValue();
-				if (sentry.getKey().equals("battery")&&(sentry.getValue().equals("1"))) mBattery = true;
+				if (sentry.getKey().equals("battery") && (sentry.getValue().equals("1"))) mBattery = true;
 				if (sentry.getKey().equals("sett_decimals")) decimals = Integer.valueOf(sentry.getValue());
-				if (sentry.getKey().equals("sett_battery")&&(sentry.getValue().equals("1"))) showBattery = true;
+				if (sentry.getKey().equals("sett_battery") && (sentry.getValue().equals("1"))) showBattery = true;
 			}
 
 			DecimalFormat oneDigit = new DecimalFormat("#,##0.0");// format to 1
@@ -449,7 +413,7 @@ public class DeviceListFragment extends BaseFragment {
 					if (sentry.getValue().equals("1")) {
 						mBattery = true;
 						mBatteryView.setImageResource(R.drawable.batt_full);
-					}else{
+					} else {
 						mBattery = false;
 						mBatteryView.setImageResource(R.drawable.batt_empty);
 					}
@@ -469,15 +433,15 @@ public class DeviceListFragment extends BaseFragment {
 		protected TextView mTitleMainView;
 		protected ToggleButton mToggle;
 		protected boolean mState;
-		protected boolean readwrite=true;
-		
+		protected boolean readwrite = true;
+
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 				String action = "\"state\":\"off\"";
 				if (isChecked) action = "\"state\":\"on\"";
 				mState = isChecked;
-				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
+				// deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
 			}
 		};
 
@@ -542,13 +506,14 @@ public class DeviceListFragment extends BaseFragment {
 		protected Button mBtnUp;
 		protected Button mBtnDown;
 		protected TextView mTitleMainView;
-		protected boolean readwrite=true;
-		
+		protected boolean readwrite = true;
+
 		protected Button.OnClickListener clickListener = new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				String action = "";
-				switch (v.getId()) {
+				switch (v.getId())
+				{
 				case R.id.card_inner_btnUp:
 					action = "\"state\":\"up\"";
 					break;
@@ -556,7 +521,7 @@ public class DeviceListFragment extends BaseFragment {
 					action = "\"state\":\"down\"";
 					break;
 				}
-				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);				
+				// deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
 			}
 		};
 
@@ -590,7 +555,6 @@ public class DeviceListFragment extends BaseFragment {
 			mBtnDown.setOnClickListener(clickListener);
 			mBtnDown.setClickable(readwrite);
 			mBtnUp.setClickable(readwrite);
-
 
 		}
 

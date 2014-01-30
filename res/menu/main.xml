@@ -39,4 +39,9 @@
         android:title="Debugging"
         android:orderInCategory="2"
         android:showAsAction="never"/>
+    <item
+        android:id="@+id/menu_tasker"
+        android:title="TaskerEdit"
+        android:orderInCategory="2"
+        android:showAsAction="never"/>
 </menu>

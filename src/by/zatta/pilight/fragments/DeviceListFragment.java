@@ -51,7 +51,6 @@ import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.internal.CardGridArrayAdapter;
 import it.gmariotti.cardslib.library.internal.CardHeader;
-import it.gmariotti.cardslib.library.view.CardGridView;
 import it.gmariotti.cardslib.library.view.CardListView;
 
 public class DeviceListFragment extends BaseFragment {
@@ -106,7 +105,7 @@ public class DeviceListFragment extends BaseFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.devicelist_layout, container, false);
-		//return inflater.inflate(R.layout.demo_fragment_grid_base, container, false);
+		// return inflater.inflate(R.layout.demo_fragment_grid_base, container, false);
 	}
 
 	@Override
@@ -141,14 +140,14 @@ public class DeviceListFragment extends BaseFragment {
 		if (listView != null) {
 			listView.setAdapter(mCardArrayAdapter);
 		}
-		
-//		mCardGridArrayAdapter = new CardGridArrayAdapter(getActivity(), cards);
-//		mCardGridArrayAdapter.setInnerViewTypeCount(2);
-//
-//		CardGridView gridView = (CardGridView) getActivity().findViewById(R.id.carddemo_grid_base);
-//        if (gridView!=null){
-//            gridView.setAdapter(mCardGridArrayAdapter);
-//        }
+
+		// mCardGridArrayAdapter = new CardGridArrayAdapter(getActivity(), cards);
+		// mCardGridArrayAdapter.setInnerViewTypeCount(2);
+		//
+		// CardGridView gridView = (CardGridView) getActivity().findViewById(R.id.carddemo_grid_base);
+		// if (gridView!=null){
+		// gridView.setAdapter(mCardGridArrayAdapter);
+		// }
 	}
 
 	public static void updateUI(List<DeviceEntry> list) {
@@ -171,7 +170,7 @@ public class DeviceListFragment extends BaseFragment {
 			}
 		}
 		mCardArrayAdapter.notifyDataSetChanged();
-		//mCardGridArrayAdapter.notifyDataSetChanged();
+		// mCardGridArrayAdapter.notifyDataSetChanged();
 	}
 
 	public interface DeviceListListener {
@@ -184,7 +183,7 @@ public class DeviceListFragment extends BaseFragment {
 	public class ListDimmerCard extends Card {
 		protected String who;
 		protected boolean mState;
-		protected boolean readwrite=true;
+		protected boolean readwrite = true;
 		protected int mSeekValue;
 		protected int minSeekValue;
 		protected int maxSeekValue;
@@ -304,7 +303,7 @@ public class DeviceListFragment extends BaseFragment {
 		protected TextView mTitleMainView;
 		protected ToggleButton mToggle;
 		protected boolean mState;
-		protected boolean readwrite=true;
+		protected boolean readwrite = true;
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -351,7 +350,7 @@ public class DeviceListFragment extends BaseFragment {
 			}
 			mToggle.setClickable(readwrite);
 			if (!readwrite) mToggle.setAlpha((float) 0.5);
-			
+
 		}
 
 		public void update(DeviceEntry entry) {
@@ -391,9 +390,9 @@ public class DeviceListFragment extends BaseFragment {
 				if (sentry.getKey().equals("locationName")) mTitleMain = sentry.getValue();
 				if (sentry.getKey().equals("temperature")) mTemperature = sentry.getValue();
 				if (sentry.getKey().equals("humidity")) mHumidity = sentry.getValue();
-				if (sentry.getKey().equals("battery")&&(sentry.getValue().equals("1"))) mBattery = true;
+				if (sentry.getKey().equals("battery") && (sentry.getValue().equals("1"))) mBattery = true;
 				if (sentry.getKey().equals("sett_decimals")) decimals = Integer.valueOf(sentry.getValue());
-				if (sentry.getKey().equals("sett_battery")&&(sentry.getValue().equals("1"))) showBattery = true;
+				if (sentry.getKey().equals("sett_battery") && (sentry.getValue().equals("1"))) showBattery = true;
 			}
 
 			DecimalFormat oneDigit = new DecimalFormat("#,##0.0");// format to 1
@@ -449,7 +448,7 @@ public class DeviceListFragment extends BaseFragment {
 					if (sentry.getValue().equals("1")) {
 						mBattery = true;
 						mBatteryView.setImageResource(R.drawable.batt_full);
-					}else{
+					} else {
 						mBattery = false;
 						mBatteryView.setImageResource(R.drawable.batt_empty);
 					}
@@ -469,8 +468,8 @@ public class DeviceListFragment extends BaseFragment {
 		protected TextView mTitleMainView;
 		protected ToggleButton mToggle;
 		protected boolean mState;
-		protected boolean readwrite=true;
-		
+		protected boolean readwrite = true;
+
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -542,13 +541,14 @@ public class DeviceListFragment extends BaseFragment {
 		protected Button mBtnUp;
 		protected Button mBtnDown;
 		protected TextView mTitleMainView;
-		protected boolean readwrite=true;
-		
+		protected boolean readwrite = true;
+
 		protected Button.OnClickListener clickListener = new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				String action = "";
-				switch (v.getId()) {
+				switch (v.getId())
+				{
 				case R.id.card_inner_btnUp:
 					action = "\"state\":\"up\"";
 					break;
@@ -556,7 +556,7 @@ public class DeviceListFragment extends BaseFragment {
 					action = "\"state\":\"down\"";
 					break;
 				}
-				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);				
+				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
 			}
 		};
 
@@ -590,7 +590,6 @@ public class DeviceListFragment extends BaseFragment {
 			mBtnDown.setOnClickListener(clickListener);
 			mBtnDown.setClickable(readwrite);
 			mBtnUp.setClickable(readwrite);
-
 
 		}
 

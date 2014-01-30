@@ -53,9 +53,9 @@ public enum ConnectionProvider {
 	}
 
 	public synchronized String getCommandOutput(String command) {
-		//Log.v(TAG, "getCommandOutput");
+		// Log.v(TAG, "getCommandOutput");
 		if (writer == null || !writer.isAlive() || reader == null || !reader.isAlive()) {
-			//Log.v(TAG, "setting up new connection");
+			// Log.v(TAG, "setting up new connection");
 			output_queue = new ArrayBlockingQueue<String>(6);
 			command_queue = new ArrayBlockingQueue<String>(10);
 			connector = new ConnectorThread(command_queue, output_queue);
@@ -70,7 +70,7 @@ public enum ConnectionProvider {
 			command_queue.put(command);
 
 		} catch (InterruptedException e) {
-			//Log.w(TAG, "Interrupted while command_queue.put(command)");
+			// Log.w(TAG, "Interrupted while command_queue.put(command)");
 			e.printStackTrace();
 			return null;
 		}
@@ -78,62 +78,62 @@ public enum ConnectionProvider {
 			output = output_queue.take();
 			gimmeAnswer = false;
 		} catch (InterruptedException e2) {
-			//Log.w(TAG, "Interrupted while output_queue.take()");
+			// Log.w(TAG, "Interrupted while output_queue.take()");
 		}
 
 		try {
-			//Log.v(TAG, "get output: " + command + " -> " + output);
+			// Log.v(TAG, "get output: " + command + " -> " + output);
 		} catch (Exception e2) {
-			//Log.w(TAG, "Interrupted while output_queue.take()");
+			// Log.w(TAG, "Interrupted while output_queue.take()");
 		}
 		return output;
 	}
 
 	public synchronized void finishTheWork() {
-		//Log.v(TAG, "called finishTheWork");
+		// Log.v(TAG, "called finishTheWork");
 
 		try {
 			connector.finalize();
 		} catch (Throwable e) {
-			//Log.w(TAG, "couldnt finalize the connector");
+			// Log.w(TAG, "couldnt finalize the connector");
 		}
 		try {
 			writer.finalize();
 		} catch (Throwable e) {
-			//Log.w(TAG, "couldnt finalize the writer");
+			// Log.w(TAG, "couldnt finalize the writer");
 		}
 		try {
 			reader.finalize();
 		} catch (Throwable e) {
-			//Log.w(TAG, "couldnt finalize the reader");
+			// Log.w(TAG, "couldnt finalize the reader");
 		}
 
 		writer = null;
 		reader = null;
 
 		if (socket != null) {
-			//Log.v(TAG, "socket wasn't null");
+			// Log.v(TAG, "socket wasn't null");
 			try {
 				socket.close();
 			} catch (Exception e) {
-				//Log.w(TAG, "couldnt close the socket");
+				// Log.w(TAG, "couldnt close the socket");
 			}
 			socket = null;
 		}
 
 		if (output_queue != null) output_queue.clear();
 		if (command_queue != null) command_queue.clear();
-		//Log.v(TAG, "queueu's cleared");
+		// Log.v(TAG, "queueu's cleared");
 		output_queue = null;
 		command_queue = null;
-		//Log.v(TAG, "queueu's nulled");
+		// Log.v(TAG, "queueu's nulled");
 	}
 
 	public synchronized boolean doConnect() {
 		status = Status.NO_CONNECTION;
 		connectionAttempts = 0;
 		boolean toBeReturned = (getCommandOutput("{\"message\":\"client gui\"}").contains("{\"message\":\"accept client\"}"));
-		//Log.v(TAG, "doConnect returns: " + toBeReturned);
+		// Log.v(TAG, "doConnect returns: " + toBeReturned);
 		return toBeReturned;
 	}
 
@@ -142,33 +142,33 @@ public enum ConnectionProvider {
 	}
 
 	public synchronized void sendCommand(String command) {
-		//Log.v(TAG, "sending command:" + "{\"message\":\"send\",\"code\":{" + command + "}}");
+		// Log.v(TAG, "sending command:" + "{\"message\":\"send\",\"code\":{" + command + "}}");
 		command_queue.add("{\"message\":\"send\",\"code\":{" + command + "}}");
 	}
 
 	public boolean stillConnected() {
-		//Log.v(TAG, "calling stillConnected");
+		// Log.v(TAG, "calling stillConnected");
 		timeHeart = new Date().getTime();
 		if (timeHeart - timeBeat < 5000) {
 			return true;
 		}
 		if (writer == null || !writer.isAlive() || reader == null || !reader.isAlive()) {
-			//Log.v(TAG, "writer or reader null of not alive");
+			// Log.v(TAG, "writer or reader null of not alive");
 			status = Status.NO_CONNECTION;
 			return false;
 		}
 
 		try {
-			//Log.v(TAG, "trying to write HEART");
+			// Log.v(TAG, "trying to write HEART");
 			command_queue.put("HEART");
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
-			//Log.v(TAG, "couldn't write HEART");
+			// Log.v(TAG, "couldn't write HEART");
 			status = Status.NO_CONNECTION;
 			return false;
 		}
 		if (timeHeart - timeBeat < 8000) {
-			//Log.v(TAG, "returning true");
+			// Log.v(TAG, "returning true");
 			return true;
 		}
 		status = Status.NO_CONNECTION;
@@ -194,14 +194,14 @@ public enum ConnectionProvider {
 		private ArrayBlockingQueue<String> output_queue;
 
 		ConnectorThread(ArrayBlockingQueue<String> command_queue, ArrayBlockingQueue<String> output_queue) {
-			//Log.v(TAG, "constructed connector thread");
+			// Log.v(TAG, "constructed connector thread");
 			this.command_queue = command_queue;
 			this.output_queue = output_queue;
 		}
 
 		@Override
 		protected void finalize() throws Throwable {
-			//Log.v(TAG, "Finalize the ConnectorThread");
+			// Log.v(TAG, "Finalize the ConnectorThread");
 			this.interrupt();
 			super.finalize();
 		}
@@ -209,10 +209,10 @@ public enum ConnectionProvider {
 		@Override
 		public void run() {
 			while (!(status == Status.CONNECTED) && !(status == Status.FAILED)) {
-				//Log.v(TAG, "run connector, about to ensure");
+				// Log.v(TAG, "run connector, about to ensure");
 				ensure_connection();
 			}
-			//Log.v(TAG, "Ending connectorthread with: "+ status.name());
+			// Log.v(TAG, "Ending connectorthread with: "+ status.name());
 		}
 
 		public void ensure_connection() {
@@ -222,52 +222,55 @@ public enum ConnectionProvider {
 		}
 
 		public void init() {
-			//Log.v(TAG, "init connection");
+			// Log.v(TAG, "init connection");
 			if (status == Status.NO_CONNECTION || status == Status.CONNECTING) {
 				connectionAttempts++;
 				try {
 					if (socket == null) {
-						//Log.v(TAG, "socket was null");
+						// Log.v(TAG, "socket was null");
 						socket = new Socket();
 						socket.setSoTimeout(30000);
 					}
 					if (!socket.isConnected()) socket.connect(SSDPfinder.pi(), 10000);
 				} catch (UnknownHostException e) {
-					//Log.w(TAG, "UnknownHost");
+					// Log.w(TAG, "UnknownHost");
 					status = Status.CONNECTING;
 				} catch (IOException e) {
-					//Log.w(TAG, "IOException");
+					// Log.w(TAG, "IOException");
 					status = Status.CONNECTING;
 				} catch (IllegalArgumentException e) {
-					//Log.w(TAG, "IllegalArgumentException");
+					// Log.w(TAG, "IllegalArgumentException");
 					status = Status.CONNECTING;
 				}
 				if (!(socket == null)) {
-					//Log.v(TAG, "socket wasn't null");
+					// Log.v(TAG, "socket wasn't null");
 					if (socket.isConnected()) {
-						//Log.v(TAG, "socket made");
+						// Log.v(TAG, "socket made");
 						connectionAttempts = 0;
 						status = Status.CONNECTED;
 
 						if (reader == null || !reader.isAlive()) {
-							//Log.v(TAG, "starting new reader");
+							// Log.v(TAG, "starting new reader");
 							reader = new ReaderThread(output_queue);
 							reader.setName("ReaderThread");
 							reader.start();
 						} else {
-							//Log.v(TAG, "reader was still alive");
+							// Log.v(TAG, "reader was still alive");
 						}
 						if (writer == null || !writer.isAlive()) {
-							//Log.v(TAG, "starting new writer");
+							// Log.v(TAG, "starting new writer");
 							writer = new WriterThread(command_queue);
 							writer.setName("WriterThread");
 							writer.start();
 						} else {
-							//Log.v(TAG, "writer was still alive");
+							// Log.v(TAG, "writer was still alive");
 						}
 
 						if (!(writer == null || !writer.isAlive() || reader == null || !reader.isAlive())) {
-							try { Thread.sleep(100); } catch (InterruptedException e) {}
+							try {
+								Thread.sleep(100);
+							} catch (InterruptedException e) {
+							}
 							return;
 						}
 					} else status = Status.CONNECTING;
@@ -275,10 +278,10 @@ public enum ConnectionProvider {
 				try {
 					Thread.sleep(500);
 				} catch (InterruptedException e) {
-					//Log.w(TAG, "no sleep");
+					// Log.w(TAG, "no sleep");
 				}
 
-				//Log.v(TAG, "connectionAttempts: " + Integer.toString(connectionAttempts));
+				// Log.v(TAG, "connectionAttempts: " + Integer.toString(connectionAttempts));
 				if (connectionAttempts > 3) {
 					status = Status.FAILED;
 					output_queue.add("Failed");
@@ -296,22 +299,22 @@ public enum ConnectionProvider {
 		private PrintStream printStream = null;
 
 		WriterThread(ArrayBlockingQueue<String> command_queue) {
-			//Log.v(TAG, "constructed writer thread");
+			// Log.v(TAG, "constructed writer thread");
 			this.command_queue = command_queue;
 		}
 
 		@Override
 		protected void finalize() throws Throwable {
-			//Log.d(TAG, "Finalize the WriterThread");
+			// Log.d(TAG, "Finalize the WriterThread");
 			this.interrupt();
 			super.finalize();
 		}
 
 		@Override
 		public void interrupt() {
-			//Log.v(TAG, "interrupted writer");
+			// Log.v(TAG, "interrupted writer");
 			if (printStream != null) {
-				//Log.v(TAG, "printstream wasn't null");
+				// Log.v(TAG, "printstream wasn't null");
 				printStream.close();
 				printStream = null;
 			}
@@ -325,39 +328,39 @@ public enum ConnectionProvider {
 
 		@Override
 		public void run() {
-			//Log.v(TAG, "writer started");
+			// Log.v(TAG, "writer started");
 			try {
 				while (!(command_queue == null)) {
 					if (status == Status.CONNECTED) {
-						//Log.v(TAG, "run writer, status connected");
+						// Log.v(TAG, "run writer, status connected");
 						String command;
 						try {
 							command = command_queue.take();
 							write(command);
 						} catch (Exception e) {
-							//Log.w(TAG, "couldn't take command from queueu");
+							// Log.w(TAG, "couldn't take command from queueu");
 							status = Status.NO_CONNECTION;
 						}
 
 					}
 					if (status == Status.FAILED) {
-						//Log.v(TAG, "run writer, status failed");
+						// Log.v(TAG, "run writer, status failed");
 						command_queue.clear();
 						output_queue.put("NO_CONNECTION");
 						status = Status.NO_CONNECTION;
 					}
 				}
 			} catch (InterruptedException e) {
-				//Log.w(TAG, "writer interrupted");
+				// Log.w(TAG, "writer interrupted");
 			}
-			//Log.v(TAG, "writer ended");
+			// Log.v(TAG, "writer ended");
 		}
 
 		public boolean write(String message) {
-			//Log.v(TAG, "write called");
+			// Log.v(TAG, "write called");
 			try {
 				if (printStream == null) {
-					//Log.v(TAG, "creating new printStream");
+					// Log.v(TAG, "creating new printStream");
 					printStream = new PrintStream(socket.getOutputStream(), false);
 				}
 				printStream.print(message + "\n");
@@ -365,7 +368,7 @@ public enum ConnectionProvider {
 				Thread.sleep(100);
 				return true;
 			} catch (Exception e) {
-				//Log.w(TAG, "couldn't write to the socket");
+				// Log.w(TAG, "couldn't write to the socket");
 				status = Status.NO_CONNECTION;
 				return false;
 			}
@@ -382,25 +385,25 @@ public enum ConnectionProvider {
 		private String line = null;
 
 		ReaderThread(ArrayBlockingQueue<String> output_queue) {
-			//Log.v(TAG, "constructed reader thread");
+			// Log.v(TAG, "constructed reader thread");
 			this.output_queue = output_queue;
 		}
 
 		@Override
 		protected void finalize() throws Throwable {
-			//Log.v(TAG, "finalize reader");
+			// Log.v(TAG, "finalize reader");
 			this.interrupt();
 			super.finalize();
 		}
 
 		@Override
 		public void interrupt() {
-			//Log.v(TAG, "interrupted reader");
+			// Log.v(TAG, "interrupted reader");
 			if (bufferedReader != null) {
 				try {
 					bufferedReader.close();
 				} catch (IOException e) {
-					//Log.w(TAG, "couldn't close buffered reader");
+					// Log.w(TAG, "couldn't close buffered reader");
 					e.printStackTrace();
 				}
 				bufferedReader = null;
@@ -416,11 +419,11 @@ public enum ConnectionProvider {
 
 		@Override
 		public void run() {
-			//Log.v(TAG, "reader started");
+			// Log.v(TAG, "reader started");
 			while (status == Status.CONNECTED) {
 				read();
 			}
-			//Log.v(TAG, "reader ended");
+			// Log.v(TAG, "reader ended");
 		}
 
 		public void read() {
@@ -431,22 +434,22 @@ public enum ConnectionProvider {
 					while ((line = bufferedReader.readLine()) != null) {
 						timeBeat = new Date().getTime();
 						try {
-							//Log.v(TAG, line);
+							// Log.v(TAG, line);
 							if (gimmeAnswer) {
 								output_queue.put(line);
 							} else if (!line.equals("BEAT")) {
 								ConnectionService.postUpdate(line);
 							}
 						} catch (Exception e) {
-							//Log.w(TAG, "line leeg ofzo");
+							// Log.w(TAG, "line leeg ofzo");
 						}
 					}
 					status = Status.FAILED;
-					//Log.w(TAG, "stopped reading bufferedReader");
+					// Log.w(TAG, "stopped reading bufferedReader");
 				}
 			} catch (Exception e1) {
 				status = Status.NO_CONNECTION;
-				//Log.w(TAG, "problems in read()");
+				// Log.w(TAG, "problems in read()");
 			}
 		}
 	}

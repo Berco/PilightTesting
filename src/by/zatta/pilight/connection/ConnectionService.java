@@ -78,14 +78,15 @@ public class ConnectionService extends Service {
 	private static Context aCtx;
 	private static Context ctx;
 
-	public static List<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track of all current registered clients (activities, widget:))
+	public static List<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track of all current registered clients (activities,
+																			// widget:))
 	private static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
 	private static NotificationManager mNotMan;
 	private static Notification.Builder builder;
 	private static HeartBeat t = null;
 	private static final String TAG = "Zatta::ConnectionService";
 	private boolean isConnectionUp = false;
-	
+
 	public enum NotificationType {
 		CONNECTED, CONNECTING, DESTROYED, FAILED, LOST_CONNECTION, UPDATE,
 	}
@@ -95,18 +96,17 @@ public class ConnectionService extends Service {
 		public void onReceive(Context context, Intent intent) {
 			// Extract data included in the Intent
 			String action = intent.getAction();
-			//Log.v("receiver", "Got inent action: " + action);
+			// Log.v("receiver", "Got inent action: " + action);
 
 			if (action.equals("pilight-kill-service")) {
-				//Log.v(TAG, "kill recieved");
+				// Log.v(TAG, "kill recieved");
 				stopSelf();
 			} else if (action.equals("pilight-reconnect")) {
-				//Log.v(TAG, "kill recieved");
+				// Log.v(TAG, "kill recieved");
 				makeNotification(NotificationType.CONNECTING, "reconnecting...");
 				if (isConnectionUp)
 					dropConnection();
-				else
-					isConnectionUp = makeConnection();
+				else isConnectionUp = makeConnection();
 			}
 		}
 	};
@@ -118,7 +118,7 @@ public class ConnectionService extends Service {
 	 */
 	@Override
 	public IBinder onBind(Intent intent) {
-		//Log.v(TAG, "onBind");
+		// Log.v(TAG, "onBind");
 		return mMessenger.getBinder();
 	}
 
@@ -142,7 +142,7 @@ public class ConnectionService extends Service {
 
 	@Override
 	public void onDestroy() {
-		//Log.e(TAG, "onDestroy");
+		// Log.e(TAG, "onDestroy");
 		this.unregisterReceiver(mMessageReceiver);
 		sendMessageToUI(MSG_SET_STATUS, NotificationType.DESTROYED.name());
 		dropConnection();
@@ -153,13 +153,13 @@ public class ConnectionService extends Service {
 
 	@Override
 	public void onRebind(Intent intent) {
-		//Log.v(TAG, "onRebind");
+		// Log.v(TAG, "onRebind");
 		super.onRebind(intent);
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		//Log.v(TAG, "onStartCommand");
+		// Log.v(TAG, "onStartCommand");
 		if ((mCurrentNotif == NotificationType.FAILED || mCurrentNotif == NotificationType.LOST_CONNECTION)
 				&& !(mCurrentNotif == NotificationType.CONNECTING)) {
 			isConnectionUp = makeConnection();
@@ -169,18 +169,18 @@ public class ConnectionService extends Service {
 
 	@Override
 	public boolean onUnbind(Intent intent) {
-		//Log.v(TAG, "onUnbind");
+		// Log.v(TAG, "onUnbind");
 		super.onUnbind(intent);
 		return true;
 	}
 
 	private boolean dropConnection() {
-		//Log.v(TAG, "dropConnection called");
+		// Log.v(TAG, "dropConnection called");
 		ConnectionProvider.INSTANCE.finishTheWork();
 		try {
 			t.finalize();
 		} catch (Throwable e) {
-			//Log.w(TAG, "couldnt finalize the heart-beat");
+			// Log.w(TAG, "couldnt finalize the heart-beat");
 		}
 		isConnectionUp = false;
 		return false;
@@ -208,29 +208,28 @@ public class ConnectionService extends Service {
 		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo info = cm.getActiveNetworkInfo();
 		if (!(info == null)) {
-			//Log.d(TAG, "networkInfo: " + info.getExtraInfo());
+			// Log.d(TAG, "networkInfo: " + info.getExtraInfo());
 			currentNetwork = info.getExtraInfo();
 		}
 
 		WifiManager wifiManager = (WifiManager) ctx.getSystemService(Context.WIFI_SERVICE);
 		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
 		if (!(wifiInfo == null)) {
-			//Log.d(TAG, "wifiInfo:" + wifiInfo.getSSID());
+			// Log.d(TAG, "wifiInfo:" + wifiInfo.getSSID());
 			currentNetwork = wifiInfo.getSSID();
 		}
-		if (currentNetwork == null)
-			return false;
+		if (currentNetwork == null) return false;
 
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(aCtx);
 		String previous = prefs.getString("networks_known", "");
-		//Log.d(TAG, previous);
+		// Log.d(TAG, previous);
 		currentNetwork = currentNetwork.replace("\"", "");
 		if (previous.contains(currentNetwork)) {
-			//Log.d(TAG, previous + " did contain " + currentNetwork);
+			// Log.d(TAG, previous + " did contain " + currentNetwork);
 			return false;
 		} else {
 			previous = previous + "|&|" + currentNetwork;
-			//Log.d(TAG, previous);
+			// Log.d(TAG, previous);
 			Editor edit = prefs.edit();
 			edit.putString("networks_known", previous);
 			edit.commit();
@@ -240,9 +239,9 @@ public class ConnectionService extends Service {
 
 	private boolean makeConnection() {
 		// makeNotification(NotificationType.CONNECTING, null);
-		//Log.v(TAG, "makeConnection called");
+		// Log.v(TAG, "makeConnection called");
 		if (ConnectionProvider.INSTANCE.doConnect()) {
-			//Log.v(TAG, "recieved connection!");
+			// Log.v(TAG, "recieved connection!");
 			addedToPreferences();
 			makeNotification(NotificationType.CONNECTED, "Connected");
 			startForeground(35, builder.build());
@@ -253,7 +252,7 @@ public class ConnectionService extends Service {
 			}
 			return true;
 		} else {
-			//Log.w(TAG, "received connection failure");
+			// Log.w(TAG, "received connection failure");
 			makeNotification(NotificationType.FAILED, "Connecting Failed");
 			ConnectionProvider.INSTANCE.finishTheWork();
 			return false;
@@ -274,10 +273,10 @@ public class ConnectionService extends Service {
 		makeNotification(NotificationType.UPDATE, makeNiceUpdate(update));
 		sendMessageToUI(MSG_SET_BUNDLE, java.text.DateFormat.getTimeInstance().format(Calendar.getInstance().getTime()) + update);
 	}
-	
-	private static String makeNiceUpdate(String update){
-		if (update.contains("temperature") || update.contains("humidity")){
-			
+
+	private static String makeNiceUpdate(String update) {
+		if (update.contains("temperature") || update.contains("humidity")) {
+
 		}
 		return update;
 	}
@@ -301,9 +300,10 @@ public class ConnectionService extends Service {
 
 		// Log.v(TAG, "setting notification: " + type.name());
 		if (type != mCurrentNotif) {
-			//Log.v(TAG, "setting NEW notification: " + type.name());
+			// Log.v(TAG, "setting NEW notification: " + type.name());
 			sendMessageToUI(MSG_SET_STATUS, type.name());
-			switch (type) {
+			switch (type)
+			{
 			case DESTROYED:
 				builder = new Notification.Builder(ctx);
 				builder.setSmallIcon(R.drawable.eye_black).setLargeIcon(bigPic(R.drawable.eye_black)).setContentTitle("pilight")
@@ -365,7 +365,7 @@ public class ConnectionService extends Service {
 				break;
 			}
 		} else {
-			if (message != null){
+			if (message != null) {
 				builder.setContentTitle(myDate).setStyle(new Notification.BigTextStyle().bigText(message));
 				builder.setContentText(message);
 			}
@@ -380,16 +380,17 @@ public class ConnectionService extends Service {
 	 *            The message to send.
 	 */
 	private static void sendMessageToUI(int what, String message) {
-		//Log.v(TAG, "sent message called, clients attached: " + Integer.toString(mClients.size()));
+		// Log.v(TAG, "sent message called, clients attached: " + Integer.toString(mClients.size()));
 		Iterator<Messenger> messengerIterator = mClients.iterator();
 		while (messengerIterator.hasNext()) {
 			Messenger messenger = messengerIterator.next();
 			try {
 				Bundle bundle = new Bundle();
 				bundle.setClassLoader(aCtx.getClassLoader());
-				switch (what) {
+				switch (what)
+				{
 				case MSG_SET_STATUS:
-					//Log.v(TAG, "setting status: " + message);
+					// Log.v(TAG, "setting status: " + message);
 					bundle.putString("status", message);
 					Message msg_string = Message.obtain(null, MSG_SET_STATUS);
 					msg_string.setData(bundle);
@@ -397,7 +398,7 @@ public class ConnectionService extends Service {
 					break;
 				case MSG_SET_BUNDLE:
 					if (!mDevices.isEmpty()) {
-						//Log.v(TAG, "putting mDevices");
+						// Log.v(TAG, "putting mDevices");
 						bundle.putParcelableArrayList("config", (ArrayList<? extends Parcelable>) mDevices);
 						Message msg = Message.obtain(null, MSG_SET_BUNDLE);
 						msg.setData(bundle);
@@ -411,6 +412,7 @@ public class ConnectionService extends Service {
 			}
 		}
 	}
+
 	/**
 	 * Handle incoming messages from MainActivity
 	 */
@@ -418,14 +420,14 @@ public class ConnectionService extends Service {
 	private class IncomingMessageHandler extends Handler { // Handler of incoming messages from clients.
 		@Override
 		public void handleMessage(Message msg) {
-			//Log.v(TAG, "handleMessage: " + msg.what);
-			switch (msg.what) {
+			// Log.v(TAG, "handleMessage: " + msg.what);
+			switch (msg.what)
+			{
 			case MSG_REGISTER_CLIENT:
-				mClients.clear(); //Bit hackery, I admit
+				mClients.clear(); // Bit hackery, I admit
 				mClients.add(msg.replyTo);
 				sendMessageToUI(MSG_SET_STATUS, mCurrentNotif.name());
-				if (!mDevices.isEmpty())
-					sendMessageToUI(MSG_SET_BUNDLE, null);
+				if (!mDevices.isEmpty()) sendMessageToUI(MSG_SET_BUNDLE, null);
 				break;
 			case MSG_UNREGISTER_CLIENT:
 				mClients.remove(msg.replyTo);
@@ -446,7 +448,7 @@ public class ConnectionService extends Service {
 
 		@Override
 		public void interrupt() {
-			//Log.v(TAG, "interrupted HEARTBEAT");
+			// Log.v(TAG, "interrupted HEARTBEAT");
 			super.interrupt();
 		}
 
@@ -455,20 +457,20 @@ public class ConnectionService extends Service {
 			try {
 				while (!lostConnection) {
 					fromProvider = ConnectionProvider.INSTANCE.stillConnected();
-					//Log.v(TAG, "fromProvider: stillConnected= " + fromProvider);
+					// Log.v(TAG, "fromProvider: stillConnected= " + fromProvider);
 					if (!fromProvider) {
 						Log.d(TAG, "HEART-BEAT Lost Connection!!");
 						ConnectionProvider.INSTANCE.finishTheWork();
 						isConnectionUp = false;
-						//Log.d(TAG, "dropped connection");
+						// Log.d(TAG, "dropped connection");
 						int attempts = 0;
 						while (attempts < 3 && !isConnectionUp) {
-							//Log.v(TAG, "should reconnect");
+							// Log.v(TAG, "should reconnect");
 							makeNotification(NotificationType.CONNECTING, "Reconnection attempt " + Integer.toString(attempts));
 							isConnectionUp = makeConnection();
 							attempts++;
 						}
-						//Log.d(TAG, "hopefully reconnected");
+						// Log.d(TAG, "hopefully reconnected");
 						attempts = 0;
 						if (isConnectionUp) {
 							makeNotification(NotificationType.CONNECTED, "connected");
@@ -489,17 +491,17 @@ public class ConnectionService extends Service {
 						Thread.sleep(15000);
 					}
 				}
-				//Log.v(TAG, "ended timer thread for heart-beat");
+				// Log.v(TAG, "ended timer thread for heart-beat");
 			} catch (Exception e) {
 				Log.w(TAG, "something wrong in the heart-beat \n" + e);
 			}
-			//Log.w(TAG, "ended heart-beat");
+			// Log.w(TAG, "ended heart-beat");
 			mNotMan.cancel(35);
 		}
 
 		@Override
 		protected void finalize() throws Throwable {
-			//Log.v(TAG, "Finalize the HEARTBEAT");
+			// Log.v(TAG, "Finalize the HEARTBEAT");
 			this.interrupt();
 			super.finalize();
 		}

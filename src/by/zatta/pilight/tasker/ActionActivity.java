@@ -34,16 +34,16 @@ import by.zatta.pilight.fragments.BaseFragment;
 import by.zatta.pilight.fragments.TaskerActionFragment;
 import by.zatta.pilight.model.DeviceEntry;
 
-public class ActionActivity extends Activity implements ServiceConnection, OnChangedStatusListener{
-	
+public class ActionActivity extends Activity implements ServiceConnection, OnChangedStatusListener {
+
 	String mServer, mPort, mLocation, mDevice, mState, mValue;
 	EditText mServerText, mPortText, mLocationText, mDeviceText, mValueText;
 	RadioGroup g;
 	String[] mExtra;
-	
+
 	private static final String TAG = "Zatta::ActionActivity";
 	private static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
-	
+
 	private ServiceConnection mConnection = this;
 	private final Messenger mMessenger = new Messenger(new IncomingMessageHandler());
 	private Messenger mServiceMessenger = null;
@@ -52,95 +52,96 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		final Bundle localeBundle = getIntent().getBundleExtra(com.twofortyfouram.locale.Intent.EXTRA_BUNDLE);
-		
+
 		setContentView(R.layout.actionactivity_layout);
-//		mServerText = (EditText) findViewById(R.id.editTServerAddress);
-//		mPortText = (EditText) findViewById(R.id.editTPortNum);
-//		mLocationText = (EditText) findViewById(R.id.editTLocation);
-//		mDeviceText = (EditText) findViewById(R.id.editTDevice);
-//		g = (RadioGroup) findViewById(R.id.radioGState);
-//		mValueText = (EditText) findViewById(R.id.editTValue);
-//		
-//		if (savedInstanceState == null) {
-//			if (localeBundle != null) {
-//				mExtra = localeBundle.getStringArray("Extra");
-//				mServerText.setText(mExtra[0]);
-//				mPortText.setText(mExtra[1]);
-//				mLocationText.setText(mExtra[2]);
-//				mDeviceText.setText(mExtra[3]);
-//				if (mExtra[4] == "off"){
-//					g.check(R.id.radioOff);
-//				}
-//				mValueText.setText(mExtra[5]);
-//			}
-//		}
+		// mServerText = (EditText) findViewById(R.id.editTServerAddress);
+		// mPortText = (EditText) findViewById(R.id.editTPortNum);
+		// mLocationText = (EditText) findViewById(R.id.editTLocation);
+		// mDeviceText = (EditText) findViewById(R.id.editTDevice);
+		// g = (RadioGroup) findViewById(R.id.radioGState);
+		// mValueText = (EditText) findViewById(R.id.editTValue);
+		//
+		// if (savedInstanceState == null) {
+		// if (localeBundle != null) {
+		// mExtra = localeBundle.getStringArray("Extra");
+		// mServerText.setText(mExtra[0]);
+		// mPortText.setText(mExtra[1]);
+		// mLocationText.setText(mExtra[2]);
+		// mDeviceText.setText(mExtra[3]);
+		// if (mExtra[4] == "off"){
+		// g.check(R.id.radioOff);
+		// }
+		// mValueText.setText(mExtra[5]);
+		// }
+		// }
 	}
-	
+
 	@Override
 	protected void onDestroy() {
-		//Log.d(TAG, "onDestroy");
+		// Log.d(TAG, "onDestroy");
 		super.onDestroy();
 		try {
 			doUnbindService();
 		} catch (Throwable t) {
 			Log.w(TAG, "Failed to unbind from the service", t);
 		}
-		
+
 	}
 
 	@Override
 	protected void onPause() {
-		//Log.d(TAG, "onPause");
+		// Log.d(TAG, "onPause");
 		if (mIsBound) {
-			//Log.v(TAG, "onPause::unbinding");
+			// Log.v(TAG, "onPause::unbinding");
 			doUnbindService();
 		}
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean useService = prefs.getBoolean("useService", true);
-		if (!useService){
+		if (!useService) {
 			stopService(new Intent(ActionActivity.this, ConnectionService.class));
 		}
 		finish();
 		super.onPause();
 	}
-	
+
 	@Override
 	protected void onResume() {
-		//Log.v(TAG, "onResume");
+		// Log.v(TAG, "onResume");
 		automaticBind();
 		super.onResume();
 	}
-	
-	public void finishActivity(View view){
-//		mServer = mServerText.getText().toString();
-//		mPort = mPortText.getText().toString();
-//		mLocation = mLocationText.getText().toString();
-//		mDevice = mDeviceText.getText().toString();
-//		int selected = g.getCheckedRadioButtonId();
-//		if (selected == R.id.radioOn){
-//			mState = "on";
-//		}
-//		else {
-//			mState = "off";
-//		}
-//		mValue = mValueText.getText().toString();
-//		mExtra = new String[6];
-//		mExtra[0] = mServer;
-//		mExtra[1] = mPort;
-//		mExtra[2] = mLocation;
-//		mExtra[3] = mDevice;
-//		mExtra[4] = mState;
-//		mExtra[5] = mValue;
-//		Bundle extraBundle = new Bundle();
-//		extraBundle.putStringArray("Extra", mExtra);
-//		Intent i = new Intent();
-//		i.putExtra("Server", mServer).putExtra("Port", mPort).putExtra("Location", mLocation).putExtra("Device", mDevice).putExtra("State", mState).putExtra("Value", mValue);
-//		i.putExtra(com.twofortyfouram.locale.Intent.EXTRA_BUNDLE, extraBundle);
-//		String blurb = mServer + ":" + mPort + " => " + mLocation + " " + mDevice + " " + mState + " " + mValue;
-//		i.putExtra(com.twofortyfouram.locale.Intent.EXTRA_STRING_BLURB, blurb);
-//		setResult(-1,i);
+
+	public void finishActivity(View view) {
+		// mServer = mServerText.getText().toString();
+		// mPort = mPortText.getText().toString();
+		// mLocation = mLocationText.getText().toString();
+		// mDevice = mDeviceText.getText().toString();
+		// int selected = g.getCheckedRadioButtonId();
+		// if (selected == R.id.radioOn){
+		// mState = "on";
+		// }
+		// else {
+		// mState = "off";
+		// }
+		// mValue = mValueText.getText().toString();
+		// mExtra = new String[6];
+		// mExtra[0] = mServer;
+		// mExtra[1] = mPort;
+		// mExtra[2] = mLocation;
+		// mExtra[3] = mDevice;
+		// mExtra[4] = mState;
+		// mExtra[5] = mValue;
+		// Bundle extraBundle = new Bundle();
+		// extraBundle.putStringArray("Extra", mExtra);
+		// Intent i = new Intent();
+		// i.putExtra("Server", mServer).putExtra("Port", mPort).putExtra("Location", mLocation).putExtra("Device",
+		// mDevice).putExtra("State", mState).putExtra("Value", mValue);
+		// i.putExtra(com.twofortyfouram.locale.Intent.EXTRA_BUNDLE, extraBundle);
+		// String blurb = mServer + ":" + mPort + " => " + mLocation + " " + mDevice + " " + mState + " " + mValue;
+		// i.putExtra(com.twofortyfouram.locale.Intent.EXTRA_STRING_BLURB, blurb);
+		// setResult(-1,i);
 		finish();
 	}
 
@@ -164,7 +165,7 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 		mServiceMessenger = null;
 		// textStatus.setText("Disconnected.");
 	}
-	
+
 	/**
 	 * Check if the service is running. If the service is running when the activity starts, we want to automatically bind to it.
 	 */
@@ -174,7 +175,7 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 			doBindService();
 		}
 	}
-	
+
 	boolean isConnectionServiceActive() {
 		ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
@@ -215,7 +216,7 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 			mIsBound = false;
 		}
 	}
-	
+
 	private void openDialogFragment(DialogFragment dialogStandardFragment) {
 		if (dialogStandardFragment != null) {
 			FragmentManager fm = getFragmentManager();
@@ -239,7 +240,7 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 			prev.dismiss();
 		}
 	}
-	
+
 	private void openFragment(BaseFragment mBaseFragment2) {
 		if (mBaseFragment2 != null) {
 			FragmentManager fm = getFragmentManager();
@@ -249,7 +250,7 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 			ft.commit();
 		}
 	}
-	
+
 	/**
 	 * Handle incoming messages from ConnectionService
 	 */
@@ -261,42 +262,43 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 			Bundle bundle = msg.getData();
 			bundle.setClassLoader(getApplicationContext().getClassLoader());
 
-			switch (msg.what) {
+			switch (msg.what)
+			{
 			case ConnectionService.MSG_SET_STATUS:
 				String status = bundle.getString("status", "no status received yet");
 				Log.v(TAG, "status received in activity: " + status);
-				if (status.equals("UPDATE")) break;				
-				
+				if (status.equals("UPDATE")) break;
+
 				FragmentManager fm = getFragmentManager();
 				Fragment prev = fm.findFragmentByTag("dialog");
-				
-				if (prev == null){
+
+				if (prev == null) {
 					Log.v(TAG, "there was not a fragment with tag dialog");
 					openDialogFragment(StatusDialog.newInstance(status));
 					break;
-				}else if (!(prev.getClass().equals(StatusDialog.class))){
+				} else if (!(prev.getClass().equals(StatusDialog.class))) {
 					Log.v(TAG, "there was fragment with tag dialog not being StatusDialog");
 					openDialogFragment(StatusDialog.newInstance(status));
 					break;
-				}else{
+				} else {
 					Log.v(TAG, "there was a statusdialog running");
 					StatusDialog.setChangedStatus(status);
 					break;
 				}
-				
+
 			case ConnectionService.MSG_SET_BUNDLE:
 				mDevices = bundle.getParcelableArrayList("config");
 				Log.v(TAG, "received a MSG_SET_BUNDLE");
 
-				//if (allLocations.isEmpty())
-				//	initMenu();
-				
+				// if (allLocations.isEmpty())
+				// initMenu();
+
 				FragmentManager fm2 = getFragmentManager();
 				Fragment prev2 = fm2.findFragmentByTag("piTasker");
-				
-				if ((prev2 == null)){
+
+				if ((prev2 == null)) {
 					Log.v(TAG, "setting up new Fragment");
-					//openFragment(GridBaseFragment.newInstance(mDevices));
+					// openFragment(GridBaseFragment.newInstance(mDevices));
 					openFragment(TaskerActionFragment.newInstance(mDevices));
 				}
 
@@ -309,9 +311,10 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 
 	@Override
 	public void onChangedStatusListener(int what) {
-		
+
 		Log.d(TAG, "onChangedStatusListener called");
-		switch (what) {
+		switch (what)
+		{
 		case StatusDialog.DISMISS:
 			closeDialogFragments();
 			break;
@@ -323,10 +326,9 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 			break;
 		case StatusDialog.RECONNECT:
 			this.sendBroadcast(new Intent("pilight-reconnect"));
-			//TODO after a reconnection it takes a while before a new mDevices is received..
+			// TODO after a reconnection it takes a while before a new mDevices is received..
 			break;
 		}
 	}
 
 }
-

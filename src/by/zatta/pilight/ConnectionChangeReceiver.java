@@ -37,7 +37,6 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 public class ConnectionChangeReceiver extends BroadcastReceiver {
 
@@ -85,11 +84,8 @@ public class ConnectionChangeReceiver extends BroadcastReceiver {
 			int width = (int) ctx.getResources().getDimension(android.R.dimen.notification_large_icon_width);
 			mBitmap = Bitmap.createScaledBitmap(mBitmap, width / 3, height / 3, false);
 
-			Notification.Builder builder = new Notification.Builder(ctx)
-					.setContentTitle("pilight")
-					.setContentText("Left your home network")
-					.setSmallIcon(R.drawable.eye_black)
-					.setLargeIcon(mBitmap);
+			Notification.Builder builder = new Notification.Builder(ctx).setContentTitle("pilight")
+					.setContentText("Left your home network").setSmallIcon(R.drawable.eye_black).setLargeIcon(mBitmap);
 			mNotMan.notify(34, builder.build());
 		} else {
 			mNotMan.cancel(34);
@@ -98,19 +94,18 @@ public class ConnectionChangeReceiver extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		//Log.v(TAG, "received connectivity change: " + intent.getAction());
+		// Log.v(TAG, "received connectivity change: " + intent.getAction());
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		boolean useService = prefs.getBoolean("useService", true);
-		
-		if (useService){
+
+		if (useService) {
 			if (isConnectedToKnownHome(context)) {
-				//Log.v(TAG, "we are connected to home!");
+				// Log.v(TAG, "we are connected to home!");
 				makeNotification(false, context);
 				context.startService(new Intent(context, ConnectionService.class));
 			} else {
-				//Log.v(TAG, "not at home anymore :(");
-				if (context.stopService(new Intent(context, ConnectionService.class)))
-					makeNotification(true, context);
+				// Log.v(TAG, "not at home anymore :(");
+				if (context.stopService(new Intent(context, ConnectionService.class))) makeNotification(true, context);
 				// context.sendBroadcast(new Intent("pilight-left-network"));
 			}
 		}

@@ -62,7 +62,7 @@ public class SSDPfinder {
 		port = 0;
 		line = null;
 		find();
-		//Log.v(TAG, server + ":" + Integer.toString(port));
+		// Log.v(TAG, server + ":" + Integer.toString(port));
 		return server + ":" + Integer.toString(port);
 	}
 
@@ -82,7 +82,7 @@ public class SSDPfinder {
 				Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
 				for (InetAddress inetAddress : Collections.list(inetAddresses)) {
 					if (!inetAddress.isLoopbackAddress() && (inetAddress.getClass().equals(Inet4Address.class))) {
-						//Log.v(TAG, "checking: " + inetAddress.getHostAddress().toString());
+						// Log.v(TAG, "checking: " + inetAddress.getHostAddress().toString());
 						try {
 							ssdp = new DatagramSocket(new InetSocketAddress(inetAddress.getHostAddress().toString(), 0));
 							byte[] buff = msg.getBytes();

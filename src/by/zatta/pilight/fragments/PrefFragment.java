@@ -34,13 +34,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
-import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
-import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
-import android.preference.Preference.OnPreferenceChangeListener;
-import android.util.Log;
 import android.widget.Toast;
 import by.zatta.pilight.dialogs.AboutDialog;
 
@@ -85,7 +81,8 @@ public class PrefFragment extends BasePreferenceFragment {
 		launchPrefCat.addPreference(infoScreenPref);
 
 		Preference homePref = getPreferenceManager().createPreferenceScreen(mContext);
-		homePref.setIntent(new Intent().setAction(Intent.ACTION_VIEW).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK).setData(Uri.parse("http://www.pilight.org")));
+		homePref.setIntent(new Intent().setAction(Intent.ACTION_VIEW).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+				.setData(Uri.parse("http://www.pilight.org")));
 		homePref.setTitle("pilight.org");
 		homePref.setSummary("visit the forum");
 		homePref.setKey("visit_xda");
@@ -108,7 +105,7 @@ public class PrefFragment extends BasePreferenceFragment {
 		removeNetworksPref.setSummary("remove all remembered networks");
 		removeNetworksPref.setKey("remove_all_nets");
 		settingsPrefCat.addPreference(removeNetworksPref);
-		
+
 		CheckBoxPreference serviceCheckBoxPref = new CheckBoxPreference(mContext);
 		serviceCheckBoxPref.setTitle("Keep service running");
 		serviceCheckBoxPref.setSummary("also when not in the app");
@@ -161,8 +158,7 @@ public class PrefFragment extends BasePreferenceFragment {
 		FragmentTransaction ft = fm.beginTransaction();
 		Fragment about = getFragmentManager().findFragmentByTag("dialog");
 
-		if (about != null)
-			ft.remove(about);
+		if (about != null) ft.remove(about);
 		ft.addToBackStack(null);
 
 		if (pref.getKey().contentEquals("about_app_key")) {
@@ -171,12 +167,12 @@ public class PrefFragment extends BasePreferenceFragment {
 			return true;
 		}
 
-		 if (pref.getKey().contentEquals("remove_all_nets")){
-		 Toast.makeText(getActivity().getApplicationContext(), "forgot all known networks", Toast.LENGTH_LONG).show();
-		 pref.getEditor().putString("networks_known", "").commit();
-		 return true;
-		 }
-		 
+		if (pref.getKey().contentEquals("remove_all_nets")) {
+			Toast.makeText(getActivity().getApplicationContext(), "forgot all known networks", Toast.LENGTH_LONG).show();
+			pref.getEditor().putString("networks_known", "").commit();
+			return true;
+		}
+
 		//
 		// if (pref.getKey().contentEquals("reset_custom_key")){
 		// Toast.makeText(getActivity().getApplicationContext(), getString(R.string.toastReset), Toast.LENGTH_LONG).show();

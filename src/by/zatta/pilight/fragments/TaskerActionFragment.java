@@ -34,7 +34,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -44,7 +43,6 @@ import java.util.List;
 
 import com.devadvance.circularseekbar.CircularSeekBar;
 import by.zatta.pilight.R;
-import by.zatta.pilight.connection.ConnectionService;
 import by.zatta.pilight.model.DeviceEntry;
 import by.zatta.pilight.model.SettingEntry;
 import it.gmariotti.cardslib.library.internal.Card;
@@ -72,11 +70,12 @@ public class TaskerActionFragment extends BaseFragment {
 	public int getTitleResourceId() {
 		return R.string.title_list_base;
 	}
+
 	@Override
 	public String getName() {
 		return "piTasker";
 	}
-	
+
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
@@ -107,7 +106,7 @@ public class TaskerActionFragment extends BaseFragment {
 		for (DeviceEntry device : mDevices) {
 			Log.w(TAG, Integer.toString(device.getType()));
 			Card card = null;
-			
+
 			if (device.getType() == 1)
 				card = new ListSwitchCard(getActivity().getApplicationContext(), device);
 			else if (device.getType() == 2)
@@ -116,9 +115,8 @@ public class TaskerActionFragment extends BaseFragment {
 				card = new ListWeatherCard(getActivity().getApplicationContext(), device);
 			else if (device.getType() == 4)
 				card = new ListRelayCard(getActivity().getApplicationContext(), device);
-			else if (device.getType() == 52) 
-				card = new ListScreenCard(getActivity().getApplicationContext(), device);
-			
+			else if (device.getType() == 52) card = new ListScreenCard(getActivity().getApplicationContext(), device);
+
 			if (!(card == null)) {
 				cards.add(card);
 			}
@@ -131,7 +129,7 @@ public class TaskerActionFragment extends BaseFragment {
 		if (gridView != null) {
 			gridView.setAdapter(mCardGridArrayAdapter);
 		}
-		
+
 	}
 
 	/*
@@ -164,7 +162,7 @@ public class TaskerActionFragment extends BaseFragment {
 				mTitleMainView.setText(mTitleMain);
 				mToggle.setText(Integer.toString(mSeekValue));
 				String action = "\"state\":\"on\",\"values\":{\"dimlevel\":" + String.valueOf(mSeekValue) + "}";
-				
+
 				// deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
 			}
 
@@ -228,13 +226,11 @@ public class TaskerActionFragment extends BaseFragment {
 			mSeekBar.setClickable(readwrite);
 			if (!readwrite) mToggle.setAlpha((float) 0.5);
 			if (!readwrite) mSeekBar.setAlpha((float) 0.5);
-			
+
 			ListDimmerCard card = this;
 			Log.w(TAG, card.getTitle());
 			Log.w(TAG, Integer.toString(card.getCardView().getId()));
 			Log.w(TAG, "parent: " + Integer.toString(parent.getId()));
-			card.getCardView().setId(R.id.list_cardId);
-			
 		}
 
 		public void update(DeviceEntry entry) {
@@ -315,6 +311,11 @@ public class TaskerActionFragment extends BaseFragment {
 			}
 			mToggle.setClickable(readwrite);
 			if (!readwrite) mToggle.setAlpha((float) 0.5);
+			
+			ListSwitchCard card = this;
+			Log.w(TAG, card.getTitle());
+			Log.w(TAG, Integer.toString(card.getCardView().getId()));
+			Log.w(TAG, "parent: " + Integer.toString(parent.getId()));
 
 		}
 

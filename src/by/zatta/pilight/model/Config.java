@@ -56,8 +56,7 @@ public class Config {
 
 			try {
 				JSONObject jdev = jloc.getJSONObject(locationID);
-				if (jdev.has("name"))
-					locationName = jdev.getString("name");
+				if (jdev.has("name")) locationName = jdev.getString("name");
 				// Log.v(TAG, locationID + " = " +locationName);
 				Iterator<?> dit = jdev.keys();
 
@@ -116,8 +115,7 @@ public class Config {
 											Log.e(TAG, skey + "long : " + jvallng.toString());
 											sentry.setValue(jvallng.toString());
 										}
-										if (sentry != null)
-											settings.add(sentry);
+										if (sentry != null) settings.add(sentry);
 									}
 								} else if (skey.equals("id") || skey.equals("protocol") || skey.equals("order")) {
 								} else {
@@ -144,8 +142,7 @@ public class Config {
 											sentry.setValue(jvallng.toString());
 										}
 
-										if (sentry != null)
-											settings.add(sentry);
+										if (sentry != null) settings.add(sentry);
 									} catch (JSONException e) {
 										Log.w(TAG, "The received SETTING is of an incorrent format");
 									}
@@ -166,11 +163,11 @@ public class Config {
 				Log.w(TAG, "The received LOCATION is of an incorrent format");
 			}
 		}
-//		 try {
-//		 print();
-//		 } catch (Exception e) {
-//		 Log.w(TAG, "4) couldnt print");
-//		 }
+		// try {
+		// print();
+		// } catch (Exception e) {
+		// Log.w(TAG, "4) couldnt print");
+		// }
 	}
 
 	public static void print() {
@@ -188,41 +185,42 @@ public class Config {
 
 	public static List<DeviceEntry> update(OriginEntry originEntry) {
 		lastUpdateString = "";
-		int decimals=-1;
-		String name= "";
-		String value= "";
+		int decimals = -1;
+		String name = "";
+		String value = "";
 		for (DeviceEntry device : mDevices) {
 			if (device.getNameID().equals(originEntry.getNameID())) {
 				// Log.v(TAG, "updating: " + device.getNameID());
 				for (SettingEntry sentry : device.getSettings()) {
-					//Log.v(TAG, sentry.getKey());
-					if (sentry.getKey().equals("name")){
+					// Log.v(TAG, sentry.getKey());
+					if (sentry.getKey().equals("name")) {
 						originEntry.setPopularName(sentry.getValue());
 						name = sentry.getValue();
 					}
-					if (sentry.getKey().equals("sett_decimals")){
+					if (sentry.getKey().equals("sett_decimals")) {
 						decimals = Integer.valueOf(sentry.getValue());
-						//Log.v(TAG, sentry.getValue());
+						// Log.v(TAG, sentry.getValue());
 					}
 				}
 				for (SettingEntry sentry : device.getSettings()) {
 					for (SettingEntry orSentry : originEntry.getSettings()) {
 						if (sentry.getKey().equals(orSentry.getKey())) {
 							sentry.setValue(orSentry.getValue());
-							
+
 							if (sentry.getKey().equals("temperature") && (decimals != -1)) {
 								DecimalFormat oneDigit = new DecimalFormat("#,##0.0");// format to 1 decimal place
-								String temp = oneDigit.format(Integer.valueOf(sentry.getValue()) / (Math.pow(10, decimals))) + " \u2103";
-								value = value  + "Temp: " + temp + "\n";
-							}
-							else if (sentry.getKey().equals("humidity") && (decimals != -1)) {
+								String temp = oneDigit.format(Integer.valueOf(sentry.getValue()) / (Math.pow(10, decimals)))
+										+ " \u2103";
+								value = value + "Temp: " + temp + "\n";
+							} else if (sentry.getKey().equals("humidity") && (decimals != -1)) {
 								DecimalFormat oneDigit = new DecimalFormat("#,##0.0");// format to 1 decimal place
-								String hum = oneDigit.format(Integer.valueOf(sentry.getValue()) / (Math.pow(10, decimals))) + " %";
-								value = value  + "Humidity: " + hum + "\n";
+								String hum = oneDigit.format(Integer.valueOf(sentry.getValue()) / (Math.pow(10, decimals)))
+										+ " %";
+								value = value + "Humidity: " + hum + "\n";
 							}
-							
-							else{
-								value = value  + orSentry.getKey() + ": " + orSentry.getValue() + "\n";
+
+							else {
+								value = value + orSentry.getKey() + ": " + orSentry.getValue() + "\n";
 							}
 						}
 					}
@@ -232,9 +230,9 @@ public class Config {
 		lastUpdateString = name + "\n" + value;
 		return mDevices;
 	}
-	
-	public static String getLastUpdateString(){
-		//Log.v(TAG, lastUpdateString);
+
+	public static String getLastUpdateString() {
+		// Log.v(TAG, lastUpdateString);
 		return lastUpdateString;
 	}
 }

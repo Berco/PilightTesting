@@ -93,8 +93,9 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 
 	@Override
 	public void deviceListListener(int what, String action) {
-		//Log.d(TAG, "deviceListListener called");
-		switch (what) {
+		// Log.d(TAG, "deviceListListener called");
+		switch (what)
+		{
 		case ConnectionService.MSG_SWITCH_DEVICE:
 			sendMessageToService(action);
 			break;
@@ -105,7 +106,8 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 
 	@Override
 	public void onChangedStatusListener(int what) {
-		switch (what) {
+		switch (what)
+		{
 		case StatusDialog.DISMISS:
 			closeDialogFragments();
 			break;
@@ -117,15 +119,15 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 			break;
 		case StatusDialog.RECONNECT:
 			this.sendBroadcast(new Intent("pilight-reconnect"));
-			//TODO after a reconnection it takes a while before a new mDevices is received..
+			// TODO after a reconnection it takes a while before a new mDevices is received..
 			break;
 		}
 	}
-	
 
 	@Override
 	public void overViewListener(int buttonPressed) {
-		switch (buttonPressed) {
+		switch (buttonPressed)
+		{
 		case R.id.btnStart:
 			automaticBind();
 			break;
@@ -158,7 +160,7 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		setContentView(R.layout.mainactivity_layout);
 		mCurrentTitle = getString(R.string.app_name);
 
@@ -188,11 +190,12 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 		}
 		FragmentManager fm = getFragmentManager();
 		FragmentTransaction ft = fm.beginTransaction();
-		switch (item.getItemId()) {
+		switch (item.getItemId())
+		{
 		case R.id.menu_about:
 			openDialogFragment(AboutDialog.newInstance());
 			return true;
-		case R.id.menu_settings:			
+		case R.id.menu_settings:
 			Fragment pref = fm.findFragmentByTag("prefs");
 			if (pref == null) {
 				ft.replace(R.id.fragment_main, new PrefFragment(), "prefs");
@@ -257,7 +260,7 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 	}
 
 	private void initMenu() {
-		//Log.v(TAG, "calling initMenu");
+		// Log.v(TAG, "calling initMenu");
 		mDrawerList = (ListView) findViewById(R.id.drawer);
 		if (mDrawerList != null) {
 			mDrawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, makeLocationList()));
@@ -266,16 +269,16 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
-		
+
 		String location = allLocations.values().toArray(new String[allLocations.size()])[1];
 		mCurrentTitle = allLocations.keySet().toArray(new String[allLocations.size()])[1];
 		mBaseFragment = DeviceListFragment.newInstance(mDevices, location);
 		openFragment(mBaseFragment);
-		
+
 		mDrawer.setDrawerListener(mDrawerToggle);
 		mDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 		mDrawer.openDrawer(mDrawerList);
-		
+
 		closeDialogFragments();
 	}
 
@@ -286,8 +289,7 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 			for (DeviceEntry dentry : mDevices) {
 				if (!allLocations.containsValue(dentry.getLocationID())) {
 					for (SettingEntry sentry : dentry.getSettings()) {
-						if (sentry.getKey().equals("locationName"))
-							allLocations.put(sentry.getValue(), dentry.getLocationID());
+						if (sentry.getKey().equals("locationName")) allLocations.put(sentry.getValue(), dentry.getLocationID());
 					}
 				}
 			}
@@ -397,53 +399,53 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 
 	@Override
 	protected void onDestroy() {
-		//Log.d(TAG, "onDestroy");
+		// Log.d(TAG, "onDestroy");
 		super.onDestroy();
 		try {
 			doUnbindService();
 		} catch (Throwable t) {
 			Log.w(TAG, "Failed to unbind from the service", t);
 		}
-		
+
 	}
 
 	@Override
 	protected void onPause() {
-		//Log.d(TAG, "onPause");
+		// Log.d(TAG, "onPause");
 		if (mIsBound) {
-			//Log.v(TAG, "onPause::unbinding");
+			// Log.v(TAG, "onPause::unbinding");
 			doUnbindService();
 		}
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean useService = prefs.getBoolean("useService", true);
-		if (!useService){
+		if (!useService) {
 			stopService(new Intent(MainActivity.this, ConnectionService.class));
 		}
-		//finish(); //ugly hack, I know
+		// finish(); //ugly hack, I know
 		super.onPause();
 	}
-	
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		//TODO implement this properly
-		//Log.d(TAG, "onSaveInstanceState");
+		// TODO implement this properly
+		// Log.d(TAG, "onSaveInstanceState");
 		super.onSaveInstanceState(outState);
 	}
 
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState) {
 		super.onPostCreate(savedInstanceState);
-		//Log.v(TAG, "onPostCreate");
+		// Log.v(TAG, "onPostCreate");
 		// Sync the toggle state after onRestoreInstanceState has occurred.
-		if (mDrawerToggle != null){
-			//Log.v(TAG, "mDrawerToggle sync state");
+		if (mDrawerToggle != null) {
+			// Log.v(TAG, "mDrawerToggle sync state");
 			mDrawerToggle.syncState();
 		}
 	}
 
 	@Override
 	protected void onResume() {
-		//Log.v(TAG, "onResume");
+		// Log.v(TAG, "onResume");
 		automaticBind();
 		super.onResume();
 	}
@@ -499,55 +501,55 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 	private class IncomingMessageHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
-			//Log.v(TAG, "receiving a message");
+			// Log.v(TAG, "receiving a message");
 			Bundle bundle = msg.getData();
 			bundle.setClassLoader(getApplicationContext().getClassLoader());
 
-			switch (msg.what) {
+			switch (msg.what)
+			{
 			case ConnectionService.MSG_SET_STATUS:
 				String status = bundle.getString("status", "no status received yet");
-				//Log.v(TAG, "status received in activity: " + status);
-				if (status.equals("UPDATE")) break;				
-				
+				// Log.v(TAG, "status received in activity: " + status);
+				if (status.equals("UPDATE")) break;
+
 				FragmentManager fm = getFragmentManager();
 				Fragment prev = fm.findFragmentByTag("dialog");
-				//Log.e(TAG, "prev was: " +Boolean.toString(prev==null));
-				
-				//Log.e(TAG, "pref : " +Boolean.toString(!(prev.getClass().equals(StatusDialog.class))));
-				
-				if (prev == null){
-					//Log.v(TAG, "there was not a fragment with tag dialog");
+				// Log.e(TAG, "prev was: " +Boolean.toString(prev==null));
+
+				// Log.e(TAG, "pref : " +Boolean.toString(!(prev.getClass().equals(StatusDialog.class))));
+
+				if (prev == null) {
+					// Log.v(TAG, "there was not a fragment with tag dialog");
 					openDialogFragment(StatusDialog.newInstance(status));
 					break;
-				}else if (!(prev.getClass().equals(StatusDialog.class))){
-					//Log.v(TAG, "there was fragment with tag dialog not being StatusDialog");
+				} else if (!(prev.getClass().equals(StatusDialog.class))) {
+					// Log.v(TAG, "there was fragment with tag dialog not being StatusDialog");
 					openDialogFragment(StatusDialog.newInstance(status));
 					break;
-				}else{
-					//Log.v(TAG, "there was a statusdialog running");
+				} else {
+					// Log.v(TAG, "there was a statusdialog running");
 					StatusDialog.setChangedStatus(status);
 					break;
 				}
-				
+
 			case ConnectionService.MSG_SET_BUNDLE:
 
 				mDevices = bundle.getParcelableArrayList("config");
 
-				if (allLocations.isEmpty())
-					initMenu();
+				if (allLocations.isEmpty()) initMenu();
 
 				// TODO replace this method for a findFragmentById like thing:
 				try {
 					bundle.putBoolean("bound", mIsBound);
 					OverviewFragment.updateUI(bundle);
 				} catch (Exception e) {
-					//Log.v(TAG, "OverViewFragment isn't made yet");
+					// Log.v(TAG, "OverViewFragment isn't made yet");
 				}
-				//Log.v(TAG, "sending to the List!!");
+				// Log.v(TAG, "sending to the List!!");
 				try {
 					DeviceListFragment.updateUI(mDevices);
 				} catch (Exception e) {
-					//Log.v(TAG, "ListBaseFragment isn't made yet");
+					// Log.v(TAG, "ListBaseFragment isn't made yet");
 				}
 				break;
 			default:

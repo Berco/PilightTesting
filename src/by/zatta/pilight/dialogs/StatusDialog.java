@@ -42,7 +42,7 @@ public class StatusDialog extends DialogFragment implements OnClickListener {
 	private static Button mBtnSetup;
 	private String status;
 	private static TextView tv;
-	
+
 	public final static int DISMISS = 1187639657;
 	public final static int FINISH = 1432084755;
 	public final static int RECONNECT = 1873475293;
@@ -71,7 +71,7 @@ public class StatusDialog extends DialogFragment implements OnClickListener {
 		status = getArguments().getString("status");
 		setStyle(DialogFragment.STYLE_NORMAL, 0);
 		setCancelable(false);
-		//setRetainInstance(false);
+		// setRetainInstance(false);
 	}
 
 	@Override
@@ -95,23 +95,23 @@ public class StatusDialog extends DialogFragment implements OnClickListener {
 	public enum NotificationType {
 		CONNECTED, CONNECTING, DESTROYED, FAILED, LOST_CONNECTION, UPDATE,
 	}
-	
+
 	public static void setChangedStatus(String status) {
-		//TODO check for correctness
+		// TODO check for correctness
 		mBtnCancel.setVisibility(View.GONE);
 		mBtnSetup.setVisibility(View.GONE);
 		if (status.equals("CONNECTED")) {
 			changedStatusListener.onChangedStatusListener(DISMISS);
-		}else if (status.equals("CONNECTING")) {
-			mBtnCancel.setVisibility(View.VISIBLE);		
-		}else if (status.equals("DESTROYED")){
+		} else if (status.equals("CONNECTING")) {
 			mBtnCancel.setVisibility(View.VISIBLE);
-		}else if (status.equals("FAILED")) {
+		} else if (status.equals("DESTROYED")) {
 			mBtnCancel.setVisibility(View.VISIBLE);
-			//mBtnSetup.setVisibility(View.VISIBLE);
-		}else if(status.equals("LOST_CONNECTION")) {
+		} else if (status.equals("FAILED")) {
 			mBtnCancel.setVisibility(View.VISIBLE);
-			//mBtnSetup.setVisibility(View.VISIBLE);
+			// mBtnSetup.setVisibility(View.VISIBLE);
+		} else if (status.equals("LOST_CONNECTION")) {
+			mBtnCancel.setVisibility(View.VISIBLE);
+			// mBtnSetup.setVisibility(View.VISIBLE);
 		}
 		tv.setText(status);
 	}
@@ -122,7 +122,8 @@ public class StatusDialog extends DialogFragment implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		switch (v.getId()) {
+		switch (v.getId())
+		{
 		case R.id.btnCancelStart:
 			changedStatusListener.onChangedStatusListener(FINISH);
 			break;

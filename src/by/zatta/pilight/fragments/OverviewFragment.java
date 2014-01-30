@@ -109,8 +109,7 @@ public class OverviewFragment extends BaseFragment implements OnClickListener {
 	public static void updateUI(Bundle bundle) {
 		if (bundle.getBoolean("bound"))
 			textStatus.setText("bound");
-		else
-			textStatus.setText("not bound");
+		else textStatus.setText("not bound");
 		String str1 = bundle.getString("str1");
 		textStrValue.setText("Str Message: " + str1);
 		mDevices = bundle.getParcelableArrayList("config");

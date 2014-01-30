@@ -29,29 +29,46 @@ import java.util.List;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class OriginEntry implements Parcelable{
-	
+public class OriginEntry implements Parcelable {
+
 	private String name_id;
 	private String popular_name;
 	public List<SettingEntry> settings = new ArrayList<SettingEntry>();
-	
-	public OriginEntry(){}
-    	
-	public String getNameID()					{ return this.name_id; 		}
-	public void setNameID(String name_id)		{ this.name_id = name_id;	}
-	
-	public List<SettingEntry> getSettings()					{ return this.settings; }
-	public void setSettings(List<SettingEntry> settings)	{ this.settings = settings; }
-	
-	public String getPopularName()						{ return this.popular_name; 		}
-	public void setPopularName(String popular_name)		{ this.popular_name = popular_name;	}
 
-	@Override public String toString() {
+	public OriginEntry() {
+	}
+
+	public String getNameID() {
+		return this.name_id;
+	}
+
+	public void setNameID(String name_id) {
+		this.name_id = name_id;
+	}
+
+	public List<SettingEntry> getSettings() {
+		return this.settings;
+	}
+
+	public void setSettings(List<SettingEntry> settings) {
+		this.settings = settings;
+	}
+
+	public String getPopularName() {
+		return this.popular_name;
+	}
+
+	public void setPopularName(String popular_name) {
+		this.popular_name = popular_name;
+	}
+
+	@Override
+	public String toString() {
 		String toBeReturned = this.popular_name;
-		for(SettingEntry sentry : settings){
+		for (SettingEntry sentry : settings) {
 			toBeReturned = toBeReturned + "\n" + sentry.getValue();
 		}
-		return toBeReturned; 
+		return toBeReturned;
 	}
 
 	public OriginEntry(Parcel in) {
@@ -73,19 +90,19 @@ public class OriginEntry implements Parcelable{
 	@SuppressWarnings("unchecked")
 	private void readFromParcel(Parcel in) {
 		this.name_id = in.readString();
-		this.settings = in.readArrayList(SettingEntry.class.getClassLoader());	
-	}	
-	
+		this.settings = in.readArrayList(SettingEntry.class.getClassLoader());
+	}
+
 	@SuppressWarnings("rawtypes")
-	public static final Parcelable.Creator CREATOR =
-	new Parcelable.Creator() {
+	public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
 		@Override
-			public OriginEntry createFromParcel(Parcel in) {
+		public OriginEntry createFromParcel(Parcel in) {
 			return new OriginEntry(in);
 		}
+
 		@Override
-			public OriginEntry[] newArray(int size) {
+		public OriginEntry[] newArray(int size) {
 			return new OriginEntry[size];
 		}
-	};	
+	};
 }

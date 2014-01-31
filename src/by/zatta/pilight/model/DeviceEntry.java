@@ -131,6 +131,7 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable {
 				return o.getLocationID().compareTo(this.location_id);
 			} else if (this.getType() != o.getType()) {
 				int num = 0;
+				// sorting type according deftype except the temperures, I want them on top.
 				if (this.getType() == 3 && o.getType() != 3) return -1;
 				if (this.getType() != 3 && o.getType() == 3) return 1;
 				if (this.getType() < o.getType()) num = -1;

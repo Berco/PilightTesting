@@ -91,8 +91,8 @@ public class TaskerActionFragment extends BaseFragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.devicelist_layout, container, false);
-		//return inflater.inflate(R.layout.devicegrid_layout, container, false);
+		//return inflater.inflate(R.layout.devicelist_layout, container, false);
+		return inflater.inflate(R.layout.devicegrid_layout, container, false);
 	}
 
 	@Override
@@ -123,21 +123,21 @@ public class TaskerActionFragment extends BaseFragment {
 			}
 		}
 
-		mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
-		mCardArrayAdapter.setInnerViewTypeCount(4);
-
-		CardListView listView = (CardListView) getActivity().findViewById(R.id.carddemo_list_base1);
-		if (listView != null) {
-			listView.setAdapter(mCardArrayAdapter);
-		}
-		
-//		mCardGridArrayAdapter = new CardGridArrayAdapter(getActivity(), cards);
-//		mCardGridArrayAdapter.setInnerViewTypeCount(2);
+//		mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
+//		mCardArrayAdapter.setInnerViewTypeCount(4);
 //
-//		CardGridView gridView = (CardGridView) getActivity().findViewById(R.id.carddemo_grid_base);
-//		if (gridView != null) {
-//			gridView.setAdapter(mCardGridArrayAdapter);
+//		CardListView listView = (CardListView) getActivity().findViewById(R.id.carddemo_list_base1);
+//		if (listView != null) {
+//			listView.setAdapter(mCardArrayAdapter);
 //		}
+		
+		mCardGridArrayAdapter = new CardGridArrayAdapter(getActivity(), cards);
+		mCardGridArrayAdapter.setInnerViewTypeCount(2);
+
+		CardGridView gridView = (CardGridView) getActivity().findViewById(R.id.carddemo_grid_base);
+		if (gridView != null) {
+			gridView.setAdapter(mCardGridArrayAdapter);
+		}
 	
 
 	}

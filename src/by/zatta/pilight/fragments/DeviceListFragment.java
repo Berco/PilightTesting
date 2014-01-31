@@ -51,6 +51,7 @@ import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.internal.CardGridArrayAdapter;
 import it.gmariotti.cardslib.library.internal.CardHeader;
+import it.gmariotti.cardslib.library.view.CardGridView;
 import it.gmariotti.cardslib.library.view.CardListView;
 
 public class DeviceListFragment extends BaseFragment {
@@ -104,8 +105,8 @@ public class DeviceListFragment extends BaseFragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.devicelist_layout, container, false);
-		// return inflater.inflate(R.layout.demo_fragment_grid_base, container, false);
+		//return inflater.inflate(R.layout.devicelist_layout, container, false);
+		return inflater.inflate(R.layout.devicegrid_layout, container, false);
 	}
 
 	@Override
@@ -133,21 +134,21 @@ public class DeviceListFragment extends BaseFragment {
 			if (!(card == null)) cards.add(card);
 		}
 
-		mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
-		mCardArrayAdapter.setInnerViewTypeCount(4);
+//		mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
+//		mCardArrayAdapter.setInnerViewTypeCount(4);
+//
+//		CardListView listView = (CardListView) getActivity().findViewById(R.id.carddemo_list_base1);
+//		if (listView != null) {
+//			listView.setAdapter(mCardArrayAdapter);
+//		}
 
-		CardListView listView = (CardListView) getActivity().findViewById(R.id.carddemo_list_base1);
-		if (listView != null) {
-			listView.setAdapter(mCardArrayAdapter);
-		}
-
-		// mCardGridArrayAdapter = new CardGridArrayAdapter(getActivity(), cards);
-		// mCardGridArrayAdapter.setInnerViewTypeCount(2);
-		//
-		// CardGridView gridView = (CardGridView) getActivity().findViewById(R.id.carddemo_grid_base);
-		// if (gridView!=null){
-		// gridView.setAdapter(mCardGridArrayAdapter);
-		// }
+		 mCardGridArrayAdapter = new CardGridArrayAdapter(getActivity(), cards);
+		 mCardGridArrayAdapter.setInnerViewTypeCount(2);
+		
+		 CardGridView gridView = (CardGridView) getActivity().findViewById(R.id.carddemo_grid_base);
+		 if (gridView!=null){
+		 gridView.setAdapter(mCardGridArrayAdapter);
+		 }
 	}
 
 	public static void updateUI(List<DeviceEntry> list) {

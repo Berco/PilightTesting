@@ -50,6 +50,7 @@ import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.internal.CardGridArrayAdapter;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.view.CardGridView;
+import it.gmariotti.cardslib.library.view.CardListView;
 
 public class TaskerActionFragment extends BaseFragment {
 
@@ -90,8 +91,8 @@ public class TaskerActionFragment extends BaseFragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		// return inflater.inflate(R.layout.devicelist_layout, container, false);
-		return inflater.inflate(R.layout.devicegrid_layout, container, false);
+		return inflater.inflate(R.layout.devicelist_layout, container, false);
+		//return inflater.inflate(R.layout.devicegrid_layout, container, false);
 	}
 
 	@Override
@@ -122,13 +123,22 @@ public class TaskerActionFragment extends BaseFragment {
 			}
 		}
 
-		mCardGridArrayAdapter = new CardGridArrayAdapter(getActivity(), cards);
-		mCardGridArrayAdapter.setInnerViewTypeCount(4);
+		mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
+		mCardArrayAdapter.setInnerViewTypeCount(4);
 
-		CardGridView gridView = (CardGridView) getActivity().findViewById(R.id.carddemo_grid_base);
-		if (gridView != null) {
-			gridView.setAdapter(mCardGridArrayAdapter);
+		CardListView listView = (CardListView) getActivity().findViewById(R.id.carddemo_list_base1);
+		if (listView != null) {
+			listView.setAdapter(mCardArrayAdapter);
 		}
+		
+//		mCardGridArrayAdapter = new CardGridArrayAdapter(getActivity(), cards);
+//		mCardGridArrayAdapter.setInnerViewTypeCount(2);
+//
+//		CardGridView gridView = (CardGridView) getActivity().findViewById(R.id.carddemo_grid_base);
+//		if (gridView != null) {
+//			gridView.setAdapter(mCardGridArrayAdapter);
+//		}
+	
 
 	}
 
@@ -231,6 +241,8 @@ public class TaskerActionFragment extends BaseFragment {
 			Log.w(TAG, card.getTitle());
 			Log.w(TAG, Integer.toString(card.getCardView().getId()));
 			Log.w(TAG, "parent: " + Integer.toString(parent.getId()));
+			Log.w(TAG, Integer.toString(card.getCardView().getId()));
+			
 		}
 
 		public void update(DeviceEntry entry) {
@@ -311,11 +323,6 @@ public class TaskerActionFragment extends BaseFragment {
 			}
 			mToggle.setClickable(readwrite);
 			if (!readwrite) mToggle.setAlpha((float) 0.5);
-			
-			ListSwitchCard card = this;
-			Log.w(TAG, card.getTitle());
-			Log.w(TAG, Integer.toString(card.getCardView().getId()));
-			Log.w(TAG, "parent: " + Integer.toString(parent.getId()));
 
 		}
 

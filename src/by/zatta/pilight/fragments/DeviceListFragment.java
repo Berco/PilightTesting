@@ -636,7 +636,7 @@ public class DeviceListFragment extends BaseFragment {
 					if (sentry.getValue().equals("opened")) mState = true;
 					if (sentry.getValue().equals("closed")) mState = false;
 				}
-				//if (sentry.getKey().equals("sett_readonly") && sentry.getValue().equals("1")) readwrite = false;
+				if (sentry.getKey().equals("sett_readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}
@@ -661,7 +661,7 @@ public class DeviceListFragment extends BaseFragment {
 				mToggle.setOnCheckedChangeListener(toggleListener);
 			}
 			mToggle.setClickable(readwrite);
-			if (!readwrite) mToggle.setAlpha((float) 0.5);
+			//if (!readwrite) mToggle.setAlpha((float) 0.5); // I don't think we need this for the contacts
 		}
 
 		public void update(DeviceEntry entry) {

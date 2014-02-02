@@ -129,7 +129,10 @@ public class DeviceListFragment extends BaseFragment {
 					card = new ListWeatherCard(getActivity().getApplicationContext(), device);
 				else if (device.getType() == 4)
 					card = new ListRelayCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 5) card = new ListScreenCard(getActivity().getApplicationContext(), device);
+				else if (device.getType() == 5) 
+					card = new ListScreenCard(getActivity().getApplicationContext(), device);
+				else if (device.getType() == 6) 
+					card = new ListContactCard(getActivity().getApplicationContext(), device);
 			}
 			if (!(card == null)) cards.add(card);
 		}
@@ -166,6 +169,8 @@ public class DeviceListFragment extends BaseFragment {
 					((ListRelayCard) cards.get(i)).update(device);
 				} else if (device.getType() == 5) {
 					((ListScreenCard) cards.get(i)).update(device);
+				} else if (device.getType() == 6) {
+					((ListContactCard) cards.get(i)).update(device);
 				}
 				i++;
 			}
@@ -595,6 +600,80 @@ public class DeviceListFragment extends BaseFragment {
 		}
 
 		public void update(DeviceEntry entry) {
+		}
+	}
+	
+	/*
+	 * LISTCONTACTCARD *********************************************************** *****************************************
+	 */
+	public class ListContactCard extends Card {
+		protected String who;
+		protected String mValue;
+		protected String mTitleHeader;
+		protected String mTitleMain;
+		protected TextView mTitleMainView;
+		protected ToggleButton mToggle;
+		protected boolean mState;
+		protected boolean readwrite = true;
+
+		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				String action = "\"state\":\"closed\"";
+				if (isChecked) action = "\"state\":\"opened\"";
+				mState = isChecked;
+				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
+			}
+		};
+
+		public ListContactCard(Context context, DeviceEntry entry) {
+			super(context, R.layout.contactcard_inner);
+			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
+			for (SettingEntry sentry : entry.getSettings()) {
+				if (sentry.getKey().equals("name")) mTitleHeader = sentry.getValue();
+				if (sentry.getKey().equals("locationName")) mTitleMain = sentry.getValue();
+				if (sentry.getKey().equals("state")) {
+					if (sentry.getValue().equals("opened")) mState = true;
+					if (sentry.getValue().equals("closed")) mState = false;
+				}
+				//if (sentry.getKey().equals("sett_readonly") && sentry.getValue().equals("1")) readwrite = false;
+			}
+			init();
+		}
+
+		private void init() {
+			setTitle(mTitleMain);
+			// Create a CardHeader
+			CardHeader header = new CardHeader(getContext());
+			header.setTitle(mTitleHeader);
+			addCardHeader(header);
+		}
+
+		@Override
+		public void setupInnerViewElements(ViewGroup parent, View view) {
+			// Retrieve elements
+			mTitleMainView = (TextView) parent.findViewById(R.id.card_main_inner_simple_title);
+			mToggle = (ToggleButton) parent.findViewById(R.id.card_inner_tb);
+
+			if (mTitleMainView != null) mTitleMainView.setText(mTitleMain);
+			if (mToggle != null) {
+				mToggle.setChecked(mState);
+				mToggle.setOnCheckedChangeListener(toggleListener);
+			}
+			mToggle.setClickable(readwrite);
+			if (!readwrite) mToggle.setAlpha((float) 0.5);
+		}
+
+		public void update(DeviceEntry entry) {
+			mToggle.setOnCheckedChangeListener(null);
+			for (SettingEntry sentry : entry.getSettings()) {
+				if (sentry.getKey().equals("state")) {
+					if (sentry.getValue().equals("opened")) mState = true;
+					if (sentry.getValue().equals("closed")) mState = false;
+					mToggle.setChecked(mState);
+				}
+			}
+			mToggle.setOnCheckedChangeListener(toggleListener);
 		}
 	}
 }

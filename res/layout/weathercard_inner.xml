@@ -50,28 +50,36 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_below="@id/card_main_inner_simple_title"
         android:layout_alignParentRight="true"
         android:layout_centerInParent="true"
-        android:layout_marginBottom="15dp"
         android:layout_marginRight="15dp"
         android:gravity="center" >
 
-        <TextView
-            android:id="@+id/card_main_inner_temperature"
-            style="@style/AppTheme.TitleText"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="xx C"
-            android:visibility="gone" />
+            android:orientation="vertical" >
 
-        <TextView
-            android:id="@+id/card_main_inner_humidity"
-            style="@style/AppTheme.TitleText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="xx %"
-            android:visibility="gone" />
+            <TextView
+                android:id="@+id/card_main_inner_temperature"
+                style="@style/AppTheme.TitleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                android:text="xx C"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/card_main_inner_humidity"
+                style="@style/AppTheme.TitleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                android:text="xx %"
+                android:visibility="gone" />
+
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/card_main_inner_battery"

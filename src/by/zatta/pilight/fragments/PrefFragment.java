@@ -112,6 +112,13 @@ public class PrefFragment extends BasePreferenceFragment {
 		serviceCheckBoxPref.setKey("useService");
 		serviceCheckBoxPref.setDefaultValue(true);
 		settingsPrefCat.addPreference(serviceCheckBoxPref);
+		
+		CheckBoxPreference forceListCheckBoxPref = new CheckBoxPreference(mContext);
+		forceListCheckBoxPref.setTitle("Force list for devices");
+		forceListCheckBoxPref.setSummary("instead of GridView");
+		forceListCheckBoxPref.setKey("forceList");
+		forceListCheckBoxPref.setDefaultValue(false);
+		settingsPrefCat.addPreference(forceListCheckBoxPref);
 
 		// Preference resetCustom = getPreferenceManager().createPreferenceScreen(mContext);
 		// resetCustom.setTitle(R.string.ResetCustomTitle);

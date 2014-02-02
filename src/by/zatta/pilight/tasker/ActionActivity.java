@@ -11,8 +11,6 @@ import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.RadioGroup;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -36,11 +34,6 @@ import by.zatta.pilight.model.DeviceEntry;
 
 public class ActionActivity extends Activity implements ServiceConnection, OnChangedStatusListener {
 
-	String mServer, mPort, mLocation, mDevice, mState, mValue;
-	EditText mServerText, mPortText, mLocationText, mDeviceText, mValueText;
-	RadioGroup g;
-	String[] mExtra;
-
 	private static final String TAG = "Zatta::ActionActivity";
 	private static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
 
@@ -48,34 +41,15 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 	private final Messenger mMessenger = new Messenger(new IncomingMessageHandler());
 	private Messenger mServiceMessenger = null;
 	boolean mIsBound;
+	
+	Bundle localeBundle;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		final Bundle localeBundle = getIntent().getBundleExtra(com.twofortyfouram.locale.Intent.EXTRA_BUNDLE);
-
+		localeBundle = getIntent().getBundleExtra(com.twofortyfouram.locale.Intent.EXTRA_BUNDLE);
 		setContentView(R.layout.actionactivity_layout);
-		// mServerText = (EditText) findViewById(R.id.editTServerAddress);
-		// mPortText = (EditText) findViewById(R.id.editTPortNum);
-		// mLocationText = (EditText) findViewById(R.id.editTLocation);
-		// mDeviceText = (EditText) findViewById(R.id.editTDevice);
-		// g = (RadioGroup) findViewById(R.id.radioGState);
-		// mValueText = (EditText) findViewById(R.id.editTValue);
-		//
-		// if (savedInstanceState == null) {
-		// if (localeBundle != null) {
-		// mExtra = localeBundle.getStringArray("Extra");
-		// mServerText.setText(mExtra[0]);
-		// mPortText.setText(mExtra[1]);
-		// mLocationText.setText(mExtra[2]);
-		// mDeviceText.setText(mExtra[3]);
-		// if (mExtra[4] == "off"){
-		// g.check(R.id.radioOff);
-		// }
-		// mValueText.setText(mExtra[5]);
-		// }
-		// }
 	}
 
 	@Override
@@ -258,7 +232,7 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 	private class IncomingMessageHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
-			Log.v(TAG, "receiving a message");
+			//Log.v(TAG, "receiving a message");
 			Bundle bundle = msg.getData();
 			bundle.setClassLoader(getApplicationContext().getClassLoader());
 
@@ -266,29 +240,29 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 			{
 			case ConnectionService.MSG_SET_STATUS:
 				String status = bundle.getString("status", "no status received yet");
-				Log.v(TAG, "status received in activity: " + status);
+				//Log.v(TAG, "status received in activity: " + status);
 				if (status.equals("UPDATE")) break;
 
 				FragmentManager fm = getFragmentManager();
 				Fragment prev = fm.findFragmentByTag("dialog");
 
 				if (prev == null) {
-					Log.v(TAG, "there was not a fragment with tag dialog");
+					//Log.v(TAG, "there was not a fragment with tag dialog");
 					openDialogFragment(StatusDialog.newInstance(status));
 					break;
 				} else if (!(prev.getClass().equals(StatusDialog.class))) {
-					Log.v(TAG, "there was fragment with tag dialog not being StatusDialog");
+					//Log.v(TAG, "there was fragment with tag dialog not being StatusDialog");
 					openDialogFragment(StatusDialog.newInstance(status));
 					break;
 				} else {
-					Log.v(TAG, "there was a statusdialog running");
+					//Log.v(TAG, "there was a statusdialog running");
 					StatusDialog.setChangedStatus(status);
 					break;
 				}
 
 			case ConnectionService.MSG_SET_BUNDLE:
 				mDevices = bundle.getParcelableArrayList("config");
-				Log.v(TAG, "received a MSG_SET_BUNDLE");
+				//Log.v(TAG, "received a MSG_SET_BUNDLE");
 
 				// if (allLocations.isEmpty())
 				// initMenu();
@@ -297,9 +271,9 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 				Fragment prev2 = fm2.findFragmentByTag("piTasker");
 
 				if ((prev2 == null)) {
-					Log.v(TAG, "setting up new Fragment");
+					//Log.v(TAG, "setting up new Fragment");
 					// openFragment(GridBaseFragment.newInstance(mDevices));
-					openFragment(TaskerActionFragment.newInstance(mDevices));
+					openFragment(TaskerActionFragment.newInstance(localeBundle, mDevices));
 				}
 
 				break;
@@ -312,7 +286,7 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 	@Override
 	public void onChangedStatusListener(int what) {
 
-		Log.d(TAG, "onChangedStatusListener called");
+		//Log.d(TAG, "onChangedStatusListener called");
 		switch (what)
 		{
 		case StatusDialog.DISMISS:

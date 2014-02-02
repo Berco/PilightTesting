@@ -33,13 +33,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,6 +51,7 @@ import it.gmariotti.cardslib.library.internal.CardGridArrayAdapter;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.view.CardGridView;
 import it.gmariotti.cardslib.library.view.CardListView;
+import it.gmariotti.cardslib.library.view.CardView;
 
 public class TaskerActionFragment extends BaseFragment {
 
@@ -60,12 +59,15 @@ public class TaskerActionFragment extends BaseFragment {
 	private boolean forceList;
 	static CardArrayAdapter mCardArrayAdapter;
 	static CardGridArrayAdapter mCardGridArrayAdapter;
+	Bundle localeBundle;
+	CardView resultCardView;
 	static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
 
-	public static TaskerActionFragment newInstance(List<DeviceEntry> list) {
+	public static TaskerActionFragment newInstance(Bundle localeBundle, List<DeviceEntry> list) {
 		TaskerActionFragment f = new TaskerActionFragment();
 		Bundle args = new Bundle();
 		args.putParcelableArrayList("config", (ArrayList<? extends Parcelable>) list);
+		args.putBundle("localeBundle", localeBundle);
 		f.setArguments(args);
 		return f;
 	}
@@ -89,6 +91,7 @@ public class TaskerActionFragment extends BaseFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mDevices = getArguments().getParcelableArrayList("config");
+		localeBundle = getArguments().getBundle("localeBundle");
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
 		forceList = prefs.getBoolean("forceList", false);
 		setRetainInstance(false);
@@ -104,6 +107,20 @@ public class TaskerActionFragment extends BaseFragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+
+		resultCardView = (CardView) getActivity().findViewById(R.id.cvResult);
+		
+
+		if (savedInstanceState == null) {
+			if (localeBundle != null) {
+				String[] mExtra = localeBundle.getStringArray("Extra");
+				String action = "";
+				for (String s : mExtra){
+					action = action + s;
+				}
+				makeAction(action);
+			}
+		}
 		initCards();
 	}
 
@@ -111,18 +128,19 @@ public class TaskerActionFragment extends BaseFragment {
 		Log.v(TAG, "initCards");
 		ArrayList<Card> cards = new ArrayList<Card>();
 		for (DeviceEntry device : mDevices) {
-			Log.w(TAG, Integer.toString(device.getType()));
 			Card card = null;
 
 			if (device.getType() == 1)
 				card = new ListSwitchCard(getActivity().getApplicationContext(), device);
 			else if (device.getType() == 2)
 				card = new ListDimmerCard(getActivity().getApplicationContext(), device);
-			else if (device.getType() == 33)
-				card = new ListWeatherCard(getActivity().getApplicationContext(), device);
 			else if (device.getType() == 4)
 				card = new ListRelayCard(getActivity().getApplicationContext(), device);
-			else if (device.getType() == 52) card = new ListScreenCard(getActivity().getApplicationContext(), device);
+			else if (device.getType() == 6) card = new ListContactCard(getActivity().getApplicationContext(), device);
+
+			for (SettingEntry sentry : device.getSettings()) { // don't show readonly devices, it's useless
+				if (sentry.getKey().equals("sett_readonly") && sentry.getValue().equals("1")) card = null;
+			}
 
 			if (!(card == null)) {
 				cards.add(card);
@@ -149,8 +167,19 @@ public class TaskerActionFragment extends BaseFragment {
 
 	}
 
+	private void makeAction(String action) {
+		//TODO make a actionButton for accepting the desired action appear when this is called. 
+		resultCardView.setVisibility(View.VISIBLE);
+		Card card = new ResultCard(getActivity().getApplicationContext(), action);
+		if (resultCardView.getCard()!=null)
+			resultCardView.replaceCard(card);
+		else 
+			resultCardView.setCard(card);
+		
+	}
+
 	/*
-	 * CARDS START FROM HERE: ListDimmerCard ************************************ ******************************************
+	 * CARDS START FROM HERE: ListDimmerCard ******************************************************************************
 	 */
 	public class ListDimmerCard extends Card {
 		protected String who;
@@ -170,6 +199,7 @@ public class TaskerActionFragment extends BaseFragment {
 				String action = "\"state\":\"off\"";
 				if (isChecked) action = "\"state\":\"on\"";
 				mState = isChecked;
+				makeAction(who + action);
 				// deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
 			}
 		};
@@ -179,7 +209,7 @@ public class TaskerActionFragment extends BaseFragment {
 				mTitleMainView.setText(mTitleMain);
 				mToggle.setText(Integer.toString(mSeekValue));
 				String action = "\"state\":\"on\",\"values\":{\"dimlevel\":" + String.valueOf(mSeekValue) + "}";
-
+				makeAction(who + action);
 				// deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
 			}
 
@@ -243,13 +273,6 @@ public class TaskerActionFragment extends BaseFragment {
 			mSeekBar.setClickable(readwrite);
 			if (!readwrite) mToggle.setAlpha((float) 0.5);
 			if (!readwrite) mSeekBar.setAlpha((float) 0.5);
-
-			ListDimmerCard card = this;
-			Log.w(TAG, card.getTitle());
-			Log.w(TAG, Integer.toString(card.getCardView().getId()));
-			Log.w(TAG, "parent: " + Integer.toString(parent.getId()));
-			Log.w(TAG, Integer.toString(card.getCardView().getId()));
-
 		}
 
 		public void update(DeviceEntry entry) {
@@ -273,7 +296,7 @@ public class TaskerActionFragment extends BaseFragment {
 	}
 
 	/*
-	 * LISTSWITCHCARD *********************************************************** *****************************************
+	 * LISTSWITCHCARD ****************************************************************************************************
 	 */
 	public class ListSwitchCard extends Card {
 		protected String who;
@@ -290,6 +313,7 @@ public class TaskerActionFragment extends BaseFragment {
 				String action = "\"state\":\"off\"";
 				if (isChecked) action = "\"state\":\"on\"";
 				mState = isChecked;
+				makeAction(who + action);
 				// deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
 			}
 		};
@@ -347,98 +371,7 @@ public class TaskerActionFragment extends BaseFragment {
 	}
 
 	/*
-	 * LISTWEATHERCARD ********************************************************** ******************************************
-	 */
-	public class ListWeatherCard extends Card {
-
-		protected String mTemperature;
-		protected String mHumidity;
-		protected boolean showBattery = false;
-		protected boolean mBattery = false;
-		protected String mTitleHeader;
-		protected String mTitleMain;
-		protected int decimals;
-		protected TextView mTemperatureView;
-		protected TextView mHumidityView;
-		protected ImageView mBatteryView;
-		protected TextView mTitleMainView;
-
-		public ListWeatherCard(Context context, DeviceEntry entry) {
-			super(context, R.layout.weathercard_inner);
-			for (SettingEntry sentry : entry.getSettings()) {
-				if (sentry.getKey().equals("name")) mTitleHeader = sentry.getValue();
-				if (sentry.getKey().equals("locationName")) mTitleMain = sentry.getValue();
-				if (sentry.getKey().equals("temperature")) mTemperature = sentry.getValue();
-				if (sentry.getKey().equals("humidity")) mHumidity = sentry.getValue();
-				if (sentry.getKey().equals("battery") && (sentry.getValue().equals("1"))) mBattery = true;
-				if (sentry.getKey().equals("sett_decimals")) decimals = Integer.valueOf(sentry.getValue());
-				if (sentry.getKey().equals("sett_battery") && (sentry.getValue().equals("1"))) showBattery = true;
-			}
-
-			DecimalFormat oneDigit = new DecimalFormat("#,##0.0");// format to 1
-																	// decimal
-																	// place
-			if (mTemperature != null)
-				mTemperature = oneDigit.format(Integer.valueOf(mTemperature) / (Math.pow(10, decimals))) + " \u2103";
-			if (mHumidity != null) mHumidity = oneDigit.format(Integer.valueOf(mHumidity) / (Math.pow(10, decimals))) + " %";
-
-			init();
-		}
-
-		private void init() {
-			setTitle(mTitleMain);
-			// Create a CardHeader
-			CardHeader header = new CardHeader(getContext());
-			header.setTitle(mTitleHeader);
-			addCardHeader(header);
-		}
-
-		@Override
-		public void setupInnerViewElements(ViewGroup parent, View view) {
-			// Retrieve elements
-			mTitleMainView = (TextView) parent.findViewById(R.id.card_main_inner_simple_title);
-			mTemperatureView = (TextView) parent.findViewById(R.id.card_main_inner_temperature);
-			mHumidityView = (TextView) parent.findViewById(R.id.card_main_inner_humidity);
-			mBatteryView = (ImageView) parent.findViewById(R.id.card_main_inner_battery);
-
-			if (mTitleMainView != null) mTitleMainView.setText(mTitleMain);
-			if (mTemperatureView != null && mTemperature != null) mTemperatureView.setVisibility(View.VISIBLE);
-			mTemperatureView.setText(mTemperature);
-			if (mHumidityView != null && mHumidity != null) mHumidityView.setVisibility(View.VISIBLE);
-			mHumidityView.setText(mHumidity);
-			if (mBatteryView != null && showBattery) {
-				mBatteryView.setVisibility(View.VISIBLE);
-				if (mBattery)
-					mBatteryView.setImageResource(R.drawable.batt_full);
-				else mBatteryView.setImageResource(R.drawable.batt_empty);
-			}
-		}
-
-		public void update(DeviceEntry entry) {
-			for (SettingEntry sentry : entry.getSettings()) {
-				if (sentry.getKey().equals("temperature")) {
-					DecimalFormat oneDigit = new DecimalFormat("#,##0.0");// format to 1 decimal place
-					mTemperature = oneDigit.format(Integer.valueOf(sentry.getValue()) / (Math.pow(10, decimals))) + " \u2103";
-				}
-				if (sentry.getKey().equals("humidity")) {
-					DecimalFormat oneDigit = new DecimalFormat("#,##0.0");// format to 1 decimal place
-					mHumidity = oneDigit.format(Integer.valueOf(sentry.getValue()) / (Math.pow(10, decimals))) + " %";
-				}
-				if (sentry.getKey().equals("battery")) {
-					if (sentry.getValue().equals("1")) {
-						mBattery = true;
-						mBatteryView.setImageResource(R.drawable.batt_full);
-					} else {
-						mBattery = false;
-						mBatteryView.setImageResource(R.drawable.batt_empty);
-					}
-				}
-			}
-		}
-	}
-
-	/*
-	 * LISTRELAYCARD *********************************************************** *****************************************
+	 * LISTRELAYCARD ****************************************************************************************************
 	 */
 	public class ListRelayCard extends Card {
 		protected String who;
@@ -456,6 +389,7 @@ public class TaskerActionFragment extends BaseFragment {
 				String action = "\"state\":\"off\"";
 				if (isChecked) action = "\"state\":\"on\"";
 				mState = isChecked;
+				makeAction(who + action);
 				// deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
 			}
 		};
@@ -512,40 +446,39 @@ public class TaskerActionFragment extends BaseFragment {
 	}
 
 	/*
-	 * LISTSCREENCARD *********************************************************** *****************************************
+	 * LISTCONTACTCARD ****************************************************************************************************
 	 */
-	public class ListScreenCard extends Card {
+	public class ListContactCard extends Card {
 		protected String who;
+		protected String mValue;
 		protected String mTitleHeader;
 		protected String mTitleMain;
-		protected Button mBtnUp;
-		protected Button mBtnDown;
 		protected TextView mTitleMainView;
+		protected ToggleButton mToggle;
+		protected boolean mState;
 		protected boolean readwrite = true;
 
-		protected Button.OnClickListener clickListener = new Button.OnClickListener() {
+		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
-			public void onClick(View v) {
-				String action = "";
-				switch (v.getId())
-				{
-				case R.id.card_inner_btnUp:
-					action = "\"state\":\"up\"";
-					break;
-				case R.id.card_inner_btnDown:
-					action = "\"state\":\"down\"";
-					break;
-				}
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				String action = "\"state\":\"closed\"";
+				if (isChecked) action = "\"state\":\"opened\"";
+				mState = isChecked;
+				makeAction(who + action);
 				// deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
 			}
 		};
 
-		public ListScreenCard(Context context, DeviceEntry entry) {
-			super(context, R.layout.screencard_inner);
+		public ListContactCard(Context context, DeviceEntry entry) {
+			super(context, R.layout.contactcard_inner);
 			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
 			for (SettingEntry sentry : entry.getSettings()) {
 				if (sentry.getKey().equals("name")) mTitleHeader = sentry.getValue();
 				if (sentry.getKey().equals("locationName")) mTitleMain = sentry.getValue();
+				if (sentry.getKey().equals("state")) {
+					if (sentry.getValue().equals("opened")) mState = true;
+					if (sentry.getValue().equals("closed")) mState = false;
+				}
 				if (sentry.getKey().equals("sett_readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
@@ -563,17 +496,43 @@ public class TaskerActionFragment extends BaseFragment {
 		public void setupInnerViewElements(ViewGroup parent, View view) {
 			// Retrieve elements
 			mTitleMainView = (TextView) parent.findViewById(R.id.card_main_inner_simple_title);
-			if (mTitleMainView != null) mTitleMainView.setText(mTitleMain);
-			mBtnUp = (Button) parent.findViewById(R.id.card_inner_btnUp);
-			mBtnDown = (Button) parent.findViewById(R.id.card_inner_btnDown);
-			mBtnUp.setOnClickListener(clickListener);
-			mBtnDown.setOnClickListener(clickListener);
-			mBtnDown.setClickable(readwrite);
-			mBtnUp.setClickable(readwrite);
+			mToggle = (ToggleButton) parent.findViewById(R.id.card_inner_tb);
 
+			if (mTitleMainView != null) mTitleMainView.setText(mTitleMain);
+			if (mToggle != null) {
+				mToggle.setChecked(mState);
+				mToggle.setOnCheckedChangeListener(toggleListener);
+			}
+			mToggle.setClickable(readwrite);
+			// if (!readwrite) mToggle.setAlpha((float) 0.5); // I don't think we need this for the contacts
 		}
 
 		public void update(DeviceEntry entry) {
+			mToggle.setOnCheckedChangeListener(null);
+			for (SettingEntry sentry : entry.getSettings()) {
+				if (sentry.getKey().equals("state")) {
+					if (sentry.getValue().equals("opened")) mState = true;
+					if (sentry.getValue().equals("closed")) mState = false;
+					mToggle.setChecked(mState);
+				}
+			}
+			mToggle.setOnCheckedChangeListener(toggleListener);
+		}
+	}
+
+	/*
+	 * RESULTCARD ****************************************************************************************************
+	 */
+	public class ResultCard extends Card {
+
+		public ResultCard(Context context, String who) {
+			//TODO make the card look pretty
+			super(context, R.layout.resultcard_inner);
+			setTitle(who);
+			// Create a CardHeader
+			CardHeader header = new CardHeader(getContext());
+			header.setTitle("Action");
+			addCardHeader(header);
 		}
 	}
 }

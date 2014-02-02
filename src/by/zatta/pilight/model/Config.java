@@ -43,7 +43,19 @@ public class Config {
 	public static List<DeviceEntry> getDevices(JSONObject jloc) {
 		mDevices.clear();
 		parse(jloc);
+		contactWorkaround();
 		return mDevices;
+	}
+	
+	private static void contactWorkaround(){
+		for (DeviceEntry device : mDevices) {
+				for (SettingEntry sentry : device.getSettings()) {
+					if (sentry.getValue().equals("opened") ||
+							sentry.getValue().equals("closed")	) {
+						device.setType(6);
+					}
+				}
+		}
 	}
 
 	public static void parse(JSONObject jloc) {

@@ -25,8 +25,10 @@ package by.zatta.pilight.fragments;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,6 +57,7 @@ import it.gmariotti.cardslib.library.view.CardListView;
 public class TaskerActionFragment extends BaseFragment {
 
 	private static final String TAG = "TaskerActionFragment";
+	private boolean forceList;
 	static CardArrayAdapter mCardArrayAdapter;
 	static CardGridArrayAdapter mCardGridArrayAdapter;
 	static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
@@ -86,13 +89,16 @@ public class TaskerActionFragment extends BaseFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mDevices = getArguments().getParcelableArrayList("config");
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+		forceList = prefs.getBoolean("forceList", false);
 		setRetainInstance(false);
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		//return inflater.inflate(R.layout.devicelist_layout, container, false);
-		return inflater.inflate(R.layout.devicegrid_layout, container, false);
+		if (forceList)
+			return inflater.inflate(R.layout.devicelist_layout, container, false);
+		else return inflater.inflate(R.layout.devicegrid_layout, container, false);
 	}
 
 	@Override
@@ -123,22 +129,23 @@ public class TaskerActionFragment extends BaseFragment {
 			}
 		}
 
-//		mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
-//		mCardArrayAdapter.setInnerViewTypeCount(4);
-//
-//		CardListView listView = (CardListView) getActivity().findViewById(R.id.carddemo_list_base1);
-//		if (listView != null) {
-//			listView.setAdapter(mCardArrayAdapter);
-//		}
-		
-		mCardGridArrayAdapter = new CardGridArrayAdapter(getActivity(), cards);
-		mCardGridArrayAdapter.setInnerViewTypeCount(2);
+		if (forceList) {
+			mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
+			mCardArrayAdapter.setInnerViewTypeCount(4);
 
-		CardGridView gridView = (CardGridView) getActivity().findViewById(R.id.carddemo_grid_base);
-		if (gridView != null) {
-			gridView.setAdapter(mCardGridArrayAdapter);
+			CardListView listView = (CardListView) getActivity().findViewById(R.id.carddemo_list_base1);
+			if (listView != null) {
+				listView.setAdapter(mCardArrayAdapter);
+			}
+		} else {
+			mCardGridArrayAdapter = new CardGridArrayAdapter(getActivity(), cards);
+			mCardGridArrayAdapter.setInnerViewTypeCount(2);
+
+			CardGridView gridView = (CardGridView) getActivity().findViewById(R.id.carddemo_grid_base);
+			if (gridView != null) {
+				gridView.setAdapter(mCardGridArrayAdapter);
+			}
 		}
-	
 
 	}
 
@@ -242,7 +249,7 @@ public class TaskerActionFragment extends BaseFragment {
 			Log.w(TAG, Integer.toString(card.getCardView().getId()));
 			Log.w(TAG, "parent: " + Integer.toString(parent.getId()));
 			Log.w(TAG, Integer.toString(card.getCardView().getId()));
-			
+
 		}
 
 		public void update(DeviceEntry entry) {

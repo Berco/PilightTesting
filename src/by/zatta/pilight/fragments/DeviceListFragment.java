@@ -25,8 +25,10 @@ package by.zatta.pilight.fragments;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,6 +67,7 @@ public class DeviceListFragment extends BaseFragment {
 	static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
 	public final int GIMME_DEVICES = 1002;
 	private static String mFilter;
+	private static boolean forceList;
 
 	public static DeviceListFragment newInstance(List<DeviceEntry> list, String filter) {
 		DeviceListFragment f = new DeviceListFragment();
@@ -100,13 +103,16 @@ public class DeviceListFragment extends BaseFragment {
 		super.onCreate(savedInstanceState);
 		mDevices = getArguments().getParcelableArrayList("config");
 		mFilter = getArguments().getString("filter", null);
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+		forceList = prefs.getBoolean("forceList", false);
 		setRetainInstance(false);
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		//return inflater.inflate(R.layout.devicelist_layout, container, false);
-		return inflater.inflate(R.layout.devicegrid_layout, container, false);
+		if (forceList)
+			return inflater.inflate(R.layout.devicelist_layout, container, false);
+		else return inflater.inflate(R.layout.devicegrid_layout, container, false);
 	}
 
 	@Override
@@ -129,29 +135,30 @@ public class DeviceListFragment extends BaseFragment {
 					card = new ListWeatherCard(getActivity().getApplicationContext(), device);
 				else if (device.getType() == 4)
 					card = new ListRelayCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 5) 
+				else if (device.getType() == 5)
 					card = new ListScreenCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 6) 
-					card = new ListContactCard(getActivity().getApplicationContext(), device);
+				else if (device.getType() == 6) card = new ListContactCard(getActivity().getApplicationContext(), device);
 			}
 			if (!(card == null)) cards.add(card);
 		}
 
-//		mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
-//		mCardArrayAdapter.setInnerViewTypeCount(4);
-//
-//		CardListView listView = (CardListView) getActivity().findViewById(R.id.carddemo_list_base1);
-//		if (listView != null) {
-//			listView.setAdapter(mCardArrayAdapter);
-//		}
+		if (forceList) {
+			mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
+			mCardArrayAdapter.setInnerViewTypeCount(4);
 
-		 mCardGridArrayAdapter = new CardGridArrayAdapter(getActivity(), cards);
-		 mCardGridArrayAdapter.setInnerViewTypeCount(2);
-		
-		 CardGridView gridView = (CardGridView) getActivity().findViewById(R.id.carddemo_grid_base);
-		 if (gridView!=null){
-		 gridView.setAdapter(mCardGridArrayAdapter);
-		 }
+			CardListView listView = (CardListView) getActivity().findViewById(R.id.carddemo_list_base1);
+			if (listView != null) {
+				listView.setAdapter(mCardArrayAdapter);
+			}
+		} else {
+			mCardGridArrayAdapter = new CardGridArrayAdapter(getActivity(), cards);
+			mCardGridArrayAdapter.setInnerViewTypeCount(2);
+
+			CardGridView gridView = (CardGridView) getActivity().findViewById(R.id.carddemo_grid_base);
+			if (gridView != null) {
+				gridView.setAdapter(mCardGridArrayAdapter);
+			}
+		}
 	}
 
 	public static void updateUI(List<DeviceEntry> list) {
@@ -175,8 +182,11 @@ public class DeviceListFragment extends BaseFragment {
 				i++;
 			}
 		}
-		mCardArrayAdapter.notifyDataSetChanged();
-		// mCardGridArrayAdapter.notifyDataSetChanged();
+		
+		if (forceList)
+			mCardArrayAdapter.notifyDataSetChanged();
+		else
+			mCardGridArrayAdapter.notifyDataSetChanged();
 	}
 
 	public interface DeviceListListener {
@@ -602,7 +612,7 @@ public class DeviceListFragment extends BaseFragment {
 		public void update(DeviceEntry entry) {
 		}
 	}
-	
+
 	/*
 	 * LISTCONTACTCARD *********************************************************** *****************************************
 	 */
@@ -661,7 +671,7 @@ public class DeviceListFragment extends BaseFragment {
 				mToggle.setOnCheckedChangeListener(toggleListener);
 			}
 			mToggle.setClickable(readwrite);
-			//if (!readwrite) mToggle.setAlpha((float) 0.5); // I don't think we need this for the contacts
+			// if (!readwrite) mToggle.setAlpha((float) 0.5); // I don't think we need this for the contacts
 		}
 
 		public void update(DeviceEntry entry) {

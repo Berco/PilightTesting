@@ -25,17 +25,20 @@ package by.zatta.pilight.fragments;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.util.ArrayList;
@@ -56,12 +59,18 @@ import it.gmariotti.cardslib.library.view.CardView;
 public class TaskerActionFragment extends BaseFragment {
 
 	private static final String TAG = "TaskerActionFragment";
+	static ActionReadyListener actionReadyListener;
 	private boolean forceList;
 	static CardArrayAdapter mCardArrayAdapter;
 	static CardGridArrayAdapter mCardGridArrayAdapter;
 	Bundle localeBundle;
 	CardView resultCardView;
 	static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
+	private String[] actionArray;
+	private static final int NAME = 0;
+	private static final int WHERE = 1;
+	private static final int COMMAND = 2;
+	private static final int BLURP = 3;
 
 	public static TaskerActionFragment newInstance(Bundle localeBundle, List<DeviceEntry> list) {
 		TaskerActionFragment f = new TaskerActionFragment();
@@ -85,6 +94,11 @@ public class TaskerActionFragment extends BaseFragment {
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
+		try {
+			actionReadyListener = (ActionReadyListener) activity;
+		} catch (ClassCastException e) {
+			throw new ClassCastException(activity.toString() + " must implement ActionReadyListener");
+		}
 	}
 
 	@Override
@@ -109,19 +123,32 @@ public class TaskerActionFragment extends BaseFragment {
 		super.onActivityCreated(savedInstanceState);
 
 		resultCardView = (CardView) getActivity().findViewById(R.id.cvResult);
-		
 
 		if (savedInstanceState == null) {
 			if (localeBundle != null) {
-				String[] mExtra = localeBundle.getStringArray("Extra");
-				String action = "";
-				for (String s : mExtra){
-					action = action + s;
-				}
-				makeAction(action);
+				String[] actionArray = localeBundle.getStringArray("Extra");
+				makeAction(actionArray);
 			}
 		}
 		initCards();
+	}
+	
+	@Override
+	public void onCreateOptionsMenu(
+	      Menu menu, MenuInflater inflater) {
+	   inflater.inflate(R.menu.action_tasker, menu);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	   // handle item selection
+	   switch (item.getItemId()) {
+	      case R.id.action_tasker_ok:
+	    	  makeIntent();
+	         return true;
+	      default:
+	         return super.onOptionsItemSelected(item);
+	   }
 	}
 
 	private void initCards() {
@@ -164,18 +191,30 @@ public class TaskerActionFragment extends BaseFragment {
 				gridView.setAdapter(mCardGridArrayAdapter);
 			}
 		}
-
 	}
 
-	private void makeAction(String action) {
-		//TODO make a actionButton for accepting the desired action appear when this is called. 
+	private void makeAction(String[] action) {
+		actionArray = action;
 		resultCardView.setVisibility(View.VISIBLE);
+		setHasOptionsMenu(true);
 		Card card = new ResultCard(getActivity().getApplicationContext(), action);
 		if (resultCardView.getCard()!=null)
 			resultCardView.replaceCard(card);
 		else 
 			resultCardView.setCard(card);
-		
+	}
+	
+	private void makeIntent(){
+		Bundle extraBundle = new Bundle();
+		extraBundle.putStringArray("Extra", actionArray);
+		Intent i = new Intent();
+		i.putExtra(com.twofortyfouram.locale.Intent.EXTRA_BUNDLE, extraBundle);
+		i.putExtra(com.twofortyfouram.locale.Intent.EXTRA_STRING_BLURB, actionArray[BLURP]);
+		actionReadyListener.actionReadyListener(i);
+	}
+	
+	public interface ActionReadyListener {
+		public void actionReadyListener(Intent localeIntent);
 	}
 
 	/*
@@ -196,11 +235,21 @@ public class TaskerActionFragment extends BaseFragment {
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				String[] what = new String[4];
+				what[NAME]=mTitleHeader;
+				what[WHERE]=mTitleMain;			
+				
 				String action = "\"state\":\"off\"";
-				if (isChecked) action = "\"state\":\"on\"";
+				what[BLURP] = mTitleHeader + " off";
+				
+				if (isChecked){
+					action = "\"state\":\"on\"";
+					what[BLURP]=mTitleHeader + " on with previous dimlevel";
+				}
+				what[COMMAND]=who+action;	
 				mState = isChecked;
-				makeAction(who + action);
-				// deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
+				
+				makeAction(what);
 			}
 		};
 		protected CircularSeekBar.OnCircularSeekBarChangeListener seekListener = new CircularSeekBar.OnCircularSeekBarChangeListener() {
@@ -209,7 +258,12 @@ public class TaskerActionFragment extends BaseFragment {
 				mTitleMainView.setText(mTitleMain);
 				mToggle.setText(Integer.toString(mSeekValue));
 				String action = "\"state\":\"on\",\"values\":{\"dimlevel\":" + String.valueOf(mSeekValue) + "}";
-				makeAction(who + action);
+				String[] what = new String[4];
+				what[NAME]=mTitleHeader;
+				what[WHERE]=mTitleMain;
+				what[COMMAND]=who+action;
+				what[BLURP]=mTitleHeader + " set \"on\" with level " + String.valueOf(mSeekValue);
+				makeAction(what);
 				// deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
 			}
 
@@ -310,11 +364,21 @@ public class TaskerActionFragment extends BaseFragment {
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				String[] what = new String[4];
+				what[NAME]=mTitleHeader;
+				what[WHERE]=mTitleMain;			
+				
 				String action = "\"state\":\"off\"";
-				if (isChecked) action = "\"state\":\"on\"";
+				what[BLURP] = mTitleHeader + " off";
+				
+				if (isChecked){
+					action = "\"state\":\"on\"";
+					what[BLURP]=mTitleHeader + " on";
+				}
+				what[COMMAND]=who+action;	
 				mState = isChecked;
-				makeAction(who + action);
-				// deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
+				
+				makeAction(what);
 			}
 		};
 
@@ -386,11 +450,21 @@ public class TaskerActionFragment extends BaseFragment {
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				String[] what = new String[4];
+				what[NAME]=mTitleHeader;
+				what[WHERE]=mTitleMain;			
+				
 				String action = "\"state\":\"off\"";
-				if (isChecked) action = "\"state\":\"on\"";
+				what[BLURP] = mTitleHeader + " off";
+				
+				if (isChecked){
+					action = "\"state\":\"on\"";
+					what[BLURP]=mTitleHeader + " on";
+				}
+				what[COMMAND]=who+action;	
 				mState = isChecked;
-				makeAction(who + action);
-				// deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
+				
+				makeAction(what);
 			}
 		};
 
@@ -461,11 +535,21 @@ public class TaskerActionFragment extends BaseFragment {
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				String action = "\"state\":\"closed\"";
-				if (isChecked) action = "\"state\":\"opened\"";
+				String[] what = new String[4];
+				what[NAME]=mTitleHeader;
+				what[WHERE]=mTitleMain;			
+				
+				String action = "\"state\":\"off\"";
+				what[BLURP] = mTitleHeader + " off";
+				
+				if (isChecked){
+					action = "\"state\":\"on\"";
+					what[BLURP]=mTitleHeader + " on";
+				}
+				what[COMMAND]=who+action;	
 				mState = isChecked;
-				makeAction(who + action);
-				// deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
+				
+				makeAction(what);
 			}
 		};
 
@@ -525,10 +609,10 @@ public class TaskerActionFragment extends BaseFragment {
 	 */
 	public class ResultCard extends Card {
 
-		public ResultCard(Context context, String who) {
+		public ResultCard(Context context, String[] who) {
 			//TODO make the card look pretty
 			super(context, R.layout.resultcard_inner);
-			setTitle(who);
+			setTitle(who[BLURP]);
 			// Create a CardHeader
 			CardHeader header = new CardHeader(getContext());
 			header.setTitle("Action");

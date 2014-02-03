@@ -107,6 +107,9 @@ public class ConnectionService extends Service {
 				if (isConnectionUp)
 					dropConnection();
 				else isConnectionUp = makeConnection();
+			} else if (action.equals("pilight-switch-device")){
+				if (isConnectionUp)
+					ConnectionProvider.INSTANCE.sendCommand(intent.getStringExtra("command"));
 			}
 		}
 	};
@@ -132,6 +135,7 @@ public class ConnectionService extends Service {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction("pilight-reconnect");
 		filter.addAction("pilight-kill-service");
+		filter.addAction("pilight-switch-device");
 		this.registerReceiver(mMessageReceiver, filter);
 
 		mNotMan = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

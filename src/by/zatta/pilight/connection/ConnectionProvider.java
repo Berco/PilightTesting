@@ -68,6 +68,7 @@ public enum ConnectionProvider {
 		try {
 			gimmeAnswer = true;
 			command_queue.put(command);
+			Thread.sleep(500);
 
 		} catch (InterruptedException e) {
 			// Log.w(TAG, "Interrupted while command_queue.put(command)");
@@ -161,13 +162,13 @@ public enum ConnectionProvider {
 		try {
 			// Log.v(TAG, "trying to write HEART");
 			command_queue.put("HEART");
-			Thread.sleep(500);
+			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			// Log.v(TAG, "couldn't write HEART");
 			status = Status.NO_CONNECTION;
 			return false;
 		}
-		if (timeHeart - timeBeat < 8000) {
+		if (timeHeart - timeBeat < 9000) {
 			// Log.v(TAG, "returning true");
 			return true;
 		}

@@ -1,5 +1,8 @@
 package by.zatta.pilight.tasker;
 
+import by.zatta.pilight.connection.ConnectionService;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,7 +19,22 @@ public final class FireReceiver extends BroadcastReceiver {
 		Bundle extraBundle = intent.getBundleExtra(com.twofortyfouram.locale.Intent.EXTRA_BUNDLE);
 		String[] what = extraBundle.getStringArray("Extra");
 		String command = what[2];
-		Toast.makeText(context,command,Toast.LENGTH_SHORT).show();
+		
+		if (isConnectionServiceActive(context)){
+			context.sendBroadcast(new Intent("pilight-switch-device").putExtra("command", command));
+		}else{
+			Toast.makeText(context,"NOT Active" + command,Toast.LENGTH_SHORT).show();
+		}
 		return;
+	}
+	
+	boolean isConnectionServiceActive(Context context) {
+		ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+			if (ConnectionService.class.getName().equals(service.service.getClassName())) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

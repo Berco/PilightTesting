@@ -215,7 +215,6 @@ public class PrefFragment extends BasePreferenceFragment {
 
 	@Override
 	public int getTitleResourceId() {
-		// TODO Auto-generated method stub
 		return R.string.action_settings;
 	}
 

@@ -27,11 +27,15 @@ public final class FireReceiver extends BroadcastReceiver {
 		String command = what[2];
 		
 		if (isConnectionServiceActive(context)){
+			Log.v(TAG, "ConnectionService found active");
 			context.sendBroadcast(new Intent("pilight-switch-device").putExtra("command", command));
 		}else{
+			Log.v(TAG, "ConnectionService found NOT active");
 			if (isConnectedToKnownHome(context)){
+				Log.v(TAG, "Looks like we are home anyway");
 				context.startService(new Intent(context, ConnectionService.class).putExtra("command", command));
 			} else {
+				Log.v(TAG, "But not at home, not even trying..");
 				Toast.makeText(context, "Can not fire pilight action",Toast.LENGTH_SHORT).show();
 			}
 		}

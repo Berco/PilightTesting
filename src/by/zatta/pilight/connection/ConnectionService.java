@@ -108,6 +108,7 @@ public class ConnectionService extends Service {
 				else isConnectionUp = makeConnection();
 			} else if (action.equals("pilight-switch-device")){
 				if (isConnectionUp)
+					Log.v(TAG, "broadcastReceiver: "+intent.getStringExtra("command"));
 					ConnectionProvider.INSTANCE.sendCommand(intent.getStringExtra("command"));
 			}
 		}
@@ -126,7 +127,7 @@ public class ConnectionService extends Service {
 
 	@Override
 	public void onCreate() {
-		// Log.v(TAG, "onCreate");
+		Log.e(TAG, "onCreate");
 		super.onCreate();
 		ctx = this;
 		aCtx = getApplicationContext();
@@ -140,12 +141,13 @@ public class ConnectionService extends Service {
 		mNotMan = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
 		isConnectionUp = makeConnection();
+		Log.e(TAG, "onCreate done");
 
 	}
 
 	@Override
 	public void onDestroy() {
-		// Log.e(TAG, "onDestroy");
+		Log.e(TAG, "onDestroy");
 		this.unregisterReceiver(mMessageReceiver);
 		sendMessageToUI(MSG_SET_STATUS, NotificationType.DESTROYED.name());
 		dropConnection();
@@ -158,25 +160,48 @@ public class ConnectionService extends Service {
 		// Log.v(TAG, "onRebind");
 		super.onRebind(intent);
 	}
-
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		// Log.v(TAG, "onStartCommand");
-		if ((mCurrentNotif == NotificationType.FAILED || mCurrentNotif == NotificationType.LOST_CONNECTION)
-				&& !(mCurrentNotif == NotificationType.CONNECTING)) {
-			isConnectionUp = makeConnection();
-		}
-		if (intent.hasExtra("command") && isConnectionUp){
-			ConnectionProvider.INSTANCE.sendCommand(intent.getStringExtra("command"));
-		}
-		return START_STICKY;
-	}
-
+	
 	@Override
 	public boolean onUnbind(Intent intent) {
 		// Log.v(TAG, "onUnbind");
 		super.onUnbind(intent);
 		return true;
+	}
+
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		Log.e(TAG, "onStartCommand");
+		if ((mCurrentNotif == NotificationType.FAILED || mCurrentNotif == NotificationType.LOST_CONNECTION)
+				&& !(mCurrentNotif == NotificationType.CONNECTING)) {
+			isConnectionUp = makeConnection();
+		}
+		if (intent.hasExtra("command") && isConnectionUp){
+			Log.d(TAG, "onStartCommand with intentStringExtra: " + intent.getStringExtra("command"));
+			ConnectionProvider.INSTANCE.sendCommand(intent.getStringExtra("command"));
+			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(aCtx);
+			boolean useService = prefs.getBoolean("useService", true);
+			if (!useService){
+				WriteMonitor mWM = new WriteMonitor();
+				mWM.start();
+			}
+		}
+		return START_STICKY;
+	}
+	
+	public class WriteMonitor extends Thread {
+		@Override
+		public void run() {
+			Log.d(TAG, "WriteMonitor started");
+			try {
+				while(!Thread.interrupted() && ConnectionProvider.INSTANCE.isWriting()) {
+					Log.d(TAG, "WriteMonitor running");
+					Thread.sleep(1000);
+				}
+				Log.d(TAG, "WriteMonitor finished, stopping");
+				stopSelf();
+			} catch(InterruptedException e) {
+			}		
+		}
 	}
 
 	private boolean dropConnection() {
@@ -190,35 +215,43 @@ public class ConnectionService extends Service {
 		isConnectionUp = false;
 		return false;
 	}
+	
+	private boolean makeConnection() {
+		// makeNotification(NotificationType.CONNECTING, null);
+		// Log.v(TAG, "makeConnection called");
+		if (ConnectionProvider.INSTANCE.doConnect()) {
+			// Log.v(TAG, "recieved connection!");
+			addedToPreferences();
+			makeNotification(NotificationType.CONNECTED, "Connected");
+			startForeground(35, builder.build());
+			if (!getConfig())getConfig();
+			if (t == null || !t.isAlive()) {
+				t = new HeartBeat();
+				t.start();
+			}
+			return true;
+		} else {
+			// Log.w(TAG, "received connection failure");
+			makeNotification(NotificationType.FAILED, "Connecting Failed");
+			ConnectionProvider.INSTANCE.finishTheWork();
+			return false;
+		}
+	}
 
-	private void getConfig() {
+	private boolean getConfig() {
 		String jsonString = ConnectionProvider.INSTANCE.getConfig();
 		try {
 			JSONObject json = new JSONObject(jsonString);
 			if (json.has("config")) {
 				// Log.e(TAG, "has config");
-				try {
-					mDevices = Config.getDevices(json.getJSONObject("config"));
-					Collections.sort(mDevices);
-				} catch (JSONException e) {
-				}
-			}else{
-				//Lets try it one more time....
-				Log.w(TAG, "trying to get config for the secone time");
-				String jsonStringSecond = ConnectionProvider.INSTANCE.getConfig();
-				JSONObject jsonSecond = new JSONObject(jsonStringSecond);
-					if (jsonSecond.has("config")) {
-						// Log.e(TAG, "has config");
-						try {
-							mDevices = Config.getDevices(json.getJSONObject("config"));
-							Collections.sort(mDevices);
-						} catch (JSONException e) {
-						}
-					}
+				mDevices = Config.getDevices(json.getJSONObject("config"));
+				Collections.sort(mDevices);
+				return true;
 			}
 		} catch (JSONException e) {
 			Log.w(TAG, "problems in JSONning");
 		}
+		return false;
 	}
 
 	private boolean addedToPreferences() {
@@ -255,28 +288,6 @@ public class ConnectionService extends Service {
 		}
 	}
 
-	private boolean makeConnection() {
-		// makeNotification(NotificationType.CONNECTING, null);
-		// Log.v(TAG, "makeConnection called");
-		if (ConnectionProvider.INSTANCE.doConnect()) {
-			// Log.v(TAG, "recieved connection!");
-			addedToPreferences();
-			makeNotification(NotificationType.CONNECTED, "Connected");
-			startForeground(35, builder.build());
-			getConfig();
-			if (t == null || !t.isAlive()) {
-				t = new HeartBeat();
-				t.start();
-			}
-			return true;
-		} else {
-			// Log.w(TAG, "received connection failure");
-			makeNotification(NotificationType.FAILED, "Connecting Failed");
-			ConnectionProvider.INSTANCE.finishTheWork();
-			return false;
-		}
-	}
-
 	public static void postUpdate(String update) {
 		if (update.contains("origin\":\"config")) {
 			try {
@@ -288,15 +299,8 @@ public class ConnectionService extends Service {
 				Log.w(TAG, "iets mis met het jsonObject?");
 			}
 		}
-		makeNotification(NotificationType.UPDATE, makeNiceUpdate(update));
+		makeNotification(NotificationType.UPDATE, update);
 		sendMessageToUI(MSG_SET_BUNDLE, java.text.DateFormat.getTimeInstance().format(Calendar.getInstance().getTime()) + update);
-	}
-
-	private static String makeNiceUpdate(String update) {
-		if (update.contains("temperature") || update.contains("humidity")) {
-
-		}
-		return update;
 	}
 
 	private static Bitmap bigPic(int png) {

@@ -58,7 +58,6 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.Toast;
 import by.zatta.pilight.MainActivity;
 import by.zatta.pilight.R;
 import by.zatta.pilight.model.Config;
@@ -151,7 +150,6 @@ public class ConnectionService extends Service {
 		sendMessageToUI(MSG_SET_STATUS, NotificationType.DESTROYED.name());
 		dropConnection();
 		mNotMan.cancel(35);
-		Toast.makeText(aCtx, "service destroyed", Toast.LENGTH_LONG).show();
 		super.onDestroy();
 	}
 
@@ -167,6 +165,9 @@ public class ConnectionService extends Service {
 		if ((mCurrentNotif == NotificationType.FAILED || mCurrentNotif == NotificationType.LOST_CONNECTION)
 				&& !(mCurrentNotif == NotificationType.CONNECTING)) {
 			isConnectionUp = makeConnection();
+		}
+		if (intent.hasExtra("command") && isConnectionUp){
+			ConnectionProvider.INSTANCE.sendCommand(intent.getStringExtra("command"));
 		}
 		return START_STICKY;
 	}
@@ -201,6 +202,19 @@ public class ConnectionService extends Service {
 					Collections.sort(mDevices);
 				} catch (JSONException e) {
 				}
+			}else{
+				//Lets try it one more time....
+				Log.w(TAG, "trying to get config for the secone time");
+				String jsonStringSecond = ConnectionProvider.INSTANCE.getConfig();
+				JSONObject jsonSecond = new JSONObject(jsonStringSecond);
+					if (jsonSecond.has("config")) {
+						// Log.e(TAG, "has config");
+						try {
+							mDevices = Config.getDevices(json.getJSONObject("config"));
+							Collections.sort(mDevices);
+						} catch (JSONException e) {
+						}
+					}
 			}
 		} catch (JSONException e) {
 			Log.w(TAG, "problems in JSONning");

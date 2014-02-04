@@ -6,12 +6,18 @@ import android.app.ActivityManager.RunningServiceInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
 public final class FireReceiver extends BroadcastReceiver {
-	private static final String TAG = "FireReveiver";
+	private static final String TAG = "FireReceiver";
 	
 	@Override
 	public void onReceive(final Context context, final Intent intent) {
@@ -23,7 +29,11 @@ public final class FireReceiver extends BroadcastReceiver {
 		if (isConnectionServiceActive(context)){
 			context.sendBroadcast(new Intent("pilight-switch-device").putExtra("command", command));
 		}else{
-			Toast.makeText(context,"NOT Active" + command,Toast.LENGTH_SHORT).show();
+			if (isConnectedToKnownHome(context)){
+				context.startService(new Intent(context, ConnectionService.class).putExtra("command", command));
+			} else {
+				Toast.makeText(context, "Can not fire pilight action",Toast.LENGTH_SHORT).show();
+			}
 		}
 		return;
 	}
@@ -36,5 +46,38 @@ public final class FireReceiver extends BroadcastReceiver {
 			}
 		}
 		return false;
+	}
+	
+	boolean isConnectedToKnownHome(Context ctx) {
+		/*
+		 * WifiManager is a hidden API so not really realiable. So using the connectivity manager is saver, but
+		 * ConnectivityManager.getActiveNetwork.getExtraInfo doesn't have proper documentation. So, trying both....
+		 */
+		String currentNetwork = null;
+		ConnectivityManager cm = (ConnectivityManager) ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo info = cm.getActiveNetworkInfo();
+		if (!(info == null)) {
+			// Log.d(TAG, "networkInfo: " + info.getExtraInfo());
+			currentNetwork = info.getExtraInfo();
+		}
+
+		WifiManager wifiManager = (WifiManager) ctx.getSystemService(Context.WIFI_SERVICE);
+		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+		if (!(wifiInfo == null) && currentNetwork == null) {
+			// Log.d(TAG, "wifiInfo:" + wifiInfo.getSSID());
+			currentNetwork = wifiInfo.getSSID();
+		}
+		if (currentNetwork == null) return false;
+
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+		String previous = prefs.getString("networks_known", "");
+		// Log.d(TAG, previous);
+		currentNetwork = currentNetwork.replace("\"", "");
+		if (previous.contains(currentNetwork)) {
+			// Log.d(TAG, previous + " did contain " + currentNetwork);
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

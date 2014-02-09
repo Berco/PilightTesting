@@ -65,7 +65,7 @@ import by.zatta.pilight.model.DeviceEntry;
 import by.zatta.pilight.model.Origin;
 import by.zatta.pilight.model.OriginEntry;
 
-public class ConnectionService extends Service {
+public class CopyOfConnectionService extends Service {
 
 	public static NotificationType mCurrentNotif = NotificationType.DESTROYED;
 
@@ -83,7 +83,6 @@ public class ConnectionService extends Service {
 	private static NotificationManager mNotMan;
 	private static Notification.Builder builder;
 	private static HeartBeat t = null;
-	private static WriteMonitor mWM = null;
 	private static final String TAG = "Zatta::ConnectionService";
 	private boolean isConnectionUp = false;
 
@@ -107,9 +106,10 @@ public class ConnectionService extends Service {
 				if (isConnectionUp)
 					dropConnection();
 				else isConnectionUp = makeConnection();
-			} else if (action.equals("pilight-switch-device")) {
-				if (isConnectionUp) Log.v(TAG, "broadcastReceiver: " + intent.getStringExtra("command"));
-				ConnectionProvider.INSTANCE.sendCommand(intent.getStringExtra("command"));
+			} else if (action.equals("pilight-switch-device")){
+				if (isConnectionUp)
+					Log.v(TAG, "broadcastReceiver: "+intent.getStringExtra("command"));
+					ConnectionProvider.INSTANCE.sendCommand(intent.getStringExtra("command"));
 			}
 		}
 	};
@@ -140,12 +140,9 @@ public class ConnectionService extends Service {
 
 		mNotMan = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-		Log.e(TAG, Server.CONNECTION.setup());
-
 		isConnectionUp = makeConnection();
 		if (t == null || !t.isAlive()) {
 			t = new HeartBeat();
-			t.setName("Heart-Beat");
 			t.start();
 		}
 		Log.e(TAG, "onCreate done");
@@ -162,7 +159,7 @@ public class ConnectionService extends Service {
 		Log.e(TAG, "killllllling!!!!");
 		android.os.Process.killProcess(android.os.Process.myPid());
 		super.onDestroy();
-
+		
 	}
 
 	@Override
@@ -170,7 +167,7 @@ public class ConnectionService extends Service {
 		// Log.v(TAG, "onRebind");
 		super.onRebind(intent);
 	}
-
+	
 	@Override
 	public boolean onUnbind(Intent intent) {
 		// Log.v(TAG, "onUnbind");
@@ -185,35 +182,32 @@ public class ConnectionService extends Service {
 				&& !(mCurrentNotif == NotificationType.CONNECTING)) {
 			isConnectionUp = makeConnection();
 		}
-		if (intent.hasExtra("command") && isConnectionUp) {
+		if (intent.hasExtra("command") && isConnectionUp){
 			Log.d(TAG, "onStartCommand with intentStringExtra: " + intent.getStringExtra("command"));
 			ConnectionProvider.INSTANCE.sendCommand(intent.getStringExtra("command"));
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(aCtx);
 			boolean useService = prefs.getBoolean("useService", true);
-			if (!useService) {
-				if (mWM == null || !mWM.isAlive()) {
-					mWM = new WriteMonitor();
-					mWM.setName("WriteMonitor");
-					mWM.start();
-				}
+			if (!useService){
+				WriteMonitor mWM = new WriteMonitor();
+				mWM.start();
 			}
 		}
 		return START_STICKY;
 	}
-
+	
 	public class WriteMonitor extends Thread {
 		@Override
 		public void run() {
 			Log.d(TAG, "WriteMonitor started");
 			try {
-				while (!Thread.interrupted() && ConnectionProvider.INSTANCE.isWriting()) {
+				while(!Thread.interrupted() && ConnectionProvider.INSTANCE.isWriting()) {
 					Log.d(TAG, "WriteMonitor running");
 					Thread.sleep(1000);
 				}
 				Log.d(TAG, "WriteMonitor finished, stopping");
 				stopSelf();
-			} catch (InterruptedException e) {
-			}
+			} catch(InterruptedException e) {
+			}		
 		}
 	}
 
@@ -228,7 +222,7 @@ public class ConnectionService extends Service {
 		isConnectionUp = false;
 		return false;
 	}
-
+	
 	private boolean makeConnection() {
 		// makeNotification(NotificationType.CONNECTING, null);
 		// Log.v(TAG, "makeConnection called");
@@ -237,7 +231,7 @@ public class ConnectionService extends Service {
 			addedToPreferences();
 			makeNotification(NotificationType.CONNECTED, "Connected");
 			startForeground(35, builder.build());
-			if (!getConfig()) getConfig();
+			if (!getConfig())getConfig();
 			return true;
 		} else {
 			// Log.w(TAG, "received connection failure");
@@ -271,6 +265,7 @@ public class ConnectionService extends Service {
 			// Log.d(TAG, "networkInfo: " + info.getExtraInfo());
 			currentNetwork = info.getExtraInfo();
 		}
+
 		WifiManager wifiManager = (WifiManager) ctx.getSystemService(Context.WIFI_SERVICE);
 		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
 		if (!(wifiInfo == null)) {
@@ -278,7 +273,7 @@ public class ConnectionService extends Service {
 			currentNetwork = wifiInfo.getSSID();
 		}
 		if (currentNetwork == null) return false;
-		
+
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(aCtx);
 		String previous = prefs.getString("networks_known", "");
 		// Log.d(TAG, previous);
@@ -306,10 +301,9 @@ public class ConnectionService extends Service {
 			} catch (JSONException e) {
 				Log.w(TAG, "iets mis met het jsonObject?");
 			}
-			makeNotification(NotificationType.UPDATE, update);
-			sendMessageToUI(MSG_SET_BUNDLE, java.text.DateFormat.getTimeInstance().format(Calendar.getInstance().getTime())
-					+ update);
 		}
+		makeNotification(NotificationType.UPDATE, update);
+		sendMessageToUI(MSG_SET_BUNDLE, java.text.DateFormat.getTimeInstance().format(Calendar.getInstance().getTime()) + update);
 	}
 
 	private static Bitmap bigPic(int png) {
@@ -488,7 +482,6 @@ public class ConnectionService extends Service {
 			try {
 				while (!lostConnection) {
 					Thread.sleep(500); // Putting this here to allow onCreate to setup the connection first.
-					Server.CONNECTION.sentCommand("HEART");
 					fromProvider = ConnectionProvider.INSTANCE.stillConnected();
 					Log.v(TAG, "fromProvider: stillConnected= " + fromProvider);
 					if (!fromProvider) {

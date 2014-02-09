@@ -28,7 +28,8 @@ public final class FireReceiver extends BroadcastReceiver {
 		
 		if (isConnectionServiceActive(context)){
 			Log.v(TAG, "ConnectionService found active");
-			context.sendBroadcast(new Intent("pilight-switch-device").putExtra("command", command));
+			//context.sendBroadcast(new Intent("pilight-switch-device").putExtra("command", command));
+			context.startService(new Intent(context, ConnectionService.class).putExtra("command", command));
 		}else{
 			Log.v(TAG, "ConnectionService found NOT active");
 			if (isConnectedToKnownHome(context)){

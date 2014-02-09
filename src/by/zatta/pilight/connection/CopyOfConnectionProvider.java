@@ -33,7 +33,7 @@ import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
 import android.util.Log;
 
-public enum ConnectionProvider {
+public enum CopyOfConnectionProvider {
 	INSTANCE;
 	private static final String TAG = "Zatta::ConnectionProvider";
 	private static Status status = Status.NO_CONNECTION;
@@ -56,7 +56,7 @@ public enum ConnectionProvider {
 		Log.v(TAG, "getCommandOutput");
 		if (writer == null || !writer.isAlive() || reader == null || !reader.isAlive()) {
 			Log.v(TAG, "setting up new connection");
-			output_queue = new ArrayBlockingQueue<String>(10);
+			output_queue = new ArrayBlockingQueue<String>(6);
 			command_queue = new ArrayBlockingQueue<String>(10);
 			connector = new ConnectorThread(command_queue, output_queue);
 			connector.setName("SocketThread");

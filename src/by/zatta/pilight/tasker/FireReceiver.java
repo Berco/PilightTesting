@@ -21,13 +21,11 @@ public final class FireReceiver extends BroadcastReceiver {
 	
 	@Override
 	public void onReceive(final Context context, final Intent intent) {
-		Log.v(TAG, "Fired");
 		Bundle extraBundle = intent.getBundleExtra(com.twofortyfouram.locale.Intent.EXTRA_BUNDLE);
 		String[] what = extraBundle.getStringArray("Extra");
 		String command = what[2];
 		
 		if (isConnectionServiceActive(context)){
-			Log.v(TAG, "ConnectionService found active");
 			//context.sendBroadcast(new Intent("pilight-switch-device").putExtra("command", command));
 			context.startService(new Intent(context, ConnectionService.class).putExtra("command", command));
 		}else{

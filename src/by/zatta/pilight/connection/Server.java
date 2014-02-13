@@ -1,3 +1,26 @@
+/******************************************************************************************
+ * 
+ * Copyright (C) 2013 Zatta
+ * 
+ * This file is part of pilight for android.
+ * 
+ * pilight for android is free software: you can redistribute it and/or modify 
+ * it under the terms of the GNU General Public License as published by the 
+ * Free Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ * 
+ * pilight for android is distributed in the hope that it will be useful, but 
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
+ * for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along 
+ * with pilightfor android.
+ * If not, see <http://www.gnu.org/licenses/>
+ * 
+ * Copyright (c) 2013 pilight project
+ ********************************************************************************************/
+
 package by.zatta.pilight.connection;
 
 import java.io.BufferedReader;
@@ -22,15 +45,32 @@ public enum Server {
 	private static Socket socket;
 	private static BufferedReader bufferedReader = null;
 	private static PrintStream printStream = null;
+	private static boolean isWriting = false;
 
 	public synchronized String setup() {
 		if (setupThread != null) {
 			try {
 				setupThread.finalize();
+				setupThread = null;
 			} catch (Throwable e) {
 				Log.w(TAG, "couldn't stop setupThread");
 			}
-			setupThread = null;
+		}
+		if (reader != null) {
+			try {
+				reader.interrupt();
+				reader = null;
+			} catch (Throwable e) {
+				Log.w(TAG, "couldn't stop reader");
+			}
+		}
+		if (writer != null) {
+			try {
+				writer.interrupt();
+				writer = null;
+			} catch (Throwable e) {
+				Log.w(TAG, "couldn't stop writer");
+			}
 		}
 		String toBeReturned = "";
 		output = new ArrayBlockingQueue<String>(1);
@@ -45,10 +85,10 @@ public enum Server {
 		if (setupThread != null) {
 			try {
 				setupThread.finalize();
+				setupThread = null;
 			} catch (Throwable e) {
 				Log.w(TAG, "couldn't stop setupThread");
 			}
-			setupThread = null;
 		}
 		output.clear();
 		output = null;
@@ -57,18 +97,50 @@ public enum Server {
 
 	public synchronized void sentCommand(String message) {
 		if (writer == null || !writer.isAlive()) {
-			Log.v(TAG, "setting up new connection");
 			command = new ArrayBlockingQueue<String>(10);
 			writer = new WriterThread(command);
 			writer.setName("WriterThread");
 			writer.start();
 		}
 		try {
+			isWriting = true;
 			command.put(message);
 		} catch (InterruptedException e) {
 			Log.w(TAG, "Failed to write command to queue");
 			Log.w(TAG, e);
 		}
+	}
+
+	public boolean isWriting() {
+		return isWriting;
+	}
+
+	public synchronized void disconnect() {
+		try {
+			socket.close();
+		} catch (Exception e) {
+			Log.w(TAG, "couldn't close socket");
+		}
+		try {
+			setupThread.finalize();
+		} catch (Throwable e) {
+			Log.w(TAG, "couldn't stop setupThread");
+		}
+		try {
+			reader.interrupt();
+		} catch (Throwable e) {
+			Log.w(TAG, "couldn't stop reader");
+		}
+		try {
+			writer.interrupt();
+		} catch (Throwable e) {
+			Log.w(TAG, "couldn't stop writer");
+		}
+		setupThread = null;
+		reader = null;
+		writer = null;
+		bufferedReader = null;
+		printStream = null;
 	}
 
 	private static class SetUp extends Thread {
@@ -89,7 +161,7 @@ public enum Server {
 
 		@Override
 		protected void finalize() throws Throwable {
-			Log.e(TAG, "Finalize the SetupThread");
+			Log.v(TAG, "Finalize the SetupThread");
 			this.interrupt();
 			super.finalize();
 		}
@@ -97,9 +169,8 @@ public enum Server {
 		@Override
 		public void run() {
 			while (runs < 5) {
-				Log.e(TAG, step.name() + " " + Integer.toString(runs));
-				switch (step)
-				{
+				Log.d(TAG, step.name() + " " + Integer.toString(runs));
+				switch (step) {
 				case ADRESS:
 					runs++;
 					try {
@@ -117,7 +188,7 @@ public enum Server {
 					runs++;
 					try {
 						socket = new Socket();
-						socket.setSoTimeout(60000);
+						socket.setSoTimeout(0);
 						socket.connect(adress, 300);
 					} catch (SocketException e) {
 						Log.w(TAG, "SocketExeption");
@@ -183,7 +254,7 @@ public enum Server {
 				if (!(line.equals(""))) {
 					output.put(line);
 					if (reader == null || !reader.isAlive()) {
-						Log.v(TAG, "starting new reader");
+						Log.v(TAG, "starting new reader from SetupThread");
 						reader = new ReaderThread();
 						reader.setName("ReaderThread");
 						reader.start();
@@ -203,21 +274,12 @@ public enum Server {
 		private ArrayBlockingQueue<String> command = null;
 
 		WriterThread(ArrayBlockingQueue<String> command) {
-			Log.v(TAG, "constructed writer thread");
 			this.command = command;
 		}
 
 		@Override
-		protected void finalize() throws Throwable {
-			Log.v(TAG, "finalize writer");
-			this.interrupt();
-			super.finalize();
-		}
-		
-		@Override
 		public void run() {
-			Log.v(TAG, "writer started");
-			while (socket.isConnected() && !command.isEmpty()) {
+			while (!socket.isClosed() && !(socket == null) && !command.isEmpty()) {
 				try {
 					write(command.take());
 				} catch (InterruptedException e) {
@@ -225,13 +287,14 @@ public enum Server {
 					Log.w(TAG, e);
 				}
 			}
+			printStream = null;
+			isWriting = false;
 		}
 
 		private boolean write(String message) {
-			Log.v(TAG, "write called");
+			Log.v(TAG, "write called: " + message);
 			try {
 				if (printStream == null) {
-					Log.v(TAG, "creating new printStream");
 					printStream = new PrintStream(socket.getOutputStream(), false);
 				}
 				printStream.print(message + "\n");
@@ -250,58 +313,33 @@ public enum Server {
 		private String line;
 
 		ReaderThread() {
-			Log.v(TAG, "constructed reader thread");
-		}
-
-		@Override
-		protected void finalize() throws Throwable {
-			Log.v(TAG, "finalize reader");
-			this.interrupt();
-			super.finalize();
-		}
-
-		@Override
-		public void interrupt() {
-			Log.v(TAG, "interrupted reader");
-			if (bufferedReader != null) {
-				try {
-					bufferedReader.close();
-				} catch (IOException e) {
-					Log.w(TAG, "couldn't close buffered reader");
-				}
-				bufferedReader = null;
-			}
-			super.interrupt();
 		}
 
 		@Override
 		public void run() {
 			Log.v(TAG, "reader started");
-			while (socket.isConnected()) {
+			while (!socket.isClosed() && !(socket == null)) {
 				read();
 			}
-			Log.e(TAG, "lostConnection");
-			ConnectionService.postUpdate("LOST_CONNNETION");
+			bufferedReader = null;
+			ConnectionService.postUpdate("LOST_CONNECTION");
 		}
 
 		public void read() {
+
 			try {
 				if (bufferedReader == null)
 					bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"), 1025);
 				if (bufferedReader.ready()) {
 					while ((line = bufferedReader.readLine()) != null) {
-						try {
-							Log.v(TAG, line);
-							ConnectionService.postUpdate(line);
-						} catch (Exception e) {
-							Log.w(TAG, "line leeg ofzo");
-						}
+						ConnectionService.postUpdate(line);
 					}
-					Log.w(TAG, "stopped reading bufferedReader");
+					bufferedReader = null;
+					socket.close();
+					Log.v(TAG, "stopped reading bufferedReader");
 				}
-			} catch (Exception e1) {
-				Log.e(TAG, "problems in read()");
-				Log.w(TAG, e1);
+			} catch (Exception e) {
+				Log.w(TAG, "exception caught in read");
 			}
 		}
 	}

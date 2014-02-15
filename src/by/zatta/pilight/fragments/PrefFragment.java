@@ -31,19 +31,26 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences.Editor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
+import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceCategory;
+import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
+import android.util.Log;
 import android.widget.Toast;
 import by.zatta.pilight.dialogs.AboutDialog;
 
 public class PrefFragment extends BasePreferenceFragment {
+	static final String TAG = "PrefFragment";
 	OnLanguageListener languageListener;
+	OnViewChangeListener viewChangeListener;
+	PreferenceManager manager;
 
 	// OnResetListener resetListener;
 
@@ -52,7 +59,7 @@ public class PrefFragment extends BasePreferenceFragment {
 		super.onAttach(activity);
 		try {
 			languageListener = (OnLanguageListener) activity;
-			// resetListener = (OnResetListener) activity;
+			viewChangeListener = (OnViewChangeListener) activity;
 		} catch (ClassCastException e) {
 			throw new ClassCastException(activity.toString() + " must implement correct Listener");
 		}
@@ -61,10 +68,9 @@ public class PrefFragment extends BasePreferenceFragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		Context context = this.getActivity().getLayoutInflater().getContext();
 		setPreferenceScreen(createPreferenceHierarchy(context));
-
+		manager = getPreferenceManager();
 	}
 
 	private PreferenceScreen createPreferenceHierarchy(Context mContext) {
@@ -123,6 +129,16 @@ public class PrefFragment extends BasePreferenceFragment {
 		forceListCheckBoxPref.setSummary(R.string.prefSum_listgrid);
 		forceListCheckBoxPref.setKey("forceList");
 		forceListCheckBoxPref.setDefaultValue(false);
+		forceListCheckBoxPref.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue) {
+				Log.e(TAG, "PrefChange: " + Boolean.toString((Boolean) newValue));
+				Editor edit = manager.getSharedPreferences().edit();
+				edit.putBoolean("forceList", (Boolean) newValue).commit();
+				viewChangeListener.onViewChangeListener((Boolean) newValue);
+				return true;
+			}
+		});
 		uInterfacePrefCat.addPreference(forceListCheckBoxPref);
 
 		CheckBoxPreference destroyedCheckBoxPref = new CheckBoxPreference(mContext);
@@ -164,7 +180,7 @@ public class PrefFragment extends BasePreferenceFragment {
 			pref.getEditor().putString("networks_known", "").commit();
 			return true;
 		}
-
+		
 		if (pref.getKey().contentEquals("languagePref")) {
 			pref.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
 				@Override
@@ -185,9 +201,9 @@ public class PrefFragment extends BasePreferenceFragment {
 	public interface OnLanguageListener {
 		public void onLanguageListener(String language);
 	}
-	//
-	// public interface OnResetListener{
-	// public void onResetListener();
-	// }
+	
+	 public interface OnViewChangeListener{
+		 public void onViewChangeListener(Boolean forceList);
+	 }
 
 }

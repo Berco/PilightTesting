@@ -26,6 +26,7 @@ package by.zatta.pilight;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import android.annotation.SuppressLint;
@@ -41,6 +42,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
@@ -72,11 +75,12 @@ import by.zatta.pilight.fragments.DeviceListFragment;
 import by.zatta.pilight.fragments.DeviceListFragment.DeviceListListener;
 import by.zatta.pilight.fragments.PrefFragment;
 import by.zatta.pilight.fragments.PrefFragment.OnLanguageListener;
+import by.zatta.pilight.fragments.PrefFragment.OnViewChangeListener;
 import by.zatta.pilight.model.DeviceEntry;
 import by.zatta.pilight.model.SettingEntry;
 
 public class MainActivity extends Activity implements ServiceConnection, DeviceListListener,
-		OnChangedStatusListener, OnLanguageListener {
+		OnChangedStatusListener, OnViewChangeListener,OnLanguageListener {
 
 	private static final String TAG = "Zatta::MainActivity";
 	private static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
@@ -125,9 +129,27 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 	}
 	
 	@Override
+	public void onViewChangeListener(Boolean forceList) {
+		Log.e(TAG, "received forceList: " + Boolean.toString(forceList));
+		FragmentManager fm = getFragmentManager();
+		FragmentTransaction ft = fm.beginTransaction();
+		BaseFragment prev = (BaseFragment) fm.findFragmentByTag("DeviceList");
+		prev.onCreate(null);
+	}
+	
+	@Override
 	public void onLanguageListener(String language) {
 		Toast.makeText(this, "Language: " + language, Toast.LENGTH_SHORT).show();
-		
+		Log.w(TAG, language + " Listenener");
+    	makeLocale(language);
+    	invalidateOptionsMenu();
+    	initMenu();
+    	FragmentManager fm = getFragmentManager();
+		FragmentTransaction ft = fm.beginTransaction();
+		fm.popBackStack();		
+		ft.replace(R.id.fragment_main, new PrefFragment(), "prefs");
+		ft.addToBackStack(null);
+		ft.commit();
 	}
 
 	@Override
@@ -161,6 +183,8 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 		automaticBind();
 		Log.v(TAG, "onCreate done");
 	}
+	
+	
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -229,6 +253,27 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 		// unexpectedly disconnected - process crashed.
 		mServiceMessenger = null;
 		// textStatus.setText("Disconnected.");
+	}
+	
+	public void makeLocale(String language){
+    	Log.w(TAG, language + " makeLocale");
+        Locale locale = new Locale(language); 
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.locale = locale;
+        getBaseContext().getResources().updateConfiguration(config, 
+        getBaseContext().getResources().getDisplayMetrics());
+    }
+    
+    public String myAppVersion(){
+		PackageInfo pinfo;
+		try {
+			pinfo = this.getPackageManager().getPackageInfo((this.getPackageName()), 0);
+			return pinfo.versionName;
+		} catch (NameNotFoundException e) {
+			return " ";
+		}
+		
 	}
 
 	private void initMenu() {
@@ -525,5 +570,4 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 			}
 		}
 	}
-
 }

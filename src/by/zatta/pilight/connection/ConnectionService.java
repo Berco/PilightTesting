@@ -223,6 +223,7 @@ public class ConnectionService extends Service {
 				Collections.sort(mDevices);
 				addedToPreferences();
 				makeNotification(NotificationType.CONNECTED, "Connected");
+				sendMessageToUI(MSG_SET_BUNDLE, null);
 				startForeground(35, builder.build());
 				if (mHB == null || !mHB.isAlive()) {
 					mHB = new HeartBeat();

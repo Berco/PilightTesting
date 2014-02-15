@@ -132,9 +132,8 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 	public void onViewChangeListener(Boolean forceList) {
 		Log.e(TAG, "received forceList: " + Boolean.toString(forceList));
 		FragmentManager fm = getFragmentManager();
-		FragmentTransaction ft = fm.beginTransaction();
 		BaseFragment prev = (BaseFragment) fm.findFragmentByTag("DeviceList");
-		prev.onCreate(null);
+		if (prev != null) prev.onCreate(null);
 	}
 	
 	@Override

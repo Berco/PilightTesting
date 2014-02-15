@@ -133,6 +133,7 @@ public class PrefFragment extends BasePreferenceFragment {
 			@Override
 			public boolean onPreferenceChange(Preference preference, Object newValue) {
 				Log.e(TAG, "PrefChange: " + Boolean.toString((Boolean) newValue));
+				//I need this editor to get the change written to the preferences before this method returns
 				Editor edit = manager.getSharedPreferences().edit();
 				edit.putBoolean("forceList", (Boolean) newValue).commit();
 				viewChangeListener.onViewChangeListener((Boolean) newValue);

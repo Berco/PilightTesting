@@ -32,14 +32,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class StatusDialog extends DialogFragment implements OnClickListener {
 
 	static OnChangedStatusListener changedStatusListener;
-	private static String TAG = "Zatta::StatusDialog";
 	private static Button mBtnCancel;
 	private static Button mBtnSetup;
+	private static ProgressBar pbConnecting;
 	private String status;
 	private static TextView tv;
 
@@ -76,9 +77,10 @@ public class StatusDialog extends DialogFragment implements OnClickListener {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		getDialog().setTitle("Making Connection");
+		getDialog().setTitle(R.string.title_status_dialog);
 		View v = inflater.inflate(R.layout.status_dialog_layout, container, false);
 		tv = (TextView) v.findViewById(R.id.tvStatusDisplay);
+		pbConnecting = (ProgressBar) v.findViewById(R.id.pbConnecting);
 		mBtnCancel = (Button) v.findViewById(R.id.btnCancelStart);
 		mBtnSetup = (Button) v.findViewById(R.id.btnSetupConnection);
 		mBtnCancel.setOnClickListener(this);
@@ -100,20 +102,28 @@ public class StatusDialog extends DialogFragment implements OnClickListener {
 		// TODO check for correctness
 		mBtnCancel.setVisibility(View.GONE);
 		mBtnSetup.setVisibility(View.GONE);
+		pbConnecting.setVisibility(View.GONE);
+		mBtnCancel.setText(R.string.btn_close);
+		mBtnSetup.setText(R.string.btn_retry);
 		if (status.equals("CONNECTED")) {
 			changedStatusListener.onChangedStatusListener(DISMISS);
 		} else if (status.equals("CONNECTING")) {
+			pbConnecting.setVisibility(View.VISIBLE);
+			tv.setText(R.string.status_connecting);
 			mBtnCancel.setVisibility(View.VISIBLE);
+			mBtnCancel.setText(R.string.btn_abort);
 		} else if (status.equals("DESTROYED")) {
+			tv.setText(R.string.status_destroyed);
 			mBtnCancel.setVisibility(View.VISIBLE);
 		} else if (status.equals("FAILED")) {
+			tv.setText(R.string.status_failed);
 			mBtnCancel.setVisibility(View.VISIBLE);
-			// mBtnSetup.setVisibility(View.VISIBLE);
+			mBtnSetup.setVisibility(View.VISIBLE);
 		} else if (status.equals("LOST_CONNECTION")) {
+			tv.setText(R.string.status_lost);
 			mBtnCancel.setVisibility(View.VISIBLE);
-			// mBtnSetup.setVisibility(View.VISIBLE);
+			mBtnSetup.setVisibility(View.VISIBLE);
 		}
-		tv.setText(status);
 	}
 
 	public interface OnChangedStatusListener {

@@ -27,37 +27,37 @@
     <string name="app_name">pilight</string>
     
     <!-- Titles -->
-    <string name="title_settings">Settings</string>
+    <string name="title_settings">Instellingen</string>
     <string name="title_list_base">DeviceList</string> 
-    <string name="title_about">About</string>
+    <string name="title_about">Over</string>
     <string name="title_status_dialog">Status</string>
-    <string name="title_all">All</string>
+    <string name="title_all">Alle</string>
     
     <!-- Status Dialog -->
-    <string name="status_connecting">Establishing a connection \n One moment!</string>
-    <string name="status_failed">A failure occurred during establishing a connection to the pilight deamon on your raspberry pi.</string>
-    <string name="status_lost">The connection to the deamon was lost.</string>
-    <string name="status_destroyed">The service that maintains the connection from this app to the pilight daemon was destroyed.</string>
-    <string name="btn_close">Close</string>
-    <string name="btn_abort">Abort</string>
-    <string name="btn_retry">Retry</string>
+    <string name="status_connecting">Verbinding maken. \n Een moment aub!</string>
+    <string name="status_failed">Het maken van een verbinding met de pilight deamon op uw raspberry pi is mislukt.</string>
+    <string name="status_lost">De verbinding met de daemon is verbroken.</string>
+    <string name="status_destroyed">De service van deze app die de verbinding met de daemon verzorgt is gestopt.</string>
+    <string name="btn_close">Sluiten</string>
+    <string name="btn_abort">Onderbreken</string>
+    <string name="btn_retry">Nogmaals</string>
     
     <!-- Preferences -->
-    <string name="prefTit_info">Information</string>
-    <string name="prefSum_about">All about the app</string>
+    <string name="prefTit_info">Informatie</string>
+    <string name="prefSum_about">Alles over de app</string>
     <string name="prefTit_web">www.pilight.org</string>
-    <string name="prefSum_web">visit our official website</string>
+    <string name="prefSum_web">bezoek de officiele website</string>
     <string name="prefTit_tweakers">Tweakers.net</string>
-    <string name="prefSum_tweakers">Dutch forum thread</string>
-    <string name="prefTit_connection">Connection</string>
-    <string name="prefSum_connection">remove all remembered networks</string>
-    <string name="prefTit_useService">Keep service running</string>
-    <string name="prefSum_useService">also when not in the app</string>
+    <string name="prefSum_tweakers">Nederlands forum</string>
+    <string name="prefTit_connection">Verbinding</string>
+    <string name="prefSum_connection">Vergeet alle bekende netwerken</string>
+    <string name="prefTit_useService">Laat de service draaien</string>
+    <string name="prefSum_useService">ook wanneer de app niet open is</string>
     <string name="prefTit_UI">UI</string>
-    <string name="prefTit_listgrid">Force list for devices</string>
-    <string name="prefSum_listgrid">instead of a grid</string>
-    <string name="prefTit_destroyNotification">Don\'t show a notification</string>
-    <string name="prefSum_destroyNotification">when you\'ve left your home network</string>
+    <string name="prefTit_listgrid">Forceer lijst voor apparaten</string>
+    <string name="prefSum_listgrid">in plaats van een grid</string>
+    <string name="prefTit_destroyNotification">Laat geen notificatie zien</string>
+    <string name="prefSum_destroyNotification">wanneer u uw thuisnetwerk verlaten heeft</string>
     <string name="prefTit_language">Language</string> <!-- DO NOT TRANSLATE -->
     <string name="prefSum_language">preferred for this app only</string> <!-- DO NOT TRANSLATE -->
     

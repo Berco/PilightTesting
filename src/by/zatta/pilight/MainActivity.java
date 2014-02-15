@@ -47,6 +47,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -57,6 +58,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -68,14 +70,13 @@ import by.zatta.pilight.dialogs.StatusDialog.OnChangedStatusListener;
 import by.zatta.pilight.fragments.BaseFragment;
 import by.zatta.pilight.fragments.DeviceListFragment;
 import by.zatta.pilight.fragments.DeviceListFragment.DeviceListListener;
-import by.zatta.pilight.fragments.OverviewFragment;
-import by.zatta.pilight.fragments.OverviewFragment.OverViewListener;
 import by.zatta.pilight.fragments.PrefFragment;
+import by.zatta.pilight.fragments.PrefFragment.OnLanguageListener;
 import by.zatta.pilight.model.DeviceEntry;
 import by.zatta.pilight.model.SettingEntry;
 
-public class MainActivity extends Activity implements ServiceConnection, OverViewListener, DeviceListListener,
-		OnChangedStatusListener {
+public class MainActivity extends Activity implements ServiceConnection, DeviceListListener,
+		OnChangedStatusListener, OnLanguageListener {
 
 	private static final String TAG = "Zatta::MainActivity";
 	private static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
@@ -122,32 +123,11 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 			break;
 		}
 	}
-
+	
 	@Override
-	public void overViewListener(int buttonPressed) {
-		switch (buttonPressed)
-		{
-		case R.id.btnStart:
-			automaticBind();
-			break;
-		case R.id.btnStop:
-			doUnbindService();
-			stopService(new Intent(MainActivity.this, ConnectionService.class));
-			break;
-		case R.id.btnBind:
-			doBindService();
-			break;
-		case R.id.btnUnbind:
-			doUnbindService();
-			break;
-		case R.id.btnUpby1:
-			sendMessageToService("switch a device");
-			break;
-		case R.id.btnUpby10:
-			sendMessageToService("switch another device");
-			break;
-		}
-
+	public void onLanguageListener(String language) {
+		Toast.makeText(this, "Language: " + language, Toast.LENGTH_SHORT).show();
+		
 	}
 
 	@Override
@@ -159,7 +139,7 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		Log.v(TAG, "onCreate starts");
 		setContentView(R.layout.mainactivity_layout);
 		mCurrentTitle = getString(R.string.app_name);
 
@@ -167,9 +147,19 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 		mDrawer.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 		mDrawerToggle = new CustomActionBarDrawerToggle(this, mDrawer);
 		mDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-
-		openDialogFragment(StatusDialog.newInstance("starting"));
+		
+		if (savedInstanceState != null){
+			Log.v(TAG, "savedInstanceState was not null");
+			mDevices = savedInstanceState.getParcelableArrayList("config");
+			mCurrentTitle = savedInstanceState.getString("currentTitle", "oops");
+			getActionBar().setTitle(mCurrentTitle);
+			initMenu();
+		} else {
+			mDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+			openDialogFragment(StatusDialog.newInstance("CONNECTING"));
+		}
 		automaticBind();
+		Log.v(TAG, "onCreate done");
 	}
 
 	@Override
@@ -203,19 +193,6 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 				ft.commit();
 			} else {
 				ft.remove(fm.findFragmentByTag("prefs"));
-				ft.commit();
-				fm.popBackStack();
-			}
-			return true;
-		case R.id.menu_debug:
-			Fragment debug = fm.findFragmentByTag("debug");
-			if (debug == null) {
-				ft.replace(R.id.fragment_main, new OverviewFragment(), "debug");
-				fm.popBackStack();
-				ft.addToBackStack(null);
-				ft.commit();
-			} else {
-				ft.remove(fm.findFragmentByTag("debug"));
 				ft.commit();
 				fm.popBackStack();
 			}
@@ -255,7 +232,7 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 	}
 
 	private void initMenu() {
-		// Log.v(TAG, "calling initMenu");
+		Log.v(TAG, "calling initMenu");
 		mDrawerList = (ListView) findViewById(R.id.drawer);
 		if (mDrawerList != null) {
 			mDrawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, makeLocationList()));
@@ -265,21 +242,15 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
 
-		String location = allLocations.values().toArray(new String[allLocations.size()])[1];
-		mCurrentTitle = allLocations.keySet().toArray(new String[allLocations.size()])[1];
-		mBaseFragment = DeviceListFragment.newInstance(mDevices, location);
-		openFragment(mBaseFragment);
-
 		mDrawer.setDrawerListener(mDrawerToggle);
 		mDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-		mDrawer.openDrawer(mDrawerList);
 
 		closeDialogFragments();
 	}
 
 	private String[] makeLocationList() {
 		allLocations.clear();
-		allLocations.put("All", null);
+		allLocations.put(getString(R.string.title_all), null);
 		if (mDevices != null) {
 			for (DeviceEntry dentry : mDevices) {
 				if (!allLocations.containsValue(dentry.getLocationID())) {
@@ -292,6 +263,14 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 		String[] locationNames = new String[allLocations.size()];
 		locationNames = allLocations.keySet().toArray(locationNames);
 		return locationNames;
+	}
+	
+	private void startInitialFragment(){
+		String location = allLocations.values().toArray(new String[allLocations.size()])[1];
+		mCurrentTitle = allLocations.keySet().toArray(new String[allLocations.size()])[1];
+		getActionBar().setTitle(mCurrentTitle);
+		mBaseFragment = DeviceListFragment.newInstance(mDevices, location);
+		openFragment(mBaseFragment);
 	}
 
 	/**
@@ -360,6 +339,7 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 	}
 
 	private void openFragment(BaseFragment mBaseFragment2) {
+		Log.v(TAG, "openFragment");
 		if (mBaseFragment2 != null) {
 			FragmentManager fm = getFragmentManager();
 			FragmentTransaction ft = fm.beginTransaction();
@@ -416,14 +396,15 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 		if (!useService) {
 			stopService(new Intent(MainActivity.this, ConnectionService.class));
 		}
-		// finish(); //ugly hack, I know
 		super.onPause();
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		// TODO implement this properly
-		// Log.d(TAG, "onSaveInstanceState");
+		Log.d(TAG, "onSaveInstanceState");
+		outState.putParcelableArrayList("config", (ArrayList<? extends Parcelable>) mDevices);
+		outState.putString("currentTitle", mCurrentTitle);
 		super.onSaveInstanceState(outState);
 	}
 
@@ -528,19 +509,11 @@ public class MainActivity extends Activity implements ServiceConnection, OverVie
 				}
 
 			case ConnectionService.MSG_SET_BUNDLE:
-
 				mDevices = bundle.getParcelableArrayList("config");
-
-				if (allLocations.isEmpty()) initMenu();
-
-				// TODO replace this method for a findFragmentById like thing:
-				try {
-					bundle.putBoolean("bound", mIsBound);
-					OverviewFragment.updateUI(bundle);
-				} catch (Exception e) {
-					// Log.v(TAG, "OverViewFragment isn't made yet");
+				if (allLocations.isEmpty()) {
+					initMenu();
+					startInitialFragment();
 				}
-				// Log.v(TAG, "sending to the List!!");
 				try {
 					DeviceListFragment.updateUI(mDevices);
 				} catch (Exception e) {

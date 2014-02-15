@@ -21,7 +21,7 @@
   ~  * If not, see <http://www.gnu.org/licenses/>
   ~  * 
   ~  * Copyright (c) 2013 pilight project
-  ~  ********************************************************************************/
+  ~  ********************************************************************************/
 -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"

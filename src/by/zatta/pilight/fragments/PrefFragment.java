@@ -34,28 +34,28 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
+import android.preference.ListPreference;
 import android.preference.Preference;
+import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceScreen;
 import android.widget.Toast;
 import by.zatta.pilight.dialogs.AboutDialog;
 
 public class PrefFragment extends BasePreferenceFragment {
+	OnLanguageListener languageListener;
 
-	private static final String TAG = "PrefFragment";
-
-	// OnLanguageListener languageListener;
 	// OnResetListener resetListener;
 
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		// try {
-		// languageListener = (OnLanguageListener) activity;
-		// resetListener = (OnResetListener) activity;
-		// } catch (ClassCastException e) {
-		// throw new ClassCastException(activity.toString() + " must implement correct Listener");
-		// }
+		try {
+			languageListener = (OnLanguageListener) activity;
+			// resetListener = (OnResetListener) activity;
+		} catch (ClassCastException e) {
+			throw new ClassCastException(activity.toString() + " must implement correct Listener");
+		}
 	}
 
 	@Override
@@ -64,6 +64,7 @@ public class PrefFragment extends BasePreferenceFragment {
 
 		Context context = this.getActivity().getLayoutInflater().getContext();
 		setPreferenceScreen(createPreferenceHierarchy(context));
+
 	}
 
 	private PreferenceScreen createPreferenceHierarchy(Context mContext) {
@@ -71,90 +72,74 @@ public class PrefFragment extends BasePreferenceFragment {
 		root.setKey("pilight_preferences");
 
 		PreferenceCategory launchPrefCat = new PreferenceCategory(mContext);
-		launchPrefCat.setTitle("Information");
+		launchPrefCat.setTitle(R.string.prefTit_info);
 		root.addPreference(launchPrefCat);
 
 		Preference infoScreenPref = getPreferenceManager().createPreferenceScreen(mContext);
-		infoScreenPref.setTitle("About");
-		infoScreenPref.setSummary("All about the app");
+		infoScreenPref.setTitle(R.string.title_about);
+		infoScreenPref.setSummary(R.string.prefSum_about);
 		infoScreenPref.setKey("about_app_key");
 		launchPrefCat.addPreference(infoScreenPref);
 
 		Preference homePref = getPreferenceManager().createPreferenceScreen(mContext);
 		homePref.setIntent(new Intent().setAction(Intent.ACTION_VIEW).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 				.setData(Uri.parse("http://www.pilight.org")));
-		homePref.setTitle("pilight.org");
-		homePref.setSummary("visit the forum");
-		homePref.setKey("visit_xda");
+		homePref.setTitle(R.string.prefTit_web);
+		homePref.setSummary(R.string.prefSum_web);
+		homePref.setKey("visit_pilight");
 		launchPrefCat.addPreference(homePref);
 
 		Preference tweakersPref = getPreferenceManager().createPreferenceScreen(mContext);
 		tweakersPref.setIntent(new Intent().setAction(Intent.ACTION_VIEW).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 				.setData(Uri.parse("http://gathering.tweakers.net/forum/list_messages/1556119/last")));
-		tweakersPref.setTitle("Tweakers.net");
-		tweakersPref.setSummary("Dutch forum thread");
-		tweakersPref.setKey("vist_dg");
+		tweakersPref.setTitle(R.string.prefTit_tweakers);
+		tweakersPref.setSummary(R.string.prefSum_tweakers);
+		tweakersPref.setKey("visit_tweakers");
 		launchPrefCat.addPreference(tweakersPref);
 
 		PreferenceCategory settingsPrefCat = new PreferenceCategory(mContext);
-		settingsPrefCat.setTitle("Settings");
+		settingsPrefCat.setTitle(R.string.title_settings);
 		root.addPreference(settingsPrefCat);
 
 		Preference removeNetworksPref = getPreferenceManager().createPreferenceScreen(mContext);
-		removeNetworksPref.setTitle("Connection");
-		removeNetworksPref.setSummary("remove all remembered networks");
+		removeNetworksPref.setTitle(R.string.prefTit_connection);
+		removeNetworksPref.setSummary(R.string.prefSum_connection);
 		removeNetworksPref.setKey("remove_all_nets");
 		settingsPrefCat.addPreference(removeNetworksPref);
 
 		CheckBoxPreference serviceCheckBoxPref = new CheckBoxPreference(mContext);
-		serviceCheckBoxPref.setTitle("Keep service running");
-		serviceCheckBoxPref.setSummary("also when not in the app");
+		serviceCheckBoxPref.setTitle(R.string.prefTit_useService);
+		serviceCheckBoxPref.setSummary(R.string.prefSum_useService);
 		serviceCheckBoxPref.setKey("useService");
 		serviceCheckBoxPref.setDefaultValue(true);
 		settingsPrefCat.addPreference(serviceCheckBoxPref);
-		
+
+		PreferenceCategory uInterfacePrefCat = new PreferenceCategory(mContext);
+		uInterfacePrefCat.setTitle(R.string.prefTit_UI);
+		root.addPreference(uInterfacePrefCat);
+
 		CheckBoxPreference forceListCheckBoxPref = new CheckBoxPreference(mContext);
-		forceListCheckBoxPref.setTitle("Force list for devices");
-		forceListCheckBoxPref.setSummary("instead of GridView");
+		forceListCheckBoxPref.setTitle(R.string.prefTit_listgrid);
+		forceListCheckBoxPref.setSummary(R.string.prefSum_listgrid);
 		forceListCheckBoxPref.setKey("forceList");
 		forceListCheckBoxPref.setDefaultValue(false);
-		settingsPrefCat.addPreference(forceListCheckBoxPref);
+		uInterfacePrefCat.addPreference(forceListCheckBoxPref);
 
-		// Preference resetCustom = getPreferenceManager().createPreferenceScreen(mContext);
-		// resetCustom.setTitle(R.string.ResetCustomTitle);
-		// resetCustom.setSummary(R.string.ResetCustomSummary);
-		// resetCustom.setKey("reset_custom_key");
-		// settingsPrefCat.addPreference(resetCustom);
+		CheckBoxPreference destroyedCheckBoxPref = new CheckBoxPreference(mContext);
+		destroyedCheckBoxPref.setTitle(R.string.prefTit_destroyNotification);
+		destroyedCheckBoxPref.setSummary(R.string.prefSum_destroyNotification);
+		destroyedCheckBoxPref.setKey("destroySilent");
+		destroyedCheckBoxPref.setDefaultValue(false);
+		uInterfacePrefCat.addPreference(destroyedCheckBoxPref);
 
-		// CheckBoxPreference welcomeCheckBoxPref = new CheckBoxPreference(mContext);
-		// welcomeCheckBoxPref.setTitle(R.string.PrefWelcomeTitle);
-		// welcomeCheckBoxPref.setSummary(R.string.PrefWelcomeSummary);
-		// welcomeCheckBoxPref.setKey("showFirstUse");
-		// settingsPrefCat.addPreference(welcomeCheckBoxPref);
-
-		// ListPreference listPref = new ListPreference(mContext);
-		// listPref.setEntries(R.array.languages);
-		// listPref.setEntryValues(R.array.languages_short);
-		// listPref.setDialogTitle(R.string.LanguagePrefTitle);
-		// listPref.setKey("languagePref");
-		// listPref.setTitle(R.string.LanguagePrefTitle);
-		// listPref.setSummary(R.string.LanguagePrefSummary);
-		// settingsPrefCat.addPreference(listPref);
-
-		// CheckBoxPreference addonCheckBoxPref = new CheckBoxPreference(mContext);
-		// addonCheckBoxPref.setTitle(R.string.AddonScriptPrefTitle);
-		// addonCheckBoxPref.setSummary(R.string.AddonScriptPrefSummary);
-		// addonCheckBoxPref.setKey("enableAddonScript");
-		// addonCheckBoxPref.setChecked(true);
-		// if (ShellProvider.INSTANCE.isAddonable())
-		// settingsPrefCat.addPreference(addonCheckBoxPref);
-
-		// CheckBoxPreference debugCheckBoxPref = new CheckBoxPreference(mContext);
-		// debugCheckBoxPref.setTitle(R.string.DebugPrefTitle);
-		// debugCheckBoxPref.setSummary(R.string.DebugPrefSummary);
-		// debugCheckBoxPref.setKey("enableDebugging");
-		// debugCheckBoxPref.setChecked(true);
-		// settingsPrefCat.addPreference(debugCheckBoxPref);
+		ListPreference listPref = new ListPreference(mContext);
+		listPref.setEntries(R.array.languages);
+		listPref.setEntryValues(R.array.languages_short);
+		listPref.setDialogTitle(R.string.prefTit_language);
+		listPref.setKey("languagePref");
+		listPref.setTitle(R.string.prefTit_language);
+		listPref.setSummary(R.string.prefSum_language);
+		uInterfacePrefCat.addPreference(listPref);
 
 		return root;
 	}
@@ -180,47 +165,26 @@ public class PrefFragment extends BasePreferenceFragment {
 			return true;
 		}
 
-		//
-		// if (pref.getKey().contentEquals("reset_custom_key")){
-		// Toast.makeText(getActivity().getApplicationContext(), getString(R.string.toastReset), Toast.LENGTH_LONG).show();
-		// resetListener.onResetListener();
-		// return true;
-		// }
-		//
-		// if (pref.getKey().contentEquals("languagePref")){
-		// pref.setOnPreferenceChangeListener(new OnPreferenceChangeListener(){
-		// @Override
-		// public boolean onPreferenceChange(Preference preference, Object newValue) {
-		// languageListener.onLanguageListener(newValue.toString());
-		// return true;
-		// }
-		// });
-		// }
-		//
-		// if (pref.getKey().contentEquals("enableAddonScript")){
-		// ShellProvider.INSTANCE.mountRW(true);
-		// if (pref.getSharedPreferences().getBoolean("enableAddonScript", true)){
-		// Log.w(TAG, "enabled addon.d support");
-		// ShellProvider.INSTANCE.copyAddon();
-		// } else {
-		// Log.w(TAG, "disabled addon.d support");
-		// ShellProvider.INSTANCE.removeAddon();
-		// }
-		// ShellProvider.INSTANCE.mountRW(false);
-		// return true;
-		// }
-
+		if (pref.getKey().contentEquals("languagePref")) {
+			pref.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+				@Override
+				public boolean onPreferenceChange(Preference preference, Object newValue) {
+					languageListener.onLanguageListener(newValue.toString());
+					return true;
+				}
+			});
+		}
 		return false;
 	}
 
 	@Override
 	public int getTitleResourceId() {
-		return R.string.action_settings;
+		return R.string.title_settings;
 	}
 
-	// public interface OnLanguageListener{
-	// public void onLanguageListener(String language);
-	// }
+	public interface OnLanguageListener {
+		public void onLanguageListener(String language);
+	}
 	//
 	// public interface OnResetListener{
 	// public void onResetListener();

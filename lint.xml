@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="ContentDescription" severity="ignore" />
+    <issue id="ExportedReceiver">
+        <ignore path="AndroidManifest.xml" />
+    </issue>
+    <issue id="ExportedService">
+        <ignore path="AndroidManifest.xml" />
+    </issue>
+    <issue id="HardcodedText">
+        <ignore path="res/layout/debugging_layout.xml" />
+    </issue>
+    <issue id="IconColors" severity="ignore" />
+    <issue id="IconLocation" severity="ignore" />
+    <issue id="MissingTranslation" severity="ignore" />
+    <issue id="UselessParent" severity="ignore" />
+</lint>

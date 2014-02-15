@@ -40,7 +40,7 @@ import android.preference.PreferenceManager;
 
 public class ConnectionChangeReceiver extends BroadcastReceiver {
 
-	private final static String TAG = "Zatta::ConnectionChangeReceiver";
+	//private final static String TAG = "Zatta::ConnectionChangeReceiver";
 
 	boolean isConnectedToKnownHome(Context ctx) {
 		/*
@@ -97,6 +97,7 @@ public class ConnectionChangeReceiver extends BroadcastReceiver {
 		// Log.v(TAG, "received connectivity change: " + intent.getAction());
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		boolean useService = prefs.getBoolean("useService", true);
+		boolean dontShowNotification = prefs.getBoolean("destroySilent", false);
 
 		if (useService) {
 			if (isConnectedToKnownHome(context)) {
@@ -105,7 +106,11 @@ public class ConnectionChangeReceiver extends BroadcastReceiver {
 				context.startService(new Intent(context, ConnectionService.class));
 			} else {
 				// Log.v(TAG, "not at home anymore :(");
-				if (context.stopService(new Intent(context, ConnectionService.class))) makeNotification(true, context);
+				if (context.stopService(new Intent(context, ConnectionService.class))){
+					if (!dontShowNotification)
+						makeNotification(true, context);
+				}
+					
 				// context.sendBroadcast(new Intent("pilight-left-network"));
 			}
 		}

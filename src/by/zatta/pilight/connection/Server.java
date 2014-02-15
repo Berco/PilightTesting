@@ -48,30 +48,8 @@ public enum Server {
 	private static boolean isWriting = false;
 
 	public synchronized String setup() {
-		if (setupThread != null) {
-			try {
-				setupThread.finalize();
-				setupThread = null;
-			} catch (Throwable e) {
-				Log.w(TAG, "couldn't stop setupThread");
-			}
-		}
-		if (reader != null) {
-			try {
-				reader.interrupt();
-				reader = null;
-			} catch (Throwable e) {
-				Log.w(TAG, "couldn't stop reader");
-			}
-		}
-		if (writer != null) {
-			try {
-				writer.interrupt();
-				writer = null;
-			} catch (Throwable e) {
-				Log.w(TAG, "couldn't stop writer");
-			}
-		}
+		disconnect();
+		
 		String toBeReturned = "";
 		output = new ArrayBlockingQueue<String>(1);
 		setupThread = new SetUp(output);
@@ -150,7 +128,7 @@ public enum Server {
 
 		private ArrayBlockingQueue<String> output;
 		private Step step = Step.ADRESS;
-		private int runs = 0;
+		private int runs = 2; // There is no use in trying to catch ssdp 6 times..
 		private String line = "";
 		InetSocketAddress adress = null;
 

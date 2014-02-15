@@ -42,10 +42,11 @@
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <ProgressBar
-        android:id="@+id/progressBar1"
+        android:id="@+id/pbConnecting"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -70,7 +71,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Retry"
                 android:visibility="gone" />
 
             <Button
@@ -79,7 +79,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Okay"
                 android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>

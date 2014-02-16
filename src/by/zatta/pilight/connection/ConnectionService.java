@@ -438,7 +438,8 @@ public class ConnectionService extends Service {
 					Thread.sleep(3000);
 				}
 				Log.v(TAG, "WriteMonitor finished, stopping");
-				stopSelf();
+				if (mClients.isEmpty())	
+					stopSelf();
 			} catch (InterruptedException e) {
 			}
 		}

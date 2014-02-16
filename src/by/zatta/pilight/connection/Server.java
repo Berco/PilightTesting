@@ -310,7 +310,10 @@ public enum Server {
 					bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"), 1025);
 				if (bufferedReader.ready()) {
 					while ((line = bufferedReader.readLine()) != null) {
-						ConnectionService.postUpdate(line);
+						int start =0;
+						start = line.indexOf("{");
+						if (start == -1) start = 0;
+						ConnectionService.postUpdate(line.substring(start));
 					}
 					bufferedReader = null;
 					socket.close();

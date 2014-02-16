@@ -128,7 +128,7 @@ public enum Server {
 
 		private ArrayBlockingQueue<String> output;
 		private Step step = Step.ADRESS;
-		private int runs = 2; // There is no use in trying to catch ssdp 6 times..
+		private int runs = 0;
 		private String line = "";
 		InetSocketAddress adress = null;
 

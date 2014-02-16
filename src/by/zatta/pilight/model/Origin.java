@@ -86,8 +86,11 @@ public class Origin {
 						String secondKey = (String) sit.next();
 						JSONArray jSecArr = jSecond.optJSONArray(secondKey);
 						String jSecStr = jSecond.optString(secondKey);
+						Double jSecDbl = jSecond.optDouble(secondKey);
+						Long jSecLng = jSecond.optLong(secondKey);
+						
+						
 						SettingEntry sentry = new SettingEntry();
-
 						if (jSecArr != null) {
 							/* Iterate through all values for this setting */
 							for (Short i = 0; i < jSecArr.length(); i++) {
@@ -99,6 +102,14 @@ public class Origin {
 							// Log.v(TAG, "Uit string: " + jSecStr);
 							sentry.setKey(secondKey);
 							sentry.setValue(jSecStr);
+						}else if (jSecDbl != null) {
+							// Log.v(TAG, "Uit string: " + jSecStr);
+							sentry.setKey(secondKey);
+							sentry.setValue(Double.toString(jSecDbl));
+						}else if (jSecLng != null) {
+							// Log.v(TAG, "Uit string: " + jSecStr);
+							sentry.setKey(secondKey);
+							sentry.setValue(Long.toString(jSecLng));
 						}
 						settings.add(sentry);
 					}

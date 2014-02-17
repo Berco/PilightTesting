@@ -45,17 +45,19 @@
         android:layout_toRightOf="@id/colorBorder"
         android:gravity="center" />
 
-    <ToggleButton
-        android:id="@+id/card_inner_tb"
-        style="@style/ToggleButton.Relay"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+    <RelativeLayout
+        android:layout_width="90dp"
+        android:layout_height="@dimen/card_base_empty_height"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="15dp"
-        android:layout_marginRight="15dp"
-        android:layout_marginTop="15dp"
-        android:gravity="center"
-        android:textOff=""
-        android:textOn="" />
+        android:gravity="center" >
 
+        <ToggleButton
+            android:id="@+id/card_inner_tb"
+            style="@style/ToggleButton.Relay"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_centerInParent="true"
+            android:textOff=""
+            android:textOn="" />
+    </RelativeLayout>
 </RelativeLayout>

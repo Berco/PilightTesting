@@ -123,7 +123,6 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 			break;
 		case StatusDialog.RECONNECT:
 			this.sendBroadcast(new Intent("pilight-reconnect"));
-			// TODO after a reconnection it takes a while before a new mDevices is received..
 			break;
 		}
 	}
@@ -163,6 +162,10 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 		Log.v(TAG, "onCreate starts");
 		setContentView(R.layout.mainactivity_layout);
 		mCurrentTitle = getString(R.string.app_name);
+		
+		SharedPreferences getPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        String language = getPrefs.getString("languagePref", "unknown");        
+        if (!language.equals("unknown")) makeLocale(language);
 
 		mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mDrawer.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
@@ -445,8 +448,6 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		// TODO implement this properly
-		Log.d(TAG, "onSaveInstanceState");
 		outState.putParcelableArrayList("config", (ArrayList<? extends Parcelable>) mDevices);
 		outState.putString("currentTitle", mCurrentTitle);
 		super.onSaveInstanceState(outState);
@@ -455,17 +456,13 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState) {
 		super.onPostCreate(savedInstanceState);
-		// Log.v(TAG, "onPostCreate");
-		// Sync the toggle state after onRestoreInstanceState has occurred.
 		if (mDrawerToggle != null) {
-			// Log.v(TAG, "mDrawerToggle sync state");
 			mDrawerToggle.syncState();
 		}
 	}
 
 	@Override
 	protected void onResume() {
-		// Log.v(TAG, "onResume");
 		automaticBind();
 		super.onResume();
 	}

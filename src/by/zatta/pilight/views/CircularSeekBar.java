@@ -25,7 +25,7 @@
  * reference material, and as a result, were extremely helpful.
  */
 
-package com.devadvance.circularseekbar;
+package by.zatta.pilight.views;
 
 import by.zatta.pilight.R;
 import android.content.Context;

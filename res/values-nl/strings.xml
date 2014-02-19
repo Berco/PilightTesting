@@ -60,6 +60,8 @@
     <string name="prefSum_destroyNotification">wanneer u uw thuisnetwerk verlaten heeft</string>
     <string name="prefTit_language">Language</string> <!-- DO NOT TRANSLATE -->
     <string name="prefSum_language">preferred for this app only</string> <!-- DO NOT TRANSLATE -->
+    <string name="prefTit_showAll">Laat alle apparaten zien</string>
+    <string name="prefSum_showAll">bij het openen van de app</string>
     
     
     

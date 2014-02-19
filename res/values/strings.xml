@@ -60,6 +60,8 @@
     <string name="prefSum_destroyNotification">when you\'ve left your home network</string>
     <string name="prefTit_language">Language</string> <!-- DO NOT TRANSLATE -->
     <string name="prefSum_language">preferred for this app only</string> <!-- DO NOT TRANSLATE -->
+    <string name="prefTit_showAll">Show all devices</string>
+    <string name="prefSum_showAll">at the start of the app</string>
     
     
     

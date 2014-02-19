@@ -313,8 +313,12 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 	}
 	
 	private void startInitialFragment(){
-		String location = allLocations.values().toArray(new String[allLocations.size()])[1];
-		mCurrentTitle = allLocations.keySet().toArray(new String[allLocations.size()])[1];
+		SharedPreferences getPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        boolean showAll = getPrefs.getBoolean("showAllByDefault", false);
+        int menuStart;
+        if (showAll) menuStart = 0; else menuStart = 1;
+		String location = allLocations.values().toArray(new String[allLocations.size()])[menuStart];
+		mCurrentTitle = allLocations.keySet().toArray(new String[allLocations.size()])[menuStart];
 		getActionBar().setTitle(mCurrentTitle);
 		mBaseFragment = DeviceListFragment.newInstance(mDevices, location);
 		openFragment(mBaseFragment);

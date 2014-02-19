@@ -44,10 +44,10 @@ import android.widget.ToggleButton;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.devadvance.circularseekbar.CircularSeekBar;
 import by.zatta.pilight.R;
 import by.zatta.pilight.model.DeviceEntry;
 import by.zatta.pilight.model.SettingEntry;
+import by.zatta.pilight.views.CircularSeekBar;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.internal.CardGridArrayAdapter;

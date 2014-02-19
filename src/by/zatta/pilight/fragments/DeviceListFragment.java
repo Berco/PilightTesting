@@ -44,11 +44,12 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.devadvance.circularseekbar.CircularSeekBar;
 import by.zatta.pilight.R;
 import by.zatta.pilight.connection.ConnectionService;
 import by.zatta.pilight.model.DeviceEntry;
 import by.zatta.pilight.model.SettingEntry;
+import by.zatta.pilight.views.CircularSeekBar;
+import by.zatta.pilight.views.CustomHeaderInnerCard;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.internal.CardGridArrayAdapter;
@@ -220,7 +221,7 @@ public class DeviceListFragment extends BaseFragment {
 		protected CircularSeekBar.OnCircularSeekBarChangeListener seekListener = new CircularSeekBar.OnCircularSeekBarChangeListener() {
 			@Override
 			public void onStopTrackingTouch(CircularSeekBar seekBar) {
-				mTitleMainView.setText(mTitleMain);
+				mTitleMainView.setText("");
 				mToggle.setText(Integer.toString(mSeekValue));
 				String action = "\"state\":\"on\",\"values\":{\"dimlevel\":" + String.valueOf(mSeekValue) + "}";
 				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
@@ -230,7 +231,7 @@ public class DeviceListFragment extends BaseFragment {
 			public void onProgressChanged(CircularSeekBar seekBar, int progress, boolean fromUser) {
 				mSeekValue = progress + minSeekValue;
 				mToggle.setText(Integer.toString(mSeekValue));
-				mTitleMainView.setText("Dimmer setting: " + Integer.toString(mSeekValue));
+				mTitleMainView.setText(Integer.toString(mSeekValue));
 				mToggle.getBackground().setAlpha((int) ((float) (mSeekValue + 1) / (maxSeekValue + 1) * 80) + 70);
 			}
 		};
@@ -254,10 +255,7 @@ public class DeviceListFragment extends BaseFragment {
 		}
 
 		private void init() {
-			setTitle(mTitleMain);
-			// Create a CardHeader
-			CardHeader header = new CardHeader(getContext());
-			header.setTitle(mTitleHeader);
+			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleHeader, mTitleMain);
 			addCardHeader(header);
 		}
 
@@ -268,7 +266,7 @@ public class DeviceListFragment extends BaseFragment {
 			mSeekBar = (CircularSeekBar) parent.findViewById(R.id.circularSeekBar1);
 			mToggle = (ToggleButton) parent.findViewById(R.id.card_inner_tb);
 
-			if (mTitleMainView != null) mTitleMainView.setText(mTitleMain);
+			if (mTitleMainView != null) mTitleMainView.setText("");
 
 			if (mToggle != null) {
 				mToggle.setChecked(mState);
@@ -346,10 +344,7 @@ public class DeviceListFragment extends BaseFragment {
 		}
 
 		private void init() {
-			setTitle(mTitleMain);
-			// Create a CardHeader
-			CardHeader header = new CardHeader(getContext());
-			header.setTitle(mTitleHeader);
+			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleHeader, mTitleMain);
 			addCardHeader(header);
 		}
 
@@ -359,7 +354,7 @@ public class DeviceListFragment extends BaseFragment {
 			mTitleMainView = (TextView) parent.findViewById(R.id.card_main_inner_simple_title);
 			mToggle = (ToggleButton) parent.findViewById(R.id.card_inner_tb);
 
-			if (mTitleMainView != null) mTitleMainView.setText(mTitleMain);
+			if (mTitleMainView != null) mTitleMainView.setText("");
 			if (mToggle != null) {
 				mToggle.setChecked(mState);
 				mToggle.setOnCheckedChangeListener(toggleListener);
@@ -422,10 +417,7 @@ public class DeviceListFragment extends BaseFragment {
 		}
 
 		private void init() {
-			setTitle(mTitleMain);
-			// Create a CardHeader
-			CardHeader header = new CardHeader(getContext());
-			header.setTitle(mTitleHeader);
+			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleHeader, mTitleMain);
 			addCardHeader(header);
 		}
 
@@ -437,7 +429,7 @@ public class DeviceListFragment extends BaseFragment {
 			mHumidityView = (TextView) parent.findViewById(R.id.card_main_inner_humidity);
 			mBatteryView = (ImageView) parent.findViewById(R.id.card_main_inner_battery);
 
-			if (mTitleMainView != null) mTitleMainView.setText(mTitleMain);
+			if (mTitleMainView != null) mTitleMainView.setText("");
 			if (mTemperatureView != null && mTemperature != null) mTemperatureView.setVisibility(View.VISIBLE);
 			mTemperatureView.setText(mTemperature);
 			if (mHumidityView != null && mHumidity != null) mHumidityView.setVisibility(View.VISIBLE);
@@ -512,10 +504,7 @@ public class DeviceListFragment extends BaseFragment {
 		}
 
 		private void init() {
-			setTitle(mTitleMain);
-			// Create a CardHeader
-			CardHeader header = new CardHeader(getContext());
-			header.setTitle(mTitleHeader);
+			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleHeader, mTitleMain);
 			addCardHeader(header);
 		}
 
@@ -525,7 +514,7 @@ public class DeviceListFragment extends BaseFragment {
 			mTitleMainView = (TextView) parent.findViewById(R.id.card_main_inner_simple_title);
 			mToggle = (ToggleButton) parent.findViewById(R.id.card_inner_tb);
 
-			if (mTitleMainView != null) mTitleMainView.setText(mTitleMain);
+			if (mTitleMainView != null) mTitleMainView.setText("");
 			if (mToggle != null) {
 				mToggle.setChecked(mState);
 				mToggle.setOnCheckedChangeListener(toggleListener);
@@ -588,10 +577,7 @@ public class DeviceListFragment extends BaseFragment {
 		}
 
 		private void init() {
-			setTitle(mTitleMain);
-			// Create a CardHeader
-			CardHeader header = new CardHeader(getContext());
-			header.setTitle(mTitleHeader);
+			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleHeader, mTitleMain);
 			addCardHeader(header);
 		}
 
@@ -599,7 +585,7 @@ public class DeviceListFragment extends BaseFragment {
 		public void setupInnerViewElements(ViewGroup parent, View view) {
 			// Retrieve elements
 			mTitleMainView = (TextView) parent.findViewById(R.id.card_main_inner_simple_title);
-			if (mTitleMainView != null) mTitleMainView.setText(mTitleMain);
+			if (mTitleMainView != null) mTitleMainView.setText("");
 			mBtnUp = (Button) parent.findViewById(R.id.card_inner_btnUp);
 			mBtnDown = (Button) parent.findViewById(R.id.card_inner_btnDown);
 			mBtnUp.setOnClickListener(clickListener);
@@ -652,10 +638,7 @@ public class DeviceListFragment extends BaseFragment {
 		}
 
 		private void init() {
-			setTitle(mTitleMain);
-			// Create a CardHeader
-			CardHeader header = new CardHeader(getContext());
-			header.setTitle(mTitleHeader);
+			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleHeader, mTitleMain);
 			addCardHeader(header);
 		}
 
@@ -665,7 +648,7 @@ public class DeviceListFragment extends BaseFragment {
 			mTitleMainView = (TextView) parent.findViewById(R.id.card_main_inner_simple_title);
 			mToggle = (ToggleButton) parent.findViewById(R.id.card_inner_tb);
 
-			if (mTitleMainView != null) mTitleMainView.setText(mTitleMain);
+			if (mTitleMainView != null) mTitleMainView.setText("");
 			if (mToggle != null) {
 				mToggle.setChecked(mState);
 				mToggle.setOnCheckedChangeListener(toggleListener);

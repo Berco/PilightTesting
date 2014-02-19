@@ -148,6 +148,13 @@ public class PrefFragment extends BasePreferenceFragment {
 		destroyedCheckBoxPref.setKey("destroySilent");
 		destroyedCheckBoxPref.setDefaultValue(false);
 		uInterfacePrefCat.addPreference(destroyedCheckBoxPref);
+		
+		CheckBoxPreference showAllByDefaultPref = new CheckBoxPreference(mContext);
+		showAllByDefaultPref.setTitle(R.string.prefTit_showAll);
+		showAllByDefaultPref.setSummary(R.string.prefSum_showAll);
+		showAllByDefaultPref.setKey("showAllByDefault");
+		showAllByDefaultPref.setDefaultValue(false);
+		uInterfacePrefCat.addPreference(showAllByDefaultPref);
 
 		ListPreference listPref = new ListPreference(mContext);
 		listPref.setEntries(R.array.languages);

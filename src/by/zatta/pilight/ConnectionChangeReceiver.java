@@ -103,6 +103,8 @@ public class ConnectionChangeReceiver extends BroadcastReceiver {
 			if (isConnectedToKnownHome(context)) {
 				// Log.v(TAG, "we are connected to home!");
 				makeNotification(false, context);
+				// Added this sleep because often the connection isn't fully up (obtaining ip or so)
+				try { Thread.sleep(2000); } catch (InterruptedException e) {}
 				context.startService(new Intent(context, ConnectionService.class));
 			} else {
 				// Log.v(TAG, "not at home anymore :(");

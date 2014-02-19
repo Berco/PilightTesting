@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,6 +45,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
@@ -147,6 +149,10 @@ public class ConnectionService extends Service {
 		super.onCreate();
 		ctx = this;
 		aCtx = getApplicationContext();
+		
+		SharedPreferences getPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        String language = getPrefs.getString("languagePref", "unknown");        
+        if (!language.equals("unknown")) makeLocale(language);
 
 		IntentFilter filter = new IntentFilter();
 		filter.addAction("pilight-reconnect");
@@ -192,6 +198,16 @@ public class ConnectionService extends Service {
 		}
 		return START_STICKY;
 	}
+	
+	public void makeLocale(String language){
+    	Log.w(TAG, language + " makeLocale");
+        Locale locale = new Locale(language); 
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.locale = locale;
+        getBaseContext().getResources().updateConfiguration(config, 
+        getBaseContext().getResources().getDisplayMetrics());
+    }
 
 	private static boolean dropConnection() {
 		Log.v(TAG, "dropConnection called");
@@ -214,7 +230,7 @@ public class ConnectionService extends Service {
 
 	private boolean makeConnection() {
 		if (mCurrentNotif == NotificationType.DESTROYED)
-			makeNotification(NotificationType.CONNECTING, "establishing connection");
+			makeNotification(NotificationType.CONNECTING, aCtx.getString(R.string.noti_connecting));
 		String serverString = Server.CONNECTION.setup();
 		if (serverString.contains("{\"config\":")) {
 			try {
@@ -222,7 +238,7 @@ public class ConnectionService extends Service {
 				mDevices = Config.getDevices(json.getJSONObject("config"));
 				Collections.sort(mDevices);
 				addedToPreferences();
-				makeNotification(NotificationType.CONNECTED, "Connected");
+				makeNotification(NotificationType.CONNECTED, aCtx.getString(R.string.noti_connected));
 				sendMessageToUI(MSG_SET_BUNDLE, null);
 				startForeground(35, builder.build());
 				if (mHB == null || !mHB.isAlive()) {
@@ -237,7 +253,7 @@ public class ConnectionService extends Service {
 				return false;
 			}
 		} else {
-			makeNotification(NotificationType.FAILED, "Connecting Failed");
+			makeNotification(NotificationType.FAILED, null);
 			return false;
 		}
 	}
@@ -291,7 +307,7 @@ public class ConnectionService extends Service {
 			sendMessageToUI(MSG_SET_BUNDLE, java.text.DateFormat.getTimeInstance().format(Calendar.getInstance().getTime())
 					+ update);
 		} else if (update.contains("LOST_CONNECTION") && !isDestroying) {
-			makeNotification(NotificationType.LOST_CONNECTION, "Lost Connection");
+			makeNotification(NotificationType.LOST_CONNECTION, aCtx.getString(R.string.noti_lost));
 			dropConnection();
 			ctx.sendBroadcast(new Intent("pilight-reconnect"));
 		}
@@ -322,7 +338,7 @@ public class ConnectionService extends Service {
 			{
 			case DESTROYED:
 				builder = new Notification.Builder(ctx);
-				builder.setSmallIcon(R.drawable.eye_black).setLargeIcon(bigPic(R.drawable.eye_black)).setContentTitle("pilight")
+				builder.setSmallIcon(R.drawable.eye_black).setLargeIcon(bigPic(R.drawable.eye_black)).setContentTitle(aCtx.getString(R.string.app_name))
 						.setContentText(message);
 				mCurrentNotif = NotificationType.DESTROYED;
 				break;
@@ -330,7 +346,7 @@ public class ConnectionService extends Service {
 				kill = new Intent("pilight-kill-service");
 				killService = PendingIntent.getBroadcast(ctx, 0, kill, PendingIntent.FLAG_UPDATE_CURRENT);
 
-				builder = new Notification.Builder(ctx).setContentTitle("pilight").setContentText(message)
+				builder = new Notification.Builder(ctx).setContentTitle(aCtx.getString(R.string.app_name)).setContentText(message)
 						.setDeleteIntent(killService).setSmallIcon(R.drawable.eye_trans)
 						.setLargeIcon(bigPic(R.drawable.eye_trans));
 				mCurrentNotif = NotificationType.CONNECTING;
@@ -340,7 +356,7 @@ public class ConnectionService extends Service {
 				main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 				startMainActivity = PendingIntent.getActivity(ctx, 0, main, PendingIntent.FLAG_UPDATE_CURRENT);
 
-				builder = new Notification.Builder(ctx).setContentTitle("pilight").setContentText(message + "\n" + myDate)
+				builder = new Notification.Builder(ctx).setContentTitle(aCtx.getString(R.string.app_name)).setContentText(message + "\n" + myDate)
 						.setContentIntent(startMainActivity).setSmallIcon(R.drawable.eye_white)
 						.setLargeIcon(bigPic(R.drawable.eye_white));
 				mCurrentNotif = NotificationType.CONNECTED;
@@ -351,8 +367,8 @@ public class ConnectionService extends Service {
 				kill = new Intent("pilight-kill-service");
 				killService = PendingIntent.getBroadcast(ctx, 0, kill, PendingIntent.FLAG_UPDATE_CURRENT);
 
-				builder = new Notification.Builder(ctx).setContentTitle("pilight").setContentText("Failed " + "\n" + myDate)
-						.setDeleteIntent(killService).addAction(R.drawable.action_refresh, "Try to connect again", sentBroadcast)
+				builder = new Notification.Builder(ctx).setContentTitle("pilight").setContentText(aCtx.getString(R.string.noti_failed))
+						.setDeleteIntent(killService).addAction(R.drawable.action_refresh, aCtx.getString(R.string.noti_retry), sentBroadcast)
 						.setSmallIcon(R.drawable.eye_trans).setLargeIcon(bigPic(R.drawable.eye_trans));
 				mCurrentNotif = NotificationType.FAILED;
 				break;
@@ -362,8 +378,8 @@ public class ConnectionService extends Service {
 				kill = new Intent("pilight-kill-service");
 				killService = PendingIntent.getBroadcast(ctx, 0, kill, PendingIntent.FLAG_UPDATE_CURRENT);
 
-				builder = new Notification.Builder(ctx).setContentTitle("pilight").setContentText(message + "\n" + myDate)
-						.setDeleteIntent(killService).addAction(R.drawable.action_refresh, "Try to reconnect", sentBroadcast)
+				builder = new Notification.Builder(ctx).setContentTitle(aCtx.getString(R.string.app_name)).setContentText(message + "\n" + myDate)
+						.setDeleteIntent(killService).addAction(R.drawable.action_refresh, aCtx.getString(R.string.noti_retry), sentBroadcast)
 						.setSmallIcon(R.drawable.eye_trans).setLargeIcon(bigPic(R.drawable.eye_trans));
 				mCurrentNotif = NotificationType.LOST_CONNECTION;
 				break;

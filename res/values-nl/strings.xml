@@ -63,7 +63,12 @@
     <string name="prefTit_showAll">Laat alle apparaten zien</string>
     <string name="prefSum_showAll">bij het openen van de app</string>
     
-    
+     <!-- Notifications -->
+    <string name="noti_failed">Verbinding maken is mislukt</string>
+    <string name="noti_retry">Nogmaals proberen</string>
+    <string name="noti_lost">Verbinging verbroken</string>
+    <string name="noti_connected">Verbonden</string>
+    <string name="noti_connecting">Verbinding leggen</string>
     
     
     

@@ -63,6 +63,13 @@
     <string name="prefTit_showAll">Show all devices</string>
     <string name="prefSum_showAll">at the start of the app</string>
     
+    <!-- Notifications -->
+    <string name="noti_failed">Failed to connect</string>
+    <string name="noti_retry">Try to connect again</string>
+    <string name="noti_lost">Lost connection</string>
+    <string name="noti_connected">Connected</string>
+    <string name="noti_connecting">Establishing connection</string>
+    
     
     
     

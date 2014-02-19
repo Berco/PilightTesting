@@ -61,7 +61,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -129,7 +128,6 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 	
 	@Override
 	public void onViewChangeListener(Boolean forceList) {
-		Log.e(TAG, "received forceList: " + Boolean.toString(forceList));
 		FragmentManager fm = getFragmentManager();
 		BaseFragment prev = (BaseFragment) fm.findFragmentByTag("DeviceList");
 		if (prev != null) prev.onCreate(null);
@@ -137,8 +135,6 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 	
 	@Override
 	public void onLanguageListener(String language) {
-		Toast.makeText(this, "Language: " + language, Toast.LENGTH_SHORT).show();
-		Log.w(TAG, language + " Listenener");
     	makeLocale(language);
     	invalidateOptionsMenu();
     	initMenu();

@@ -204,11 +204,11 @@ public class DeviceListFragment extends BaseFragment {
 		protected int mSeekValue;
 		protected int minSeekValue;
 		protected int maxSeekValue;
-		protected String mTitleHeader;
-		protected String mTitleMain;
+		protected String mTitleDevice;
+		protected String mTitleLocation;
 		protected CircularSeekBar mSeekBar;
 		protected ToggleButton mToggle;
-		protected TextView mTitleMainView;
+		protected TextView mValueView;
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -221,7 +221,7 @@ public class DeviceListFragment extends BaseFragment {
 		protected CircularSeekBar.OnCircularSeekBarChangeListener seekListener = new CircularSeekBar.OnCircularSeekBarChangeListener() {
 			@Override
 			public void onStopTrackingTouch(CircularSeekBar seekBar) {
-				mTitleMainView.setText("");
+				mValueView.setText("");
 				mToggle.setText(Integer.toString(mSeekValue));
 				String action = "\"state\":\"on\",\"values\":{\"dimlevel\":" + String.valueOf(mSeekValue) + "}";
 				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
@@ -231,7 +231,7 @@ public class DeviceListFragment extends BaseFragment {
 			public void onProgressChanged(CircularSeekBar seekBar, int progress, boolean fromUser) {
 				mSeekValue = progress + minSeekValue;
 				mToggle.setText(Integer.toString(mSeekValue));
-				mTitleMainView.setText(Integer.toString(mSeekValue));
+				mValueView.setText(Integer.toString(mSeekValue));
 				mToggle.getBackground().setAlpha((int) ((float) (mSeekValue + 1) / (maxSeekValue + 1) * 80) + 70);
 			}
 		};
@@ -240,8 +240,8 @@ public class DeviceListFragment extends BaseFragment {
 			super(context, R.layout.dimmercard_inner);
 			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
 			for (SettingEntry sentry : entry.getSettings()) {
-				if (sentry.getKey().equals("name")) mTitleHeader = sentry.getValue();
-				if (sentry.getKey().equals("locationName")) mTitleMain = sentry.getValue();
+				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
+				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
 				if (sentry.getKey().equals("dimlevel")) mSeekValue = Integer.valueOf(sentry.getValue());
 				if (sentry.getKey().equals("state")) {
 					if (sentry.getValue().equals("on")) mState = true;
@@ -255,18 +255,18 @@ public class DeviceListFragment extends BaseFragment {
 		}
 
 		private void init() {
-			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleHeader, mTitleMain);
+			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleDevice, mTitleLocation);
 			addCardHeader(header);
 		}
 
 		@Override
 		public void setupInnerViewElements(ViewGroup parent, View view) {
 			// Retrieve elements
-			mTitleMainView = (TextView) parent.findViewById(R.id.card_main_inner_simple_title);
+			mValueView = (TextView) parent.findViewById(R.id.card_main_inner_simple_title);
 			mSeekBar = (CircularSeekBar) parent.findViewById(R.id.circularSeekBar1);
 			mToggle = (ToggleButton) parent.findViewById(R.id.card_inner_tb);
 
-			if (mTitleMainView != null) mTitleMainView.setText("");
+			if (mValueView != null) mValueView.setText("");
 
 			if (mToggle != null) {
 				mToggle.setChecked(mState);
@@ -312,9 +312,8 @@ public class DeviceListFragment extends BaseFragment {
 	public class ListSwitchCard extends Card {
 		protected String who;
 		protected String mValue;
-		protected String mTitleHeader;
-		protected String mTitleMain;
-		protected TextView mTitleMainView;
+		protected String mTitleDevice;
+		protected String mTitleLocation;
 		protected ToggleButton mToggle;
 		protected boolean mState;
 		protected boolean readwrite = true;
@@ -332,8 +331,8 @@ public class DeviceListFragment extends BaseFragment {
 			super(context, R.layout.switchcard_inner);
 			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
 			for (SettingEntry sentry : entry.getSettings()) {
-				if (sentry.getKey().equals("name")) mTitleHeader = sentry.getValue();
-				if (sentry.getKey().equals("locationName")) mTitleMain = sentry.getValue();
+				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
+				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
 				if (sentry.getKey().equals("state")) {
 					if (sentry.getValue().equals("on")) mState = true;
 					if (sentry.getValue().equals("off")) mState = false;
@@ -344,17 +343,15 @@ public class DeviceListFragment extends BaseFragment {
 		}
 
 		private void init() {
-			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleHeader, mTitleMain);
+			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleDevice, mTitleLocation);
 			addCardHeader(header);
 		}
 
 		@Override
 		public void setupInnerViewElements(ViewGroup parent, View view) {
 			// Retrieve elements
-			mTitleMainView = (TextView) parent.findViewById(R.id.card_main_inner_simple_title);
 			mToggle = (ToggleButton) parent.findViewById(R.id.card_inner_tb);
 
-			if (mTitleMainView != null) mTitleMainView.setText("");
 			if (mToggle != null) {
 				mToggle.setChecked(mState);
 				mToggle.setOnCheckedChangeListener(toggleListener);
@@ -386,19 +383,19 @@ public class DeviceListFragment extends BaseFragment {
 		protected String mHumidity;
 		protected boolean showBattery = false;
 		protected boolean mBattery = false;
-		protected String mTitleHeader;
-		protected String mTitleMain;
+		protected String mTitleDevice;
+		protected String mTitleLocation;
 		protected int decimals;
 		protected TextView mTemperatureView;
 		protected TextView mHumidityView;
 		protected ImageView mBatteryView;
-		protected TextView mTitleMainView;
+		
 
 		public ListWeatherCard(Context context, DeviceEntry entry) {
 			super(context, R.layout.weathercard_inner);
 			for (SettingEntry sentry : entry.getSettings()) {
-				if (sentry.getKey().equals("name")) mTitleHeader = sentry.getValue();
-				if (sentry.getKey().equals("locationName")) mTitleMain = sentry.getValue();
+				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
+				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
 				if (sentry.getKey().equals("temperature")) mTemperature = sentry.getValue();
 				if (sentry.getKey().equals("humidity")) mHumidity = sentry.getValue();
 				if (sentry.getKey().equals("battery") && (sentry.getValue().equals("1"))) mBattery = true;
@@ -417,19 +414,17 @@ public class DeviceListFragment extends BaseFragment {
 		}
 
 		private void init() {
-			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleHeader, mTitleMain);
+			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleDevice, mTitleLocation);
 			addCardHeader(header);
 		}
 
 		@Override
 		public void setupInnerViewElements(ViewGroup parent, View view) {
 			// Retrieve elements
-			mTitleMainView = (TextView) parent.findViewById(R.id.card_main_inner_simple_title);
 			mTemperatureView = (TextView) parent.findViewById(R.id.card_main_inner_temperature);
 			mHumidityView = (TextView) parent.findViewById(R.id.card_main_inner_humidity);
 			mBatteryView = (ImageView) parent.findViewById(R.id.card_main_inner_battery);
 
-			if (mTitleMainView != null) mTitleMainView.setText("");
 			if (mTemperatureView != null && mTemperature != null) mTemperatureView.setVisibility(View.VISIBLE);
 			mTemperatureView.setText(mTemperature);
 			if (mHumidityView != null && mHumidity != null) mHumidityView.setVisibility(View.VISIBLE);
@@ -471,9 +466,8 @@ public class DeviceListFragment extends BaseFragment {
 	public class ListRelayCard extends Card {
 		protected String who;
 		protected String mValue;
-		protected String mTitleHeader;
-		protected String mTitleMain;
-		protected TextView mTitleMainView;
+		protected String mTitleDevice;
+		protected String mTitleLocation;
 		protected ToggleButton mToggle;
 		protected boolean mState;
 		protected boolean readwrite = true;
@@ -492,8 +486,8 @@ public class DeviceListFragment extends BaseFragment {
 			super(context, R.layout.relaycard_inner);
 			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
 			for (SettingEntry sentry : entry.getSettings()) {
-				if (sentry.getKey().equals("name")) mTitleHeader = sentry.getValue();
-				if (sentry.getKey().equals("locationName")) mTitleMain = sentry.getValue();
+				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
+				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
 				if (sentry.getKey().equals("state")) {
 					if (sentry.getValue().equals("on")) mState = true;
 					if (sentry.getValue().equals("off")) mState = false;
@@ -504,17 +498,15 @@ public class DeviceListFragment extends BaseFragment {
 		}
 
 		private void init() {
-			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleHeader, mTitleMain);
+			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleDevice, mTitleLocation);
 			addCardHeader(header);
 		}
 
 		@Override
 		public void setupInnerViewElements(ViewGroup parent, View view) {
 			// Retrieve elements
-			mTitleMainView = (TextView) parent.findViewById(R.id.card_main_inner_simple_title);
 			mToggle = (ToggleButton) parent.findViewById(R.id.card_inner_tb);
 
-			if (mTitleMainView != null) mTitleMainView.setText("");
 			if (mToggle != null) {
 				mToggle.setChecked(mState);
 				mToggle.setOnCheckedChangeListener(toggleListener);
@@ -541,11 +533,10 @@ public class DeviceListFragment extends BaseFragment {
 	 */
 	public class ListScreenCard extends Card {
 		protected String who;
-		protected String mTitleHeader;
-		protected String mTitleMain;
+		protected String mTitleDevice;
+		protected String mTitleLocation;
 		protected Button mBtnUp;
 		protected Button mBtnDown;
-		protected TextView mTitleMainView;
 		protected boolean readwrite = true;
 
 		protected Button.OnClickListener clickListener = new Button.OnClickListener() {
@@ -569,23 +560,21 @@ public class DeviceListFragment extends BaseFragment {
 			super(context, R.layout.screencard_inner);
 			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
 			for (SettingEntry sentry : entry.getSettings()) {
-				if (sentry.getKey().equals("name")) mTitleHeader = sentry.getValue();
-				if (sentry.getKey().equals("locationName")) mTitleMain = sentry.getValue();
+				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
+				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
 				if (sentry.getKey().equals("sett_readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}
 
 		private void init() {
-			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleHeader, mTitleMain);
+			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleDevice, mTitleDevice);
 			addCardHeader(header);
 		}
 
 		@Override
 		public void setupInnerViewElements(ViewGroup parent, View view) {
 			// Retrieve elements
-			mTitleMainView = (TextView) parent.findViewById(R.id.card_main_inner_simple_title);
-			if (mTitleMainView != null) mTitleMainView.setText("");
 			mBtnUp = (Button) parent.findViewById(R.id.card_inner_btnUp);
 			mBtnDown = (Button) parent.findViewById(R.id.card_inner_btnDown);
 			mBtnUp.setOnClickListener(clickListener);
@@ -605,9 +594,8 @@ public class DeviceListFragment extends BaseFragment {
 	public class ListContactCard extends Card {
 		protected String who;
 		protected String mValue;
-		protected String mTitleHeader;
-		protected String mTitleMain;
-		protected TextView mTitleMainView;
+		protected String mTitleDevice;
+		protected String mTitleLocation;
 		protected ToggleButton mToggle;
 		protected boolean mState;
 		protected boolean readwrite = true;
@@ -626,8 +614,8 @@ public class DeviceListFragment extends BaseFragment {
 			super(context, R.layout.contactcard_inner);
 			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
 			for (SettingEntry sentry : entry.getSettings()) {
-				if (sentry.getKey().equals("name")) mTitleHeader = sentry.getValue();
-				if (sentry.getKey().equals("locationName")) mTitleMain = sentry.getValue();
+				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
+				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
 				if (sentry.getKey().equals("state")) {
 					if (sentry.getValue().equals("opened")) mState = true;
 					if (sentry.getValue().equals("closed")) mState = false;
@@ -638,17 +626,15 @@ public class DeviceListFragment extends BaseFragment {
 		}
 
 		private void init() {
-			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleHeader, mTitleMain);
+			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleDevice, mTitleLocation);
 			addCardHeader(header);
 		}
 
 		@Override
 		public void setupInnerViewElements(ViewGroup parent, View view) {
 			// Retrieve elements
-			mTitleMainView = (TextView) parent.findViewById(R.id.card_main_inner_simple_title);
 			mToggle = (ToggleButton) parent.findViewById(R.id.card_inner_tb);
 
-			if (mTitleMainView != null) mTitleMainView.setText("");
 			if (mToggle != null) {
 				mToggle.setChecked(mState);
 				mToggle.setOnCheckedChangeListener(toggleListener);

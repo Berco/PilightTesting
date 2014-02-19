@@ -41,6 +41,7 @@
 
     <TextView
         android:id="@+id/card_main_inner_simple_title"
+        style="@style/AppTheme.TitleText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"

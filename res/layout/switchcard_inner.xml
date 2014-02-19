@@ -37,14 +37,6 @@
 
     <!-- Use same ID to use built-in features -->
 
-    <TextView
-        android:id="@+id/card_main_inner_simple_title"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="10dp"
-        android:layout_toRightOf="@id/colorBorder"
-        android:gravity="center" />
-
     <RelativeLayout
         android:layout_width="90dp"
         android:layout_height="@dimen/card_base_empty_height"

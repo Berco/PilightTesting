@@ -508,7 +508,7 @@ public class ConnectionService extends Service {
 						Server.CONNECTION.sentCommand("HEART");
 						Thread.sleep(1500);
 					}
-					if (timeHeart - timeBeat > 5000) {
+					if (timeHeart - timeBeat > 7000) {
 						postUpdate("LOST_CONNECTION");
 						isConnectionUp = false;
 					}

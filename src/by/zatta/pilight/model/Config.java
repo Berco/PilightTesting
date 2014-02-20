@@ -232,7 +232,10 @@ public class Config {
 							}
 
 							else {
-								value = value + orSentry.getKey() + ": " + orSentry.getValue() + "\n";
+								char firstChar = orSentry.getKey().charAt(0);
+								char replaceBy = Character.toUpperCase(firstChar);
+								String what = orSentry.getKey().replaceFirst(Character.toString(firstChar), Character.toString(replaceBy));
+								value = value + what + ": " + orSentry.getValue() + "\n";
 							}
 						}
 					}

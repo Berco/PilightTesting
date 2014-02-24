@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ /********************************************************************************
+  ~  * 
+  ~  * Copyright (C) 2013 Zatta
+  ~  * 
+  ~  * This file is part of pilight for android.
+  ~  * 
+  ~  * pilight for android is free software: you can redistribute it and/or modify 
+  ~  * it under the terms of the GNU General Public License as published by the 
+  ~  * Free Software Foundation, either version 3 of the License, or (at your option)
+  ~  * any later version.
+  ~  * 
+  ~  * pilight for android is distributed in the hope that it will be useful, but 
+  ~  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+  ~  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
+  ~  * for more details.
+  ~  * 
+  ~  * You should have received a copy of the GNU General Public License along 
+  ~  * with pilightfor android.
+  ~  * If not, see <http://www.gnu.org/licenses/>
+  ~  * 
+  ~  * Copyright (c) 2013 pilight project
+  ~  ********************************************************************************/
+-->
+<resources>
+    <string name="app_name">pilight</string>
+    
+    <!-- Titles -->
+    <string name="title_settings">Einstellungen</string>
+    <string name="title_list_base">Ger&#228;teliste</string> 
+    <string name="title_about">&#220;ber</string>
+    <string name="title_status_dialog">Status</string>
+    <string name="title_all">Alle</string>
+    
+    <!-- Status Dialog -->
+    <string name="status_connecting">Stelle Verbindung her \n einen Augenblick bitte!</string>
+    <string name="status_failed">Konnte keine Verbindung zum pilight-Service auf deinem RaspberryPi herstellen.</string>
+    <string name="status_lost">Die Verbindung zum Service ging verloren.</string>
+    <string name="status_destroyed">Der Service, der die Verbindung zum pilight-Service herstellt, wurde zerst&#246;rt.</string>
+    <string name="btn_close">Schlie&#223;en</string>
+    <string name="btn_abort">Abbrechen</string>
+    <string name="btn_retry">erneut versuchen</string>
+    
+    <!-- Preferences -->
+    <string name="prefTit_info">Informationen</string>
+    <string name="prefSum_about">Alles &#252;ber diese App</string>
+    <string name="prefTit_web">www.pilight.org</string>
+    <string name="prefSum_web">besuche die offizielle Website</string>
+    <string name="prefTit_tweakers">Tweakers.net</string>
+    <string name="prefSum_tweakers">niederl&#228;ndisches Forum</string>
+    <string name="prefTit_connection">Verbindung</string>
+    <string name="prefSum_connection">Entferne alle Netzwerke</string>
+    <string name="prefTit_useService">Lasse Service aktiv</string>
+    <string name="prefSum_useService">auch wenn nicht in der App</string>
+    <string name="prefTit_UI">UI</string>
+    <string name="prefTit_listgrid">Erzwinge Listendesign</string>
+    <string name="prefSum_listgrid">anstatt des Kacheldesigns</string>
+    <string name="prefTit_destroyNotification">Zeige keine Benachrichtigung</string>
+    <string name="prefSum_destroyNotification">wenn du dein Netzwerk verl&#228;sst</string>
+    <string name="prefTit_language">Language</string> <!-- DO NOT TRANSLATE -->
+    <string name="prefSum_language">preferred for this app only</string> <!-- DO NOT TRANSLATE -->
+    <string name="prefTit_showAll">Zeige alle Ger&#228;te</string>
+    <string name="prefSum_showAll">beim Start der App</string>
+    
+    <!-- Notifications -->
+    <string name="noti_failed">Konnte nicht verbinden</string>
+    <string name="noti_retry">Versuche erneut zu verbinden</string>
+    <string name="noti_lost">Verbindung verloren</string>
+    <string name="noti_connected">Verbunden</string>
+    <string name="noti_connecting">Stelle Verbindung her</string>
+    
+    
+    
+    
+    
+
+</resources>

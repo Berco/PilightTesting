@@ -4,14 +4,14 @@
 	<string-array name="languages" translatable="false">
 	    <item>English</item>
 		<item>Nederlands</item>
-		<!-- <item>Deutsch</item> -->
+		<item>Deutsch</item>
 		<!--  <item>Francais</item> -->
 	</string-array>
 	
 	<string-array name="languages_short" translatable="false">
 		<item>en</item>
 		<item>nl</item>
-		<!-- <item>de</item> -->
+		<item>de</item>
 		<!--  <item>fr</item> -->
 	</string-array>
 	

@@ -41,7 +41,7 @@
     <string name="status_destroyed">Der Service, der die Verbindung zum pilight-Service herstellt, wurde zerst&#246;rt.</string>
     <string name="btn_close">Schlie&#223;en</string>
     <string name="btn_abort">Abbrechen</string>
-    <string name="btn_retry">erneut versuchen</string>
+    <string name="btn_retry">Erneut versuchen</string>
     
     <!-- Preferences -->
     <string name="prefTit_info">Informationen</string>
@@ -51,7 +51,7 @@
     <string name="prefTit_tweakers">Tweakers.net</string>
     <string name="prefSum_tweakers">niederl&#228;ndisches Forum</string>
     <string name="prefTit_connection">Verbindung</string>
-    <string name="prefSum_connection">Entferne alle Netzwerke</string>
+    <string name="prefSum_connection">entferne alle Netzwerke</string>
     <string name="prefTit_useService">Lasse Service aktiv</string>
     <string name="prefSum_useService">auch wenn nicht in der App</string>
     <string name="prefTit_UI">UI</string>

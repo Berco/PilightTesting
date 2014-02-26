@@ -70,6 +70,7 @@
     <string name="noti_lost">Verbindung verloren</string>
     <string name="noti_connected">Verbunden</string>
     <string name="noti_connecting">Stelle Verbindung her</string>
+    <string name="noti_reconnect">Verbindung wiederherstellen&#8230;</string>
     
     
     

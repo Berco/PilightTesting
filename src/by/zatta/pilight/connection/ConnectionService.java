@@ -109,7 +109,7 @@ public class ConnectionService extends Service {
 			} else if (action.equals("pilight-reconnect")) {
 				// Log.v(TAG, "kill recieved");
 				stopForeground(false);
-				makeNotification(NotificationType.CONNECTING, "reconnecting...");
+				makeNotification(NotificationType.CONNECTING, aCtx.getString(R.string.noti_reconnect));
 				if (isConnectionUp)
 					dropConnection();
 				else isConnectionUp = makeConnection();

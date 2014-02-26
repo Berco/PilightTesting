@@ -69,6 +69,7 @@
     <string name="noti_lost">Lost connection</string>
     <string name="noti_connected">Connected</string>
     <string name="noti_connecting">Establishing connection</string>
+    <string name="noti_reconnect">Reconnecting&#8230;</string>
     
     
     

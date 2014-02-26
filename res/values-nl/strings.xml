@@ -69,6 +69,7 @@
     <string name="noti_lost">Verbinging verbroken</string>
     <string name="noti_connected">Verbonden</string>
     <string name="noti_connecting">Verbinding leggen</string>
+    <string name="noti_reconnect">Verbinding herstellen&#8230;</string>
     
     
     

@@ -29,6 +29,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,8 +42,12 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import by.zatta.pilight.R;
 import by.zatta.pilight.connection.ConnectionService;
@@ -247,9 +252,9 @@ public class DeviceListFragment extends BaseFragment {
 					if (sentry.getValue().equals("on")) mState = true;
 					if (sentry.getValue().equals("off")) mState = false;
 				}
-				if (sentry.getKey().equals("sett_min")) minSeekValue = Integer.valueOf(sentry.getValue());
-				if (sentry.getKey().equals("sett_max")) maxSeekValue = Integer.valueOf(sentry.getValue());
-				if (sentry.getKey().equals("sett_readonly") && sentry.getValue().equals("1")) readwrite = false;
+				if (sentry.getKey().equals("dimlevel-minimum")) minSeekValue = Integer.valueOf(sentry.getValue());
+				if (sentry.getKey().equals("dimlevel-maximum")) maxSeekValue = Integer.valueOf(sentry.getValue());
+				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}
@@ -337,7 +342,7 @@ public class DeviceListFragment extends BaseFragment {
 					if (sentry.getValue().equals("on")) mState = true;
 					if (sentry.getValue().equals("off")) mState = false;
 				}
-				if (sentry.getKey().equals("sett_readonly") && sentry.getValue().equals("1")) readwrite = false;
+				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}
@@ -385,9 +390,13 @@ public class DeviceListFragment extends BaseFragment {
 		protected boolean mBattery = false;
 		protected String mTitleDevice;
 		protected String mTitleLocation;
+		protected String mSunriseTime;
+		protected String mSunsetTime;
 		protected int decimals;
 		protected TextView mTemperatureView;
 		protected TextView mHumidityView;
+		protected TextView mSunriseView;
+		protected TextView mSunsetView;
 		protected ImageView mBatteryView;
 		
 
@@ -398,9 +407,11 @@ public class DeviceListFragment extends BaseFragment {
 				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
 				if (sentry.getKey().equals("temperature")) mTemperature = sentry.getValue();
 				if (sentry.getKey().equals("humidity")) mHumidity = sentry.getValue();
+				if (sentry.getKey().equals("sunrise")) mSunriseTime = sentry.getValue();
+				if (sentry.getKey().equals("sunset")) mSunsetTime = sentry.getValue();
 				if (sentry.getKey().equals("battery") && (sentry.getValue().equals("1"))) mBattery = true;
-				if (sentry.getKey().equals("sett_decimals")) decimals = Integer.valueOf(sentry.getValue());
-				if (sentry.getKey().equals("sett_battery") && (sentry.getValue().equals("1"))) showBattery = true;
+				if (sentry.getKey().equals("gui-decimals")) decimals = Integer.valueOf(sentry.getValue());
+				if (sentry.getKey().equals("gui-show-battery") && (sentry.getValue().equals("1"))) showBattery = true;
 			}
 
 			DecimalFormat oneDigit = new DecimalFormat("#,##0.0");// format to 1
@@ -408,9 +419,42 @@ public class DeviceListFragment extends BaseFragment {
 																	// place
 			if (mTemperature != null)
 				mTemperature = oneDigit.format(Integer.valueOf(mTemperature) / (Math.pow(10, decimals))) + " \u2103";
-			if (mHumidity != null) mHumidity = oneDigit.format(Integer.valueOf(mHumidity) / (Math.pow(10, decimals))) + " %";
-
+			if (mHumidity != null) 
+				mHumidity = oneDigit.format(Integer.valueOf(mHumidity) / (Math.pow(10, decimals))) + " %";
+			
+			//SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+			
+			//DecimalFormat timeDigit = new DecimalFormat("#0000.###");
+			//timeDigit.setDecimalSeparatorAlwaysShown(false);
+			
+			// Date date = new SimpleDateFormat("hhmm").parse(String.format("%04d", milTime));
+			// Set format: print the hours and minutes of the date, with AM or PM at the end 
+			// SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
+			// Print the date!
+			//System.out.println(sdf.format(date));
+			
+			if (mSunriseTime != null){
+				try {
+					mSunriseTime = makeTimeString(mSunriseTime);
+				} catch (ParseException e) {}
+			}
+			if (mSunsetTime != null){
+				try {
+					mSunsetTime = makeTimeString(mSunsetTime);
+				} catch (ParseException e) {}
+			}
 			init();
+		}
+		
+		private String makeTimeString(String time) throws ParseException{
+			DecimalFormat timeDigit = new DecimalFormat("#0000.###");
+			timeDigit.setDecimalSeparatorAlwaysShown(false);
+			time = timeDigit.format(Integer.valueOf(time));
+			Date date = new SimpleDateFormat("hhmm").parse(time);
+			SimpleDateFormat sdf = (SimpleDateFormat) DateFormat.getTimeFormat(mContext);
+			//SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault()); //"hh:mm a" for AM/PM weergave
+			time = sdf.format(date);
+			return time;
 		}
 
 		private void init() {
@@ -423,12 +467,20 @@ public class DeviceListFragment extends BaseFragment {
 			// Retrieve elements
 			mTemperatureView = (TextView) parent.findViewById(R.id.card_main_inner_temperature);
 			mHumidityView = (TextView) parent.findViewById(R.id.card_main_inner_humidity);
+			mSunriseView = (TextView) parent.findViewById(R.id.card_main_inner_sunrise);
+			mSunsetView = (TextView) parent.findViewById(R.id.card_main_inner_sunset);
 			mBatteryView = (ImageView) parent.findViewById(R.id.card_main_inner_battery);
 
 			if (mTemperatureView != null && mTemperature != null) mTemperatureView.setVisibility(View.VISIBLE);
 			mTemperatureView.setText(mTemperature);
 			if (mHumidityView != null && mHumidity != null) mHumidityView.setVisibility(View.VISIBLE);
 			mHumidityView.setText(mHumidity);
+			if (mSunriseView != null && mSunriseTime != null) mSunriseView.setVisibility(View.VISIBLE);
+			mSunriseView.setText(mSunriseTime);
+			if (mSunsetView != null && mSunsetTime != null) mSunsetView.setVisibility(View.VISIBLE);
+			mSunsetView.setText(mSunsetTime);
+			
+			
 			if (mBatteryView != null && showBattery) {
 				mBatteryView.setVisibility(View.VISIBLE);
 				if (mBattery)
@@ -492,7 +544,7 @@ public class DeviceListFragment extends BaseFragment {
 					if (sentry.getValue().equals("on")) mState = true;
 					if (sentry.getValue().equals("off")) mState = false;
 				}
-				if (sentry.getKey().equals("sett_readonly") && sentry.getValue().equals("1")) readwrite = false;
+				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}
@@ -562,7 +614,7 @@ public class DeviceListFragment extends BaseFragment {
 			for (SettingEntry sentry : entry.getSettings()) {
 				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
 				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
-				if (sentry.getKey().equals("sett_readonly") && sentry.getValue().equals("1")) readwrite = false;
+				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}
@@ -620,7 +672,7 @@ public class DeviceListFragment extends BaseFragment {
 					if (sentry.getValue().equals("opened")) mState = true;
 					if (sentry.getValue().equals("closed")) mState = false;
 				}
-				if (sentry.getKey().equals("sett_readonly") && sentry.getValue().equals("1")) readwrite = false;
+				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}

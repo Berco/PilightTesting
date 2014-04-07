@@ -167,7 +167,7 @@ public class TaskerActionFragment extends BaseFragment {
 			else if (device.getType() == 6) card = new ListContactCard(getActivity().getApplicationContext(), device);
 
 			for (SettingEntry sentry : device.getSettings()) { // don't show readonly devices, it's useless
-				if (sentry.getKey().equals("sett_readonly") && sentry.getValue().equals("1")) card = null;
+				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) card = null;
 			}
 
 			if (!(card == null)) {
@@ -288,9 +288,9 @@ public class TaskerActionFragment extends BaseFragment {
 					if (sentry.getValue().equals("on")) mState = true;
 					if (sentry.getValue().equals("off")) mState = false;
 				}
-				if (sentry.getKey().equals("sett_min")) minSeekValue = Integer.valueOf(sentry.getValue());
-				if (sentry.getKey().equals("sett_max")) maxSeekValue = Integer.valueOf(sentry.getValue());
-				if (sentry.getKey().equals("sett_readonly") && sentry.getValue().equals("1")) readwrite = false;
+				if (sentry.getKey().equals("dimlevel-minimum")) minSeekValue = Integer.valueOf(sentry.getValue());
+				if (sentry.getKey().equals("dimlevel-maximum")) maxSeekValue = Integer.valueOf(sentry.getValue());
+				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}
@@ -389,7 +389,7 @@ public class TaskerActionFragment extends BaseFragment {
 					if (sentry.getValue().equals("on")) mState = true;
 					if (sentry.getValue().equals("off")) mState = false;
 				}
-				if (sentry.getKey().equals("sett_readonly") && sentry.getValue().equals("1")) readwrite = false;
+				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}
@@ -469,7 +469,7 @@ public class TaskerActionFragment extends BaseFragment {
 					if (sentry.getValue().equals("on")) mState = true;
 					if (sentry.getValue().equals("off")) mState = false;
 				}
-				if (sentry.getKey().equals("sett_readonly") && sentry.getValue().equals("1")) readwrite = false;
+				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}
@@ -548,7 +548,7 @@ public class TaskerActionFragment extends BaseFragment {
 					if (sentry.getValue().equals("opened")) mState = true;
 					if (sentry.getValue().equals("closed")) mState = false;
 				}
-				if (sentry.getKey().equals("sett_readonly") && sentry.getValue().equals("1")) readwrite = false;
+				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}

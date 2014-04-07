@@ -59,11 +59,26 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="0dp"
-                android:text="xx C"
                 android:visibility="gone" />
 
             <TextView
                 android:id="@+id/card_main_inner_humidity"
+                style="@style/AppTheme.TitleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                android:visibility="gone" />
+            
+            <TextView
+                android:id="@+id/card_main_inner_sunrise"
+                style="@style/AppTheme.TitleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/card_main_inner_sunset"
                 style="@style/AppTheme.TitleText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

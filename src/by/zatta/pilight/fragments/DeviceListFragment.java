@@ -170,7 +170,6 @@ public class DeviceListFragment extends BaseFragment {
 				mGridView.setAdapter(mCardStaggeredGridArrayAdapter);
 			}
 
-
 		}
 	}
 
@@ -197,7 +196,7 @@ public class DeviceListFragment extends BaseFragment {
 		}
 
 		if (forceList) mCardArrayAdapter.notifyDataSetChanged();
-		//else mCardGridArrayAdapter.notifyDataSetChanged();
+		// else mCardGridArrayAdapter.notifyDataSetChanged();
 		else mCardStaggeredGridArrayAdapter.notifyDataSetChanged();
 	}
 
@@ -393,17 +392,21 @@ public class DeviceListFragment extends BaseFragment {
 		protected String mTemperature;
 		protected String mHumidity;
 		protected boolean showBattery = false;
+		protected boolean showTemperature = false;
+		protected boolean showHumidity = false;
 		protected boolean mBattery = false;
 		protected String mTitleDevice;
 		protected String mTitleLocation;
 		protected String mSunriseTime;
 		protected String mSunsetTime;
 		protected int decimals;
+		protected int gui_decimals;
 		protected TextView mTemperatureView;
 		protected TextView mHumidityView;
 		protected TextView mSunriseView;
 		protected TextView mSunsetView;
 		protected ImageView mBatteryView;
+		protected DecimalFormat digits = new DecimalFormat("#,##0.0");// format to 1 decimal place
 
 		public ListWeatherCard(Context context, DeviceEntry entry) {
 			super(context, R.layout.weathercard_inner);
@@ -416,15 +419,33 @@ public class DeviceListFragment extends BaseFragment {
 				if (sentry.getKey().equals("sunset")) mSunsetTime = sentry.getValue();
 				if (sentry.getKey().equals("battery") && (sentry.getValue().equals("1"))) mBattery = true;
 				if (sentry.getKey().equals("device-decimals")) decimals = Integer.valueOf(sentry.getValue());
+				if (sentry.getKey().equals("gui-decimals")) gui_decimals = Integer.valueOf(sentry.getValue());
 				if (sentry.getKey().equals("gui-show-battery") && (sentry.getValue().equals("1"))) showBattery = true;
+				if (sentry.getKey().equals("gui-show-temperature") && (sentry.getValue().equals("1"))) showTemperature = true;
+				if (sentry.getKey().equals("gui-show-humidity") && (sentry.getValue().equals("1"))) showHumidity = true;
 			}
 
-			DecimalFormat oneDigit = new DecimalFormat("#,##0.0");// format to 1
-																	// decimal
-																	// place
+			switch (gui_decimals) {
+			case 1:
+				digits = new DecimalFormat("#,##0.0");// format to 1 decimal place
+				break;
+			case 2:
+				digits = new DecimalFormat("#,##0.00");// format to 1 decimal place
+				break;
+			case 3:
+				digits = new DecimalFormat("#,##0.000");// format to 1 decimal place
+				break;
+			case 4:
+				digits = new DecimalFormat("#,##0.0000");// format to 1 decimal place
+				break;
+			default:
+				digits = new DecimalFormat("#,##0.0");// format to 1 decimal place
+				break;
+			}
+
 			if (mTemperature != null)
-				mTemperature = oneDigit.format(Integer.valueOf(mTemperature) / (Math.pow(10, decimals))) + " \u2103";
-			if (mHumidity != null) mHumidity = oneDigit.format(Integer.valueOf(mHumidity) / (Math.pow(10, decimals))) + " %";
+				mTemperature =  digits.format(Integer.valueOf(mTemperature) / (Math.pow(10, decimals))) + " \u2103";
+			if (mHumidity != null) mHumidity = digits.format(Integer.valueOf(mHumidity) / (Math.pow(10, decimals))) + " %";
 
 			// SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
 
@@ -477,9 +498,9 @@ public class DeviceListFragment extends BaseFragment {
 			mSunsetView = (TextView) parent.findViewById(R.id.card_main_inner_sunset);
 			mBatteryView = (ImageView) parent.findViewById(R.id.card_main_inner_battery);
 
-			if (mTemperatureView != null && mTemperature != null) mTemperatureView.setVisibility(View.VISIBLE);
+			if (mTemperatureView != null && mTemperature != null && showTemperature) mTemperatureView.setVisibility(View.VISIBLE);
 			mTemperatureView.setText(mTemperature);
-			if (mHumidityView != null && mHumidity != null) mHumidityView.setVisibility(View.VISIBLE);
+			if (mHumidityView != null && mHumidity != null && showHumidity) mHumidityView.setVisibility(View.VISIBLE);
 			mHumidityView.setText(mHumidity);
 			if (mSunriseView != null && mSunriseTime != null) mSunriseView.setVisibility(View.VISIBLE);
 			mSunriseView.setText(mSunriseTime);
@@ -496,12 +517,10 @@ public class DeviceListFragment extends BaseFragment {
 		public void update(DeviceEntry entry) {
 			for (SettingEntry sentry : entry.getSettings()) {
 				if (sentry.getKey().equals("temperature")) {
-					DecimalFormat oneDigit = new DecimalFormat("#,##0.0");// format to 1 decimal place
-					mTemperature = oneDigit.format(Integer.valueOf(sentry.getValue()) / (Math.pow(10, decimals))) + " \u2103";
+					mTemperature = digits.format(Integer.valueOf(sentry.getValue()) / (Math.pow(10, decimals))) + " \u2103";
 				}
 				if (sentry.getKey().equals("humidity")) {
-					DecimalFormat oneDigit = new DecimalFormat("#,##0.0");// format to 1 decimal place
-					mHumidity = oneDigit.format(Integer.valueOf(sentry.getValue()) / (Math.pow(10, decimals))) + " %";
+					mHumidity = digits.format(Integer.valueOf(sentry.getValue()) / (Math.pow(10, decimals))) + " %";
 				}
 				if (sentry.getKey().equals("battery")) {
 					if (sentry.getValue().equals("1")) {

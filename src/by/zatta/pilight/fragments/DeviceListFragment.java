@@ -55,6 +55,8 @@ import by.zatta.pilight.model.DeviceEntry;
 import by.zatta.pilight.model.SettingEntry;
 import by.zatta.pilight.views.CircularSeekBar;
 import by.zatta.pilight.views.CustomHeaderInnerCard;
+import it.gmariotti.cardslib.library.extra.staggeredgrid.internal.CardGridStaggeredArrayAdapter;
+import it.gmariotti.cardslib.library.extra.staggeredgrid.view.CardGridStaggeredView;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.internal.CardGridArrayAdapter;
@@ -70,6 +72,7 @@ public class DeviceListFragment extends BaseFragment {
 	private static final String TAG = "ListBase";
 	static CardArrayAdapter mCardArrayAdapter;
 	static CardGridArrayAdapter mCardGridArrayAdapter;
+	static CardGridStaggeredArrayAdapter mCardStaggeredGridArrayAdapter;
 	static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
 	public final int GIMME_DEVICES = 1002;
 	private static String mFilter;
@@ -116,8 +119,7 @@ public class DeviceListFragment extends BaseFragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		if (forceList)
-			return inflater.inflate(R.layout.devicelist_layout, container, false);
+		if (forceList) return inflater.inflate(R.layout.devicelist_layout, container, false);
 		else return inflater.inflate(R.layout.devicegrid_layout, container, false);
 	}
 
@@ -133,16 +135,11 @@ public class DeviceListFragment extends BaseFragment {
 		for (DeviceEntry device : mDevices) {
 			Card card = null;
 			if (device.getLocationID().equals(mFilter) || mFilter == null) {
-				if (device.getType() == 1)
-					card = new ListSwitchCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 2)
-					card = new ListDimmerCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 3)
-					card = new ListWeatherCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 4)
-					card = new ListRelayCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 5)
-					card = new ListScreenCard(getActivity().getApplicationContext(), device);
+				if (device.getType() == 1) card = new ListSwitchCard(getActivity().getApplicationContext(), device);
+				else if (device.getType() == 2) card = new ListDimmerCard(getActivity().getApplicationContext(), device);
+				else if (device.getType() == 3) card = new ListWeatherCard(getActivity().getApplicationContext(), device);
+				else if (device.getType() == 4) card = new ListRelayCard(getActivity().getApplicationContext(), device);
+				else if (device.getType() == 5) card = new ListScreenCard(getActivity().getApplicationContext(), device);
 				else if (device.getType() == 6) card = new ListContactCard(getActivity().getApplicationContext(), device);
 			}
 			if (!(card == null)) cards.add(card);
@@ -157,13 +154,23 @@ public class DeviceListFragment extends BaseFragment {
 				listView.setAdapter(mCardArrayAdapter);
 			}
 		} else {
-			mCardGridArrayAdapter = new CardGridArrayAdapter(getActivity(), cards);
-			mCardGridArrayAdapter.setInnerViewTypeCount(2);
+			// mCardGridArrayAdapter = new CardGridArrayAdapter(getActivity(), cards);
+			// mCardGridArrayAdapter.setInnerViewTypeCount(2);
+			//
+			// CardGridView gridView = (CardGridView) getActivity().findViewById(R.id.carddemo_grid_base);
+			// if (gridView != null) {
+			// gridView.setAdapter(mCardGridArrayAdapter);
+			// }
 
-			CardGridView gridView = (CardGridView) getActivity().findViewById(R.id.carddemo_grid_base);
-			if (gridView != null) {
-				gridView.setAdapter(mCardGridArrayAdapter);
+			mCardStaggeredGridArrayAdapter = new CardGridStaggeredArrayAdapter(getActivity(), cards);
+			mCardStaggeredGridArrayAdapter.setInnerViewTypeCount(2);
+
+			CardGridStaggeredView mGridView = (CardGridStaggeredView) getActivity().findViewById(R.id.carddemo_extras_grid_stag);
+			if (mGridView != null) {
+				mGridView.setAdapter(mCardStaggeredGridArrayAdapter);
 			}
+
+
 		}
 	}
 
@@ -188,11 +195,10 @@ public class DeviceListFragment extends BaseFragment {
 				i++;
 			}
 		}
-		
-		if (forceList)
-			mCardArrayAdapter.notifyDataSetChanged();
-		else
-			mCardGridArrayAdapter.notifyDataSetChanged();
+
+		if (forceList) mCardArrayAdapter.notifyDataSetChanged();
+		//else mCardGridArrayAdapter.notifyDataSetChanged();
+		else mCardStaggeredGridArrayAdapter.notifyDataSetChanged();
 	}
 
 	public interface DeviceListListener {
@@ -398,7 +404,6 @@ public class DeviceListFragment extends BaseFragment {
 		protected TextView mSunriseView;
 		protected TextView mSunsetView;
 		protected ImageView mBatteryView;
-		
 
 		public ListWeatherCard(Context context, DeviceEntry entry) {
 			super(context, R.layout.weathercard_inner);
@@ -410,7 +415,7 @@ public class DeviceListFragment extends BaseFragment {
 				if (sentry.getKey().equals("sunrise")) mSunriseTime = sentry.getValue();
 				if (sentry.getKey().equals("sunset")) mSunsetTime = sentry.getValue();
 				if (sentry.getKey().equals("battery") && (sentry.getValue().equals("1"))) mBattery = true;
-				if (sentry.getKey().equals("gui-decimals")) decimals = Integer.valueOf(sentry.getValue());
+				if (sentry.getKey().equals("device-decimals")) decimals = Integer.valueOf(sentry.getValue());
 				if (sentry.getKey().equals("gui-show-battery") && (sentry.getValue().equals("1"))) showBattery = true;
 			}
 
@@ -419,40 +424,41 @@ public class DeviceListFragment extends BaseFragment {
 																	// place
 			if (mTemperature != null)
 				mTemperature = oneDigit.format(Integer.valueOf(mTemperature) / (Math.pow(10, decimals))) + " \u2103";
-			if (mHumidity != null) 
-				mHumidity = oneDigit.format(Integer.valueOf(mHumidity) / (Math.pow(10, decimals))) + " %";
-			
-			//SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-			
-			//DecimalFormat timeDigit = new DecimalFormat("#0000.###");
-			//timeDigit.setDecimalSeparatorAlwaysShown(false);
-			
+			if (mHumidity != null) mHumidity = oneDigit.format(Integer.valueOf(mHumidity) / (Math.pow(10, decimals))) + " %";
+
+			// SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+
+			// DecimalFormat timeDigit = new DecimalFormat("#0000.###");
+			// timeDigit.setDecimalSeparatorAlwaysShown(false);
+
 			// Date date = new SimpleDateFormat("hhmm").parse(String.format("%04d", milTime));
-			// Set format: print the hours and minutes of the date, with AM or PM at the end 
+			// Set format: print the hours and minutes of the date, with AM or PM at the end
 			// SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
 			// Print the date!
-			//System.out.println(sdf.format(date));
-			
-			if (mSunriseTime != null){
+			// System.out.println(sdf.format(date));
+
+			if (mSunriseTime != null) {
 				try {
 					mSunriseTime = makeTimeString(mSunriseTime);
-				} catch (ParseException e) {}
+				} catch (ParseException e) {
+				}
 			}
-			if (mSunsetTime != null){
+			if (mSunsetTime != null) {
 				try {
 					mSunsetTime = makeTimeString(mSunsetTime);
-				} catch (ParseException e) {}
+				} catch (ParseException e) {
+				}
 			}
 			init();
 		}
-		
-		private String makeTimeString(String time) throws ParseException{
+
+		private String makeTimeString(String time) throws ParseException {
 			DecimalFormat timeDigit = new DecimalFormat("#0000.###");
 			timeDigit.setDecimalSeparatorAlwaysShown(false);
 			time = timeDigit.format(Integer.valueOf(time));
 			Date date = new SimpleDateFormat("hhmm").parse(time);
 			SimpleDateFormat sdf = (SimpleDateFormat) DateFormat.getTimeFormat(mContext);
-			//SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault()); //"hh:mm a" for AM/PM weergave
+			// SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault()); //"hh:mm a" for AM/PM weergave
 			time = sdf.format(date);
 			return time;
 		}
@@ -479,12 +485,10 @@ public class DeviceListFragment extends BaseFragment {
 			mSunriseView.setText(mSunriseTime);
 			if (mSunsetView != null && mSunsetTime != null) mSunsetView.setVisibility(View.VISIBLE);
 			mSunsetView.setText(mSunsetTime);
-			
-			
+
 			if (mBatteryView != null && showBattery) {
 				mBatteryView.setVisibility(View.VISIBLE);
-				if (mBattery)
-					mBatteryView.setImageResource(R.drawable.batt_full);
+				if (mBattery) mBatteryView.setImageResource(R.drawable.batt_full);
 				else mBatteryView.setImageResource(R.drawable.batt_empty);
 			}
 		}
@@ -595,8 +599,7 @@ public class DeviceListFragment extends BaseFragment {
 			@Override
 			public void onClick(View v) {
 				String action = "";
-				switch (v.getId())
-				{
+				switch (v.getId()) {
 				case R.id.card_inner_btnUp:
 					action = "\"state\":\"up\"";
 					break;

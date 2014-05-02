@@ -24,6 +24,7 @@
 package by.zatta.pilight.model;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -31,6 +32,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 public class Config {
@@ -198,6 +200,7 @@ public class Config {
 		}
 	}
 
+	@SuppressLint("SimpleDateFormat")
 	public static List<DeviceEntry> update(OriginEntry originEntry) {
 		lastUpdateString = "";
 		int decimals = -1;
@@ -252,6 +255,8 @@ public class Config {
 								String hum = digits.format(Integer.valueOf(sentry.getValue()) / (Math.pow(10, decimals)))
 										+ " %";
 								value = value + "Humidity: " + hum + "\n";
+							} else if (sentry.getKey().equals("timestamp")){
+								value = value + "Stamp: " + new SimpleDateFormat("HH:mm:ss").format(Long.valueOf(sentry.getValue())*1000) + "\n";
 							}
 
 							else {

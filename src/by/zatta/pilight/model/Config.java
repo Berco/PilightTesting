@@ -24,6 +24,7 @@
 package by.zatta.pilight.model;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -31,6 +32,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 public class Config {
@@ -99,37 +101,40 @@ public class Config {
 
 								if (skey.equals("type")) {
 									device.setType(Integer.valueOf(jset.getString(skey)));
-								} else if (skey.equals("settings")) {
-									// iterate over all specific settings
-									JSONObject jthi = jset.getJSONObject(skey);
-									Iterator<?> thit = jthi.keys();
-									while (thit.hasNext()) {
-										String thkey = (String) thit.next();
-										sentry = new SettingEntry();
-										sentry.setKey("sett_" + thkey);
-
-										JSONArray jvalarr = jthi.optJSONArray(thkey);
-										String jvalstr = jthi.optString(thkey);
-										Double jvaldbl = jthi.optDouble(thkey);
-										Long jvallng = jthi.optLong(thkey);
-
-										if (jvalarr != null) {
-											for (Short i = 0; i < jvalarr.length(); i++) {
-												sentry.setKey(thkey);
-												sentry.setValue(jvalarr.get(i).toString());
-											}
-										} else if (jvalstr != null) {
-											sentry.setValue(jvalstr.toString());
-										} else if (jvaldbl != null) {
-											Log.e(TAG, skey + "double : " + jvaldbl.toString());
-											sentry.setValue(jvaldbl.toString());
-										} else if (jvallng != null) {
-											Log.e(TAG, skey + "long : " + jvallng.toString());
-											sentry.setValue(jvallng.toString());
-										}
-										if (sentry != null) settings.add(sentry);
-									}
-								} else if (skey.equals("id") || skey.equals("protocol") || skey.equals("order")) {
+								}
+								/* OBSOLETE LOOP SINCE PILIGHT 4.0 */
+//								} else if (skey.equals("settings")) {
+//									// iterate over all specific settings
+//									JSONObject jthi = jset.getJSONObject(skey);
+//									Iterator<?> thit = jthi.keys();
+//									while (thit.hasNext()) {
+//										String thkey = (String) thit.next();
+//										sentry = new SettingEntry();
+//										sentry.setKey("sett_" + thkey);
+//
+//										JSONArray jvalarr = jthi.optJSONArray(thkey);
+//										String jvalstr = jthi.optString(thkey);
+//										Double jvaldbl = jthi.optDouble(thkey);
+//										Long jvallng = jthi.optLong(thkey);
+//
+//										if (jvalarr != null) {
+//											for (Short i = 0; i < jvalarr.length(); i++) {
+//												sentry.setKey(thkey);
+//												sentry.setValue(jvalarr.get(i).toString());
+//											}
+//										} else if (jvalstr != null) {
+//											sentry.setValue(jvalstr.toString());
+//										} else if (jvaldbl != null) {
+//											Log.e(TAG, skey + "double : " + jvaldbl.toString());
+//											sentry.setValue(jvaldbl.toString());
+//										} else if (jvallng != null) {
+//											Log.e(TAG, skey + "long : " + jvallng.toString());
+//											sentry.setValue(jvallng.toString());
+//										}
+//										if (sentry != null) settings.add(sentry);
+//									}
+//								}
+								else if (skey.equals("id") || skey.equals("protocol") || skey.equals("order")) {
 								} else {
 									try {
 										sentry = new SettingEntry();
@@ -175,11 +180,11 @@ public class Config {
 				Log.w(TAG, "The received LOCATION is of an incorrent format");
 			}
 		}
-		// try {
-		// print();
-		// } catch (Exception e) {
-		// Log.w(TAG, "4) couldnt print");
-		// }
+		 try {
+		 print();
+		 } catch (Exception e) {
+		 Log.w(TAG, "4) couldnt print");
+		 }
 	}
 
 	public static void print() {
@@ -195,11 +200,14 @@ public class Config {
 		}
 	}
 
+	@SuppressLint("SimpleDateFormat")
 	public static List<DeviceEntry> update(OriginEntry originEntry) {
 		lastUpdateString = "";
 		int decimals = -1;
+		int gui_decimals = -1;
 		String name = "";
 		String value = "";
+		DecimalFormat digits = new DecimalFormat("#,##0.0");// format to 1 decimal place
 		for (DeviceEntry device : mDevices) {
 			if (device.getNameID().equals(originEntry.getNameID())) {
 				// Log.v(TAG, "updating: " + device.getNameID());
@@ -209,9 +217,29 @@ public class Config {
 						originEntry.setPopularName(sentry.getValue());
 						name = sentry.getValue();
 					}
-					if (sentry.getKey().equals("sett_decimals")) {
+					if (sentry.getKey().equals("device-decimals")) {
 						decimals = Integer.valueOf(sentry.getValue());
 						// Log.v(TAG, sentry.getValue());
+					}
+					if (sentry.getKey().equals("gui-decimals")) {
+						gui_decimals = Integer.valueOf(sentry.getValue());
+						switch (gui_decimals){
+						case 1:
+							digits = new DecimalFormat("#,##0.0");// format to 1 decimal place
+							break;
+						case 2:
+							digits = new DecimalFormat("#,##0.00");// format to 1 decimal place
+							break;
+						case 3:
+							digits = new DecimalFormat("#,##0.000");// format to 1 decimal place
+							break;
+						case 4:
+							digits = new DecimalFormat("#,##0.0000");// format to 1 decimal place
+							break;
+						default:
+							digits = new DecimalFormat("#,##0.0");// format to 1 decimal place
+							break;
+						}
 					}
 				}
 				for (SettingEntry sentry : device.getSettings()) {
@@ -220,15 +248,15 @@ public class Config {
 							sentry.setValue(orSentry.getValue());
 
 							if (sentry.getKey().equals("temperature") && (decimals != -1)) {
-								DecimalFormat oneDigit = new DecimalFormat("#,##0.0");// format to 1 decimal place
-								String temp = oneDigit.format(Integer.valueOf(sentry.getValue()) / (Math.pow(10, decimals)))
+								String temp = digits.format(Integer.valueOf(sentry.getValue()) / (Math.pow(10, decimals)))
 										+ " \u2103";
 								value = value + "Temp: " + temp + "\n";
 							} else if (sentry.getKey().equals("humidity") && (decimals != -1)) {
-								DecimalFormat oneDigit = new DecimalFormat("#,##0.0");// format to 1 decimal place
-								String hum = oneDigit.format(Integer.valueOf(sentry.getValue()) / (Math.pow(10, decimals)))
+								String hum = digits.format(Integer.valueOf(sentry.getValue()) / (Math.pow(10, decimals)))
 										+ " %";
 								value = value + "Humidity: " + hum + "\n";
+							} else if (sentry.getKey().equals("timestamp")){
+								value = value + "Stamp: " + new SimpleDateFormat("HH:mm:ss").format(Long.valueOf(sentry.getValue())*1000) + "\n";
 							}
 
 							else {

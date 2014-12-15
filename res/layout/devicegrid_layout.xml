@@ -16,37 +16,53 @@
   ~   See the License for the specific language governing permissions and
   ~   limitations under the License.
   ~  *****************************************************************************
-  -->
+-->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:card="http://schemas.android.com/apk/res-auto"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
-              
-    <it.gmariotti.cardslib.library.view.CardView
-            android:id="@+id/cvResult"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="40dp"
-            android:layout_marginRight="40dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:visibility="gone"/>
+    xmlns:card="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
 
-   <it.gmariotti.cardslib.library.view.CardGridView
-       android:layout_marginTop="4dp"
-       android:layout_marginBottom="4dp"
-       android:layout_width="match_parent"
-       android:layout_height="match_parent"
-       android:columnWidth="@dimen/carddemo_base_grid_columnwidth"
-       android:numColumns="auto_fit"
-       android:verticalSpacing="6dp"
-       android:horizontalSpacing="2dp"
-       android:stretchMode="columnWidth"
-       android:layout_marginLeft="2dp"
-       android:layout_marginRight="2dp"
-       android:gravity="center"
-       android:id="@+id/carddemo_grid_base"/>
+    <it.gmariotti.cardslib.library.view.CardView
+        android:id="@+id/cvResult"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginTop="10dp"
+        android:visibility="gone" />
+
+    <it.gmariotti.cardslib.library.view.CardGridView
+        android:id="@+id/carddemo_grid_base"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="4dp"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="2dp"
+        android:layout_marginTop="4dp"
+        android:columnWidth="@dimen/carddemo_base_grid_columnwidth"
+        android:gravity="center"
+        android:horizontalSpacing="2dp"
+        android:numColumns="auto_fit"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="6dp"
+        android:visibility="gone" />
+
+    <it.gmariotti.cardslib.library.extra.staggeredgrid.view.CardGridStaggeredView
+        android:id="@+id/carddemo_extras_grid_stag"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="4dp"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="2dp"
+        android:layout_marginTop="4dp"
+        android:columnWidth="@dimen/carddemo_base_grid_columnwidth"
+        android:gravity="center"
+        android:horizontalSpacing="2dp"
+        android:numColumns="auto_fit"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="6dp" />
 
 </LinearLayout>

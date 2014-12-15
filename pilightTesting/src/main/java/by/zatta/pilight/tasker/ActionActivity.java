@@ -47,7 +47,7 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		localeBundle = getIntent().getBundleExtra(com.twofortyfouram.locale.Intent.EXTRA_BUNDLE);
+		localeBundle = getIntent().getBundleExtra(com.twofortyfouram.locale.api.Intent.EXTRA_BUNDLE);
 		setContentView(R.layout.actionactivity_layout);
 	}
 

@@ -1,19 +1,6 @@
-bin
-gen
-libs
-.settings
-backup classes for reference
-assets
-
-src/by/zatta/agps/billing
-src/com/android/vending/billing
-/other files/*.png
-/other files/*.xcf
-
-.classpath
-.project
-default.properties
-project.properties
-proguard-project.txt
-proguard.cfg
-ic_launcher-web.png
+.gradle
+/local.properties
+/.idea/workspace.xml
+/.idea/libraries
+.DS_Store
+/build

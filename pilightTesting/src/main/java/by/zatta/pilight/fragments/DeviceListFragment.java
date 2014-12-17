@@ -133,14 +133,41 @@ public class DeviceListFragment extends BaseFragment {
 		for (DeviceEntry device : mDevices) {
 			Card card = null;
 			if (device.getLocationID().equals(mFilter) || mFilter == null) {
-				if (device.getType() == 1) card = new ListSwitchCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 2) card = new ListDimmerCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 3) card = new ListWeatherCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 4) card = new ListRelayCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 5) card = new ListScreenCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 6) card = new ListContactCard(getActivity().getApplicationContext(), device);
+                switch (device.getType()) {
+                    case DeviceEntry.DeviceType.SWITCH:
+                        card = new ListSwitchCard(getActivity().getApplicationContext(), device);
+                        break;
+                    case DeviceEntry.DeviceType.DIMMER:
+                        card = new ListDimmerCard(getActivity().getApplicationContext(), device);
+                        break;
+                    case DeviceEntry.DeviceType.WEATHER:
+                        card = new ListWeatherCard(getActivity().getApplicationContext(), device);
+                        break;
+                    case DeviceEntry.DeviceType.RELAY:
+                        card = new ListRelayCard(getActivity().getApplicationContext(), device);
+                        break;
+                    case DeviceEntry.DeviceType.SCREEN:
+                        card = new ListScreenCard(getActivity().getApplicationContext(), device);
+                        break;
+                    case DeviceEntry.DeviceType.CONTACT:
+                        card = new ListContactCard(getActivity().getApplicationContext(), device);
+                        break;
+                    // case DeviceEntry.DeviceType.PENDINGSW:
+                    //    break;
+                    // case DeviceEntry.DeviceType.DATETIME:
+                    //  break;
+                    // case DeviceEntry.DeviceType.XBMC:
+                    //  break;
+                    // case DeviceEntry.DeviceType.LIRC:
+                    //  break;
+                    // case DeviceEntry.DeviceType.WEBCAM:
+                    //  break;
+                    default:
+                        Log.w(TAG, "Unknown or Unimplemented device type " + device.getType() + " for Device " + device.getNameID());
+                        break;
+                }
 			}
-			if (!(card == null)) cards.add(card);
+			if (card != null) cards.add(card);
 		}
 
 		if (forceList) {
@@ -176,17 +203,17 @@ public class DeviceListFragment extends BaseFragment {
 		int i = 0;
 		for (DeviceEntry device : mDevices) {
 			if (device.getLocationID().equals(mFilter) || mFilter == null) {
-				if (device.getType() == 1) {
+				if (device.getType() == DeviceEntry.DeviceType.SWITCH) {
 					((ListSwitchCard) cards.get(i)).update(device);
-				} else if (device.getType() == 2) {
+				} else if (device.getType() == DeviceEntry.DeviceType.DIMMER) {
 					((ListDimmerCard) cards.get(i)).update(device);
-				} else if (device.getType() == 3) {
+				} else if (device.getType() == DeviceEntry.DeviceType.WEATHER) {
 					((ListWeatherCard) cards.get(i)).update(device);
-				} else if (device.getType() == 4) {
+				} else if (device.getType() == DeviceEntry.DeviceType.RELAY) {
 					((ListRelayCard) cards.get(i)).update(device);
-				} else if (device.getType() == 5) {
+				} else if (device.getType() == DeviceEntry.DeviceType.SCREEN) {
 					((ListScreenCard) cards.get(i)).update(device);
-				} else if (device.getType() == 6) {
+				} else if (device.getType() == DeviceEntry.DeviceType.CONTACT) {
 					((ListContactCard) cards.get(i)).update(device);
 				}
 				i++;

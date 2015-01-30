@@ -209,8 +209,8 @@ public class TaskerActionFragment extends BaseFragment {
 		Bundle extraBundle = new Bundle();
 		extraBundle.putStringArray("Extra", actionArray);
 		Intent i = new Intent();
-		i.putExtra(com.twofortyfouram.locale.Intent.EXTRA_BUNDLE, extraBundle);
-		i.putExtra(com.twofortyfouram.locale.Intent.EXTRA_STRING_BLURB, actionArray[BLURP]);
+		i.putExtra(com.twofortyfouram.locale.api.Intent.EXTRA_BUNDLE, extraBundle);
+		i.putExtra(com.twofortyfouram.locale.api.Intent.EXTRA_STRING_BLURB, actionArray[BLURP]);
 		actionReadyListener.actionReadyListener(i);
 	}
 	

@@ -5,3 +5,10 @@
 <a href="https://flattr.com/submit/auto?user_id=pilight&url=http%3A%2F%2Fwww.pilight.org" target="_blank"><img src="http://api.flattr.com/button/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0"></a>
 Donations are for pilight, more info:
 www.pilight.org
+
+## Development with Android Studio
+You will need to install the **target sdk v19** and **Build Tools 21** packages via Android SDK manager.
+
+Check out a fresh copy of this repository and import "As Existing Android Project" to Android Studio.
+When asked for whether you would like the gradle project imported as well, set the gradle project
+folder to PilightTesting (instead of PilightTesting/gradle). Enjoy!

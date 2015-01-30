@@ -21,7 +21,7 @@ public final class FireReceiver extends BroadcastReceiver {
 	
 	@Override
 	public void onReceive(final Context context, final Intent intent) {
-		Bundle extraBundle = intent.getBundleExtra(com.twofortyfouram.locale.Intent.EXTRA_BUNDLE);
+		Bundle extraBundle = intent.getBundleExtra(com.twofortyfouram.locale.api.Intent.EXTRA_BUNDLE);
 		String[] what = extraBundle.getStringArray("Extra");
 		String command = what[2];
 		

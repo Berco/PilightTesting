@@ -1,0 +1,73 @@
+<p>
+<strong>What is pilight?</strong>
+</p>
+
+<p>
+pilight is an OpenSource project released under GPLv2 and was initially created for the Raspberry Pi. The core functionality of pilight consists of sending and receiving wireless RF (e.g., 433.92Mhz) codes or to control wired 1-wire sensors or relays, the ability to have multi-platform clients, and the ability to add multiple nodes. All of these aspect of pilight have different functionalities and requirements. The first thing we need to be sure of is that we are talking about the same thing. So i will clarify what these different parts of pilight do.
+</p>
+
+<p>
+<em>Send and receiving</em>
+</p>
+
+<p>
+The reason you are <a href="/doku.php/installation" class="wikilink1" title="installation">installing</a> pilight is probably because you want to have generalized control over your wireless RF (433.92Mhz) capable or wired devices. These devices include remote switches, dimmers, weather stations, blinds etc. To be able to send and receive your wireless RF capable devices, you must first own a RF sender and receiver that you can connect to a GPIO supported computer. Once you have done that, you can run the pilight-daemon with it's full capacities.
+</p>
+
+<p>
+<strong>Please notice that there are different qualities of <a href="/doku.php/senders" class="wikilink1" title="senders">senders</a> and <a href="/doku.php/receivers" class="wikilink1" title="receivers">receivers</a>. Please buy the appropriate ones before asking for help on the pilight forum.</strong>
+</p>
+
+<p>
+GPIO supported computer
+</p>
+
+<p>
+The most well know PC that has GPIO support is the Raspberry Pi. pilight has been developed using a Raspberry Pi and this is probably the must appropriate choice to run the full fledged pilight-daemon on.
+</p>
+
+<p>
+pilight-daemon
+</p>
+
+<p>
+The core program of pilight consists of the pilight-daemon. This daemon will handle all the sending and receiving of wireless RF codes or wired sensors / relays, and consists of a socket server with which several clients can communicate to on their turn send to and receive messages from the daemon. The daemon even has a built-in webserver that allows controlling various wireless and wired devices through a web application.
+</p>
+
+<p>
+<em>Multi-platform</em>
+</p>
+
+<p>
+pilight can run on various platforms to enable you to use pilight on all computers in your (home) network. The following pilight program are tested to work on:
+</p>
+<ul>
+<li class="level1"><div class="li"> pilight-daemon*: Raspbian, XBian, FreeBSD, Ubuntu, Debian</div>
+</li>
+<li class="level1"><div class="li"> pilight-sender: Raspbian, XBian, FreeBSD, Ubuntu, Debian, Windows 7</div>
+</li>
+<li class="level1"><div class="li"> pilight-receiver: Raspbian, XBian, FreeBSD, Ubuntu, Debian, Windows 7</div>
+</li>
+<li class="level1"><div class="li"> pilight-control: Raspbian, XBian, FreeBSD, Ubuntu, Debian, Windows 7</div>
+</li>
+<li class="level1"><div class="li"> pilight-learn: Raspbian, XBian</div>
+</li>
+<li class="level1"><div class="li"> pilight-debug: Raspbian, XBian</div>
+</li>
+</ul>
+
+<p>
+* The pilight-daemon will work fine on non-GPIO capable computers, but of course, it will not be able to use it's direct wireless sending and receiving or wired abilities. The daemon can run in node mode.
+</p>
+
+<p>
+<em>Node mode</em>
+</p>
+
+<p>
+The pilight daemon can run in server mode in which it's able to perform all tasks it's capable of. The pilight daemon can also run in client mode. In this mode, the daemon will act as if it were a node. So let's say you have a Raspberry Pi running the pilight daemon in server mode in your living room. Your house has three levels and the living room is located on the 1st floor. In this situation, it can happen that the sender and receiving can't cover all levels up to the 3th floor, and maybe the coverage on the second floor is weak. In this case you can set-up a second Raspberry Pi on the 3th floor that is running in client mode. This client will connect itself to the main server in the living. Whenever the server or the client receive a code, this code is communicated to all connected nodes. Also, whenever a code has to be send, all nodes will send out the requested code. Of course, a sender and/or receiver has to be connected. 
+</p>
+
+<p>
+Another feature is that you can have you main server running on a non-GPIO capable machine. Let's say you have a NAS located in the livingroom that is always on. You run the pilight daemon in server mode but with it's sending and receiving capabilities deactivated. Then you set-up various Raspberry Pi's across your house that with the pilight daemon running as client and connected to the main server on your NAS. Now once a code has been received by one of the Raspberry Pi's it will be communicated to the main server on the NAS, and the NAS will transfer the received codes your all other Raspberry Pi's. This way, you can use your super-reliable computer as the main server and you don't have to rely on your Raspberry Pi's.
+</p> 

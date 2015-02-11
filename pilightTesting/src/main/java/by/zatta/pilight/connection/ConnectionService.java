@@ -294,7 +294,7 @@ public class ConnectionService extends Service {
 	public static void postUpdate(String update) {
 		timeBeat = new Date().getTime();
 		Log.w(TAG, update);
-		if (update.contains("origin\":\"config")) {
+		if (update.contains("origin\":\"config") && !(update.contains("cpu"))) {
 			try {
 				OriginEntry originEntry = Origin.getOriginEntry(new JSONObject(update));
 				mDevices = Config.update(originEntry);

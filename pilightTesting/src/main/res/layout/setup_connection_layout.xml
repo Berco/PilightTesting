@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ /********************************************************************************
+  ~  * 
+  ~  * Copyright (C) 2013 Zatta
+  ~  * 
+  ~  * This file is part of pilight for android.
+  ~  * 
+  ~  * pilight for android is free software: you can redistribute it and/or modify 
+  ~  * it under the terms of the GNU General Public License as published by the 
+  ~  * Free Software Foundation, either version 3 of the License, or (at your option)
+  ~  * any later version.
+  ~  * 
+  ~  * pilight for android is distributed in the hope that it will be useful, but 
+  ~  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+  ~  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
+  ~  * for more details.
+  ~  * 
+  ~  * You should have received a copy of the GNU General Public License along 
+  ~  * with pilightfor android.
+  ~  * If not, see <http://www.gnu.org/licenses/>
+  ~  * 
+  ~  * Copyright (c) 2013 pilight project
+  ~  ********************************************************************************/
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="4dip" >
+
+    <TextView
+        android:id="@+id/tvStatusDisplay"
+        android:text="Some TEXT"
+        android:layout_width="wrap_content"
+        android:layout_height="0dip"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:layout_marginBottom="10dip"
+        android:layout_marginTop="10dip"
+        android:layout_weight="1"
+        android:gravity="top|center_horizontal"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <ProgressBar
+        android:id="@+id/pbConnecting"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="?android:attr/dividerHorizontal"
+        android:orientation="vertical"
+        android:showDividers="middle" >
+
+        <View
+            android:layout_width="wrap_content"
+            android:layout_height="3dp" />
+
+        <LinearLayout
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/btnSetupConnection"
+                style="?android:attr/buttonBarButtonStyle"
+                android:text="ONE"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                 />
+
+            <Button
+                android:id="@+id/btnCancelStart"
+                style="?android:attr/buttonBarButtonStyle"
+                android:text="TWO"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                 />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

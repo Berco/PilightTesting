@@ -31,6 +31,7 @@
     <string name="title_list_base">DeviceList</string> 
     <string name="title_about">About</string>
     <string name="title_status_dialog">Status</string>
+    <string name="title_status_fragment">Status</string>
     <string name="title_all">All</string>
     
     <!-- Status Dialog -->

@@ -23,20 +23,14 @@
 
 package by.zatta.pilight;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.app.ActivityManager.RunningServiceInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -53,6 +47,9 @@ import android.os.Messenger;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -61,25 +58,28 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import by.zatta.pilight.connection.ConnectionService;
 import by.zatta.pilight.dialogs.AboutDialog;
-import by.zatta.pilight.dialogs.StatusDialog;
-import by.zatta.pilight.dialogs.StatusDialog.OnChangedStatusListener;
 import by.zatta.pilight.fragments.BaseFragment;
 import by.zatta.pilight.fragments.DeviceListFragment;
 import by.zatta.pilight.fragments.DeviceListFragment.DeviceListListener;
 import by.zatta.pilight.fragments.PrefFragment;
 import by.zatta.pilight.fragments.PrefFragment.OnLanguageListener;
 import by.zatta.pilight.fragments.PrefFragment.OnViewChangeListener;
+import by.zatta.pilight.fragments.SetupConnectionFragment;
+import by.zatta.pilight.fragments.SetupConnectionFragment.OnChangedStatusListener;
 import by.zatta.pilight.model.DeviceEntry;
 import by.zatta.pilight.model.SettingEntry;
 
 public class MainActivity extends Activity implements ServiceConnection, DeviceListListener,
-		OnChangedStatusListener, OnViewChangeListener,OnLanguageListener {
+        OnChangedStatusListener,OnViewChangeListener,OnLanguageListener {
 
 	private static final String TAG = "Zatta::MainActivity";
 	private static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
@@ -111,16 +111,24 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 	public void onChangedStatusListener(int what) {
 		switch (what)
 		{
-		case StatusDialog.DISMISS:
+		case SetupConnectionFragment.DISMISS:
 			closeDialogFragments();
+            FragmentManager fm = getFragmentManager();
+            BaseFragment prev = (BaseFragment) fm.findFragmentByTag("SetupConnectionFragment");
+            if (!(prev == null)){
+                FragmentTransaction ft = fm.beginTransaction();
+                ft.remove(prev);
+                ft.commit();
+                fm.popBackStack();
+            }
 			break;
-		case StatusDialog.FINISH:
+		case SetupConnectionFragment.FINISH:
 			closeDialogFragments();
 			doUnbindService();
 			stopService(new Intent(MainActivity.this, ConnectionService.class));
 			finish();
 			break;
-		case StatusDialog.RECONNECT:
+		case SetupConnectionFragment.RECONNECT:
 			this.sendBroadcast(new Intent("pilight-reconnect"));
 			break;
 		}
@@ -176,7 +184,7 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 			initMenu();
 		} else {
 			mDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-			openDialogFragment(StatusDialog.newInstance("CONNECTING"));
+			openSetupConnectionFragment(SetupConnectionFragment.newInstance("CONNECTING"));
 		}
 		automaticBind();
 		Log.v(TAG, "onCreate done");
@@ -209,8 +217,8 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 		case R.id.menu_settings:
 			Fragment pref = fm.findFragmentByTag("prefs");
 			if (pref == null) {
+                fm.popBackStack();
 				ft.replace(R.id.fragment_main, new PrefFragment(), "prefs");
-				fm.popBackStack();
 				ft.addToBackStack(null);
 				ft.commit();
 			} else {
@@ -362,9 +370,10 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 	}
 
 	private void openDialogFragment(DialogFragment dialogStandardFragment) {
-		if (dialogStandardFragment != null) {
-			FragmentManager fm = getFragmentManager();
-			FragmentTransaction ft = fm.beginTransaction();
+        FragmentManager fm = getFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+
+        if (dialogStandardFragment != null) {
 			DialogFragment prev = (DialogFragment) fm.findFragmentByTag("dialog");
 			if (prev != null) {
 				prev.dismiss();
@@ -384,6 +393,18 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 			prev.dismiss();
 		}
 	}
+
+    private void openSetupConnectionFragment(BaseFragment mBaseFragment){
+        FragmentManager fm = getFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+
+        Fragment pref = fm.findFragmentByTag("SetupConnectionFragment");
+        if (pref == null) {
+            fm.popBackStack();
+            ft.replace(R.id.fragment_main, mBaseFragment, "SetupConnectionFragment");
+            ft.commit();
+        }
+    }
 
 	private void openFragment(BaseFragment mBaseFragment2) {
 		Log.v(TAG, "openFragment");
@@ -530,22 +551,19 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 				if (status.equals("UPDATE")) break;
 
 				FragmentManager fm = getFragmentManager();
-				Fragment prev = fm.findFragmentByTag("dialog");
-				// Log.e(TAG, "prev was: " +Boolean.toString(prev==null));
-
-				// Log.e(TAG, "pref : " +Boolean.toString(!(prev.getClass().equals(StatusDialog.class))));
+				Fragment prev = fm.findFragmentByTag("SetupConnectionFragment");
 
 				if (prev == null) {
 					// Log.v(TAG, "there was not a fragment with tag dialog");
-					openDialogFragment(StatusDialog.newInstance(status));
+                    openSetupConnectionFragment(SetupConnectionFragment.newInstance(status));
 					break;
-				} else if (!(prev.getClass().equals(StatusDialog.class))) {
-					// Log.v(TAG, "there was fragment with tag dialog not being StatusDialog");
-					openDialogFragment(StatusDialog.newInstance(status));
+				} else if (!(prev.getClass().equals(SetupConnectionFragment.class))) {
+					// Log.v(TAG, "there was fragment with tag SetupConnectionFragment not being StatusDialog");
+                    openSetupConnectionFragment(SetupConnectionFragment.newInstance(status));
 					break;
 				} else {
-					// Log.v(TAG, "there was a statusdialog running");
-					StatusDialog.setChangedStatus(status);
+					// Log.v(TAG, "there was a SetupConnectionFragment running");
+                    SetupConnectionFragment.setChangedStatus(status);
 					break;
 				}
 

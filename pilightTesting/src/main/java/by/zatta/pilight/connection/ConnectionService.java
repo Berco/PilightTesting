@@ -293,7 +293,7 @@ public class ConnectionService extends Service {
 
 	public static void postUpdate(String update) {
 		timeBeat = new Date().getTime();
-		Log.w(TAG, update);
+		//Log.w(TAG, update);
 		if (update.contains("origin\":\"config") && !(update.contains("cpu"))) {
 			try {
 				OriginEntry originEntry = Origin.getOriginEntry(new JSONObject(update));
@@ -330,9 +330,9 @@ public class ConnectionService extends Service {
 
 		String myDate = java.text.DateFormat.getTimeInstance().format(Calendar.getInstance().getTime());
 
-		// Log.v(TAG, "setting notification: " + type.name());
+		//Log.v(TAG, "setting notification: " + type.name() + " while current = " + mCurrentNotif.name());
 		if (type != mCurrentNotif) {
-			// Log.v(TAG, "setting NEW notification: " + type.name());
+			//Log.v(TAG, "setting NEW notification: " + type.name());
 			sendMessageToUI(MSG_SET_STATUS, type.name());
 			switch (type)
 			{
@@ -387,8 +387,9 @@ public class ConnectionService extends Service {
 				main = new Intent(ctx, MainActivity.class);
 				main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 				startMainActivity = PendingIntent.getActivity(ctx, 0, main, PendingIntent.FLAG_UPDATE_CURRENT);
-
-				builder = new Notification.Builder(ctx).setContentTitle(myDate).setContentText(message)
+                    String[] title = message.split("\n");
+                    message = message.replace(title[0]+"\n", "");
+				builder = new Notification.Builder(ctx).setContentTitle(title[0]).setContentText(message)
 						.setStyle(new Notification.BigTextStyle().bigText(message)).setContentIntent(startMainActivity)
 						.setSmallIcon(R.drawable.eye_white).setLargeIcon(bigPic(R.drawable.eye_white));
 				mCurrentNotif = NotificationType.UPDATE;
@@ -398,8 +399,15 @@ public class ConnectionService extends Service {
 			}
 		} else {
 			if (message != null) {
-				builder.setContentTitle(myDate).setStyle(new Notification.BigTextStyle().bigText(message));
-				builder.setContentText(message);
+                if (message.contains("Stamp")){
+                        String[] title = message.split("\n");
+                        message = message.replace(title[0]+"\n", "");
+                    builder.setContentTitle(title[0]).setStyle(new Notification.BigTextStyle().bigText(message));
+                    builder.setContentText(message);
+                } else {
+                    builder.setContentTitle(myDate).setStyle(new Notification.BigTextStyle().bigText(message));
+                    builder.setContentText(message);
+                }
 			}
 		}
 		mNotMan.notify(35, builder.build());

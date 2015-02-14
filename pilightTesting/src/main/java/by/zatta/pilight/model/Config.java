@@ -250,12 +250,15 @@ public class Config {
 							if (sentry.getKey().equals("temperature") && (decimals != -1)) {
 								String temp = digits.format(Integer.valueOf(sentry.getValue()) / (Math.pow(10, decimals)))
 										+ " \u2103";
-								value = value + "Temp: " + temp + "\n";
+                                if (!value.contains("Temp:"))
+								    value = value + "Temp: " + temp + "\n";
 							} else if (sentry.getKey().equals("humidity") && (decimals != -1)) {
 								String hum = digits.format(Integer.valueOf(sentry.getValue()) / (Math.pow(10, decimals)))
 										+ " %";
-								value = value + "Humidity: " + hum + "\n";
+                                if (!value.contains("Humidity:"))
+								    value = value + "Humidity: " + hum + "\n";
 							} else if (sentry.getKey().equals("timestamp")){
+                                if (!value.contains("Stamp: "))
 								value = value + "Stamp: " + new SimpleDateFormat("HH:mm:ss").format(Long.valueOf(sentry.getValue())*1000) + "\n";
 							}
 
@@ -263,7 +266,8 @@ public class Config {
 								char firstChar = orSentry.getKey().charAt(0);
 								char replaceBy = Character.toUpperCase(firstChar);
 								String what = orSentry.getKey().replaceFirst(Character.toString(firstChar), Character.toString(replaceBy));
-								value = value + what + ": " + orSentry.getValue() + "\n";
+                                if (!value.contains(what))
+								    value = value + what + ": " + orSentry.getValue() + "\n";
 							}
 						}
 					}

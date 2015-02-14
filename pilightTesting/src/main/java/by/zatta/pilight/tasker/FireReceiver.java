@@ -1,6 +1,5 @@
 package by.zatta.pilight.tasker;
 
-import by.zatta.pilight.connection.ConnectionService;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.content.BroadcastReceiver;
@@ -15,6 +14,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
+
+import by.zatta.pilight.connection.ConnectionService;
 
 public final class FireReceiver extends BroadcastReceiver {
 	private static final String TAG = "FireReceiver";

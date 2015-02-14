@@ -23,11 +23,11 @@
 
 package by.zatta.pilight.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class OriginEntry implements Parcelable {
 

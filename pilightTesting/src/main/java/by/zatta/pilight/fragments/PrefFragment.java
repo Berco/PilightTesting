@@ -23,7 +23,6 @@
 
 package by.zatta.pilight.fragments;
 
-import by.zatta.pilight.R;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.Fragment;
@@ -38,12 +37,13 @@ import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
-import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.util.Log;
 import android.widget.Toast;
+
+import by.zatta.pilight.R;
 import by.zatta.pilight.dialogs.AboutDialog;
 
 public class PrefFragment extends BasePreferenceFragment {

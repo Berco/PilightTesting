@@ -23,7 +23,6 @@
 
 package by.zatta.pilight;
 
-import by.zatta.pilight.connection.ConnectionService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
@@ -37,6 +36,8 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
+
+import by.zatta.pilight.connection.ConnectionService;
 
 public class ConnectionChangeReceiver extends BroadcastReceiver {
 

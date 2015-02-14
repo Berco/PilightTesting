@@ -27,7 +27,6 @@
 
 package by.zatta.pilight.views;
 
-import by.zatta.pilight.R;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.BlurMaskFilter;
@@ -42,6 +41,8 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+
+import by.zatta.pilight.R;
 
 public class CircularSeekBar extends View {
 

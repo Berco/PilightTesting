@@ -271,6 +271,7 @@ public class DeviceListFragment extends BaseFragment {
 		protected CircularSeekBar mSeekBar;
 		protected ToggleButton mToggle;
 		protected TextView mValueView;
+
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -280,6 +281,7 @@ public class DeviceListFragment extends BaseFragment {
 				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
 			}
 		};
+
 		protected CircularSeekBar.OnCircularSeekBarChangeListener seekListener = new CircularSeekBar.OnCircularSeekBarChangeListener() {
 			@Override
 			public void onStopTrackingTouch(CircularSeekBar seekBar) {
@@ -339,6 +341,7 @@ public class DeviceListFragment extends BaseFragment {
 			}
 		}
 
+        @Override
 		public void update(DeviceEntry entry) {
 			mToggle.setOnCheckedChangeListener(null);
 			mSeekBar.setOnSeekBarChangeListener(null);
@@ -400,6 +403,7 @@ public class DeviceListFragment extends BaseFragment {
 			}
 		}
 
+        @Override
 		public void update(DeviceEntry entry) {
 			mToggle.setOnCheckedChangeListener(null);
 			for (SettingEntry sentry : entry.getSettings()) {
@@ -546,6 +550,7 @@ public class DeviceListFragment extends BaseFragment {
 			}
 		}
 
+        @Override
 		public void update(DeviceEntry entry) {
 			for (SettingEntry sentry : entry.getSettings()) {
 				if (sentry.getKey().equals("temperature")) {
@@ -609,6 +614,7 @@ public class DeviceListFragment extends BaseFragment {
 			if (!readwrite) mToggle.setAlpha((float) 0.5);
 		}
 
+        @Override
 		public void update(DeviceEntry entry) {
 			mToggle.setOnCheckedChangeListener(null);
 			for (SettingEntry sentry : entry.getSettings()) {
@@ -667,6 +673,7 @@ public class DeviceListFragment extends BaseFragment {
 
 		}
 
+        @Override
 		public void update(DeviceEntry entry) {
 		}
 	}
@@ -714,6 +721,7 @@ public class DeviceListFragment extends BaseFragment {
 			// if (!readwrite) mToggle.setAlpha((float) 0.5); // I don't think we need this for the contacts
 		}
 
+        @Override
 		public void update(DeviceEntry entry) {
 			mToggle.setOnCheckedChangeListener(null);
 			for (SettingEntry sentry : entry.getSettings()) {
@@ -769,6 +777,7 @@ public class DeviceListFragment extends BaseFragment {
             }
         }
 
+        @Override
         public void update(DeviceEntry entry) {
             mToggle.setOnCheckedChangeListener(null);
             for (SettingEntry sentry : entry.getSettings()) {

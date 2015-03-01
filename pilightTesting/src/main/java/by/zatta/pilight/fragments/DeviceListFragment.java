@@ -131,16 +131,50 @@ public class DeviceListFragment extends BaseFragment {
 		Log.v(TAG, "initCards");
 		cards = new ArrayList<Card>();
 		for (DeviceEntry device : mDevices) {
-			Card card = null;
+			DeviceCardAbstract card = null;
 			if (device.getLocationID().equals(mFilter) || mFilter == null) {
-				if (device.getType() == 1) card = new ListSwitchCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 2) card = new ListDimmerCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 3) card = new ListWeatherCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 4) card = new ListRelayCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 5) card = new ListScreenCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 6) card = new ListContactCard(getActivity().getApplicationContext(), device);
+                switch (device.getType()) {
+                    case DeviceEntry.DeviceType.SWITCH:
+                        card = new ListSwitchCard(getActivity().getApplicationContext(), device);
+                        break;
+                    case DeviceEntry.DeviceType.DIMMER:
+                        card = new ListDimmerCard(getActivity().getApplicationContext(), device);
+                        break;
+                    case DeviceEntry.DeviceType.WEATHER:
+                        card = new ListWeatherCard(getActivity().getApplicationContext(), device);
+                        break;
+                    case DeviceEntry.DeviceType.RELAY:
+                        card = new ListRelayCard(getActivity().getApplicationContext(), device);
+                        break;
+                    case DeviceEntry.DeviceType.SCREEN:
+                        card = new ListScreenCard(getActivity().getApplicationContext(), device);
+                        break;
+                    case DeviceEntry.DeviceType.CONTACT:
+                        card = new ListContactCard(getActivity().getApplicationContext(), device);
+                        break;
+                    case DeviceEntry.DeviceType.PENDINGSW:
+                        card = new ListPendingSwitchCard(getActivity().getApplicationContext(), device);
+                        break;
+                    // case DeviceEntry.DeviceType.DATETIME:
+                    //  break;
+                    // case DeviceEntry.DeviceType.XBMC:
+                    //  break;
+                    // case DeviceEntry.DeviceType.LIRC:
+                    //  break;
+                    // case DeviceEntry.DeviceType.WEBCAM:
+                    //  break;
+                    // case DeviceEntry.DeviceType.MOTION:
+                    //  break;
+                    // case DeviceEntry.DeviceType.DUSK:
+                    //  break;
+                    // case DeviceEntry.DeviceType.PING:
+                    //  break;
+                    default:
+                        Log.w(TAG, "Unknown or Unimplemented device type " + device.getType() + " for Device " + device.getNameID());
+                        break;
+                }
 			}
-			if (!(card == null)) cards.add(card);
+			if (card != null) cards.add(card);
 		}
 
 		if (forceList) {
@@ -174,21 +208,12 @@ public class DeviceListFragment extends BaseFragment {
 	public static void updateUI(List<DeviceEntry> list) {
 		mDevices = list;
 		int i = 0;
-		for (DeviceEntry device : mDevices) {
-			if (device.getLocationID().equals(mFilter) || mFilter == null) {
-				if (device.getType() == 1) {
-					((ListSwitchCard) cards.get(i)).update(device);
-				} else if (device.getType() == 2) {
-					((ListDimmerCard) cards.get(i)).update(device);
-				} else if (device.getType() == 3) {
-					((ListWeatherCard) cards.get(i)).update(device);
-				} else if (device.getType() == 4) {
-					((ListRelayCard) cards.get(i)).update(device);
-				} else if (device.getType() == 5) {
-					((ListScreenCard) cards.get(i)).update(device);
-				} else if (device.getType() == 6) {
-					((ListContactCard) cards.get(i)).update(device);
-				}
+		for (DeviceEntry entry : mDevices) {
+			if (entry.getLocationID().equals(mFilter) || mFilter == null) {
+                Card card = cards.get(i);
+                if( card instanceof DeviceCardAbstract) {
+                    ((DeviceCardAbstract) card).update(entry);
+                }
 				i++;
 			}
 		}
@@ -202,21 +227,51 @@ public class DeviceListFragment extends BaseFragment {
 		public void deviceListListener(int what, String action);
 	}
 
+    /**
+     * Abstract class to unify shared setup code for pilight devices.
+     */
+    public abstract class DeviceCardAbstract extends Card {
+        protected String who;
+        protected String mTitleDevice;
+        protected String mTitleLocation;
+        protected boolean readwrite = true;
+
+        public DeviceCardAbstract(Context context, DeviceEntry entry, int innerLayout) {
+            super(context, innerLayout);
+
+            who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
+
+            for (SettingEntry sentry : entry.getSettings()) {
+                if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
+                if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
+                if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
+            }
+
+            CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleDevice, mTitleLocation);
+            addCardHeader(header);
+        }
+
+        /**
+         * Update the device card according to the values sent by the pilight server
+         *
+         * @param entry the updated device information entry
+         */
+        abstract public void update(DeviceEntry entry);
+    }
+
 	/*
 	 * CARDS START FROM HERE: ListDimmerCard ************************************ ******************************************
 	 */
-	public class ListDimmerCard extends Card {
-		protected String who;
+	public class ListDimmerCard extends DeviceCardAbstract {
+
 		protected boolean mState;
-		protected boolean readwrite = true;
 		protected int mSeekValue;
 		protected int minSeekValue;
 		protected int maxSeekValue;
-		protected String mTitleDevice;
-		protected String mTitleLocation;
 		protected CircularSeekBar mSeekBar;
 		protected ToggleButton mToggle;
 		protected TextView mValueView;
+
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -226,6 +281,7 @@ public class DeviceListFragment extends BaseFragment {
 				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
 			}
 		};
+
 		protected CircularSeekBar.OnCircularSeekBarChangeListener seekListener = new CircularSeekBar.OnCircularSeekBarChangeListener() {
 			@Override
 			public void onStopTrackingTouch(CircularSeekBar seekBar) {
@@ -245,11 +301,9 @@ public class DeviceListFragment extends BaseFragment {
 		};
 
 		public ListDimmerCard(Context context, DeviceEntry entry) {
-			super(context, R.layout.dimmercard_inner);
-			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
+            super(context, entry, R.layout.dimmercard_inner);
+
 			for (SettingEntry sentry : entry.getSettings()) {
-				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
-				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
 				if (sentry.getKey().equals("dimlevel")) mSeekValue = Integer.valueOf(sentry.getValue());
 				if (sentry.getKey().equals("state")) {
 					if (sentry.getValue().equals("on")) mState = true;
@@ -257,14 +311,7 @@ public class DeviceListFragment extends BaseFragment {
 				}
 				if (sentry.getKey().equals("dimlevel-minimum")) minSeekValue = Integer.valueOf(sentry.getValue());
 				if (sentry.getKey().equals("dimlevel-maximum")) maxSeekValue = Integer.valueOf(sentry.getValue());
-				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
-			init();
-		}
-
-		private void init() {
-			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleDevice, mTitleLocation);
-			addCardHeader(header);
 		}
 
 		@Override
@@ -281,19 +328,20 @@ public class DeviceListFragment extends BaseFragment {
 				mToggle.setOnCheckedChangeListener(toggleListener);
 				mToggle.setText(Integer.toString(mSeekValue));
 				mToggle.getBackground().setAlpha((int) ((float) (mSeekValue + 1) / (maxSeekValue + 1) * 80) + 70);
+                mToggle.setClickable(readwrite);
+                if (!readwrite) mToggle.setAlpha((float) 0.5);
 			}
 
 			if (mSeekBar != null) {
 				mSeekBar.setMax(maxSeekValue - minSeekValue);
 				mSeekBar.setProgress(mSeekValue - minSeekValue);
 				mSeekBar.setOnSeekBarChangeListener(seekListener);
+                mSeekBar.setClickable(readwrite);
+                if (!readwrite) mSeekBar.setAlpha((float) 0.5);
 			}
-			mToggle.setClickable(readwrite);
-			mSeekBar.setClickable(readwrite);
-			if (!readwrite) mToggle.setAlpha((float) 0.5);
-			if (!readwrite) mSeekBar.setAlpha((float) 0.5);
 		}
 
+        @Override
 		public void update(DeviceEntry entry) {
 			mToggle.setOnCheckedChangeListener(null);
 			mSeekBar.setOnSeekBarChangeListener(null);
@@ -317,14 +365,10 @@ public class DeviceListFragment extends BaseFragment {
 	/*
 	 * LISTSWITCHCARD *********************************************************** *****************************************
 	 */
-	public class ListSwitchCard extends Card {
-		protected String who;
-		protected String mValue;
-		protected String mTitleDevice;
-		protected String mTitleLocation;
+	public class ListSwitchCard extends DeviceCardAbstract {
+
 		protected ToggleButton mToggle;
 		protected boolean mState;
-		protected boolean readwrite = true;
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -336,23 +380,14 @@ public class DeviceListFragment extends BaseFragment {
 		};
 
 		public ListSwitchCard(Context context, DeviceEntry entry) {
-			super(context, R.layout.switchcard_inner);
-			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
+			super(context, entry, R.layout.switchcard_inner);
+
 			for (SettingEntry sentry : entry.getSettings()) {
-				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
-				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
 				if (sentry.getKey().equals("state")) {
 					if (sentry.getValue().equals("on")) mState = true;
 					if (sentry.getValue().equals("off")) mState = false;
 				}
-				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
-			init();
-		}
-
-		private void init() {
-			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleDevice, mTitleLocation);
-			addCardHeader(header);
 		}
 
 		@Override
@@ -363,12 +398,12 @@ public class DeviceListFragment extends BaseFragment {
 			if (mToggle != null) {
 				mToggle.setChecked(mState);
 				mToggle.setOnCheckedChangeListener(toggleListener);
+                mToggle.setClickable(readwrite);
+                if (!readwrite) mToggle.setAlpha((float) 0.5);
 			}
-			mToggle.setClickable(readwrite);
-			if (!readwrite) mToggle.setAlpha((float) 0.5);
-
 		}
 
+        @Override
 		public void update(DeviceEntry entry) {
 			mToggle.setOnCheckedChangeListener(null);
 			for (SettingEntry sentry : entry.getSettings()) {
@@ -382,10 +417,12 @@ public class DeviceListFragment extends BaseFragment {
 		}
 	}
 
+
+
 	/*
 	 * LISTWEATHERCARD ********************************************************** ******************************************
 	 */
-	public class ListWeatherCard extends Card {
+	public class ListWeatherCard extends DeviceCardAbstract {
 
 		protected String mTemperature;
 		protected String mHumidity;
@@ -393,8 +430,6 @@ public class DeviceListFragment extends BaseFragment {
 		protected boolean showTemperature = false;
 		protected boolean showHumidity = false;
 		protected boolean mBattery = false;
-		protected String mTitleDevice;
-		protected String mTitleLocation;
 		protected String mSunriseTime;
 		protected String mSunsetTime;
 		protected int decimals;
@@ -407,10 +442,8 @@ public class DeviceListFragment extends BaseFragment {
 		protected DecimalFormat digits = new DecimalFormat("#,##0.0");// format to 1 decimal place
 
 		public ListWeatherCard(Context context, DeviceEntry entry) {
-			super(context, R.layout.weathercard_inner);
+			super(context, entry, R.layout.weathercard_inner);
 			for (SettingEntry sentry : entry.getSettings()) {
-				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
-				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
 				if (sentry.getKey().equals("temperature")) mTemperature = sentry.getValue();
 				if (sentry.getKey().equals("humidity")) mHumidity = sentry.getValue();
 				if (sentry.getKey().equals("sunrise")) mSunriseTime = sentry.getValue();
@@ -468,7 +501,6 @@ public class DeviceListFragment extends BaseFragment {
 				} catch (ParseException e) {
 				}
 			}
-			init();
 		}
 
 		private String makeTimeString(String time) throws ParseException {
@@ -482,11 +514,6 @@ public class DeviceListFragment extends BaseFragment {
 			return time;
 		}
 
-		private void init() {
-			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleDevice, mTitleLocation);
-			addCardHeader(header);
-		}
-
 		@Override
 		public void setupInnerViewElements(ViewGroup parent, View view) {
 			// Retrieve elements
@@ -496,14 +523,25 @@ public class DeviceListFragment extends BaseFragment {
 			mSunsetView = (TextView) parent.findViewById(R.id.card_main_inner_sunset);
 			mBatteryView = (ImageView) parent.findViewById(R.id.card_main_inner_battery);
 
-			if (mTemperatureView != null && mTemperature != null && showTemperature) mTemperatureView.setVisibility(View.VISIBLE);
-			mTemperatureView.setText(mTemperature);
-			if (mHumidityView != null && mHumidity != null && showHumidity) mHumidityView.setVisibility(View.VISIBLE);
-			mHumidityView.setText(mHumidity);
-			if (mSunriseView != null && mSunriseTime != null) mSunriseView.setVisibility(View.VISIBLE);
-			mSunriseView.setText(mSunriseTime);
-			if (mSunsetView != null && mSunsetTime != null) mSunsetView.setVisibility(View.VISIBLE);
-			mSunsetView.setText(mSunsetTime);
+			if ((mTemperatureView != null) && (mTemperature != null) && showTemperature) {
+                mTemperatureView.setVisibility(View.VISIBLE);
+                mTemperatureView.setText(mTemperature);
+            }
+
+			if ((mHumidityView != null) && (mHumidity != null) && showHumidity) {
+                mHumidityView.setVisibility(View.VISIBLE);
+                mHumidityView.setText(mHumidity);
+            }
+
+			if ((mSunriseView != null) && (mSunriseTime != null)) {
+                mSunriseView.setVisibility(View.VISIBLE);
+                mSunriseView.setText(mSunriseTime);
+            }
+
+			if (mSunsetView != null && mSunsetTime != null) {
+                mSunsetView.setVisibility(View.VISIBLE);
+                mSunsetView.setText(mSunsetTime);
+            }
 
 			if (mBatteryView != null && showBattery) {
 				mBatteryView.setVisibility(View.VISIBLE);
@@ -512,6 +550,7 @@ public class DeviceListFragment extends BaseFragment {
 			}
 		}
 
+        @Override
 		public void update(DeviceEntry entry) {
 			for (SettingEntry sentry : entry.getSettings()) {
 				if (sentry.getKey().equals("temperature")) {
@@ -536,14 +575,10 @@ public class DeviceListFragment extends BaseFragment {
 	/*
 	 * LISTRELAYCARD *********************************************************** *****************************************
 	 */
-	public class ListRelayCard extends Card {
-		protected String who;
-		protected String mValue;
-		protected String mTitleDevice;
-		protected String mTitleLocation;
+	public class ListRelayCard extends DeviceCardAbstract {
+
 		protected ToggleButton mToggle;
 		protected boolean mState;
-		protected boolean readwrite = true;
 
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
@@ -556,23 +591,13 @@ public class DeviceListFragment extends BaseFragment {
 		};
 
 		public ListRelayCard(Context context, DeviceEntry entry) {
-			super(context, R.layout.relaycard_inner);
-			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
+			super(context, entry, R.layout.relaycard_inner);
 			for (SettingEntry sentry : entry.getSettings()) {
-				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
-				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
 				if (sentry.getKey().equals("state")) {
 					if (sentry.getValue().equals("on")) mState = true;
 					if (sentry.getValue().equals("off")) mState = false;
 				}
-				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
-			init();
-		}
-
-		private void init() {
-			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleDevice, mTitleLocation);
-			addCardHeader(header);
 		}
 
 		@Override
@@ -583,11 +608,13 @@ public class DeviceListFragment extends BaseFragment {
 			if (mToggle != null) {
 				mToggle.setChecked(mState);
 				mToggle.setOnCheckedChangeListener(toggleListener);
+                mToggle.setClickable(readwrite);
 			}
-			mToggle.setClickable(readwrite);
+
 			if (!readwrite) mToggle.setAlpha((float) 0.5);
 		}
 
+        @Override
 		public void update(DeviceEntry entry) {
 			mToggle.setOnCheckedChangeListener(null);
 			for (SettingEntry sentry : entry.getSettings()) {
@@ -604,13 +631,10 @@ public class DeviceListFragment extends BaseFragment {
 	/*
 	 * LISTSCREENCARD *********************************************************** *****************************************
 	 */
-	public class ListScreenCard extends Card {
-		protected String who;
-		protected String mTitleDevice;
-		protected String mTitleLocation;
+	public class ListScreenCard extends DeviceCardAbstract {
+
 		protected Button mBtnUp;
 		protected Button mBtnDown;
-		protected boolean readwrite = true;
 
 		protected Button.OnClickListener clickListener = new Button.OnClickListener() {
 			@Override
@@ -629,19 +653,12 @@ public class DeviceListFragment extends BaseFragment {
 		};
 
 		public ListScreenCard(Context context, DeviceEntry entry) {
-			super(context, R.layout.screencard_inner);
-			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
+			super(context, entry, R.layout.screencard_inner);
 			for (SettingEntry sentry : entry.getSettings()) {
 				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
 				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
 				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
-			init();
-		}
-
-		private void init() {
-			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleDevice, mTitleDevice);
-			addCardHeader(header);
 		}
 
 		@Override
@@ -656,6 +673,7 @@ public class DeviceListFragment extends BaseFragment {
 
 		}
 
+        @Override
 		public void update(DeviceEntry entry) {
 		}
 	}
@@ -663,14 +681,10 @@ public class DeviceListFragment extends BaseFragment {
 	/*
 	 * LISTCONTACTCARD *********************************************************** *****************************************
 	 */
-	public class ListContactCard extends Card {
-		protected String who;
-		protected String mValue;
-		protected String mTitleDevice;
-		protected String mTitleLocation;
+	public class ListContactCard extends DeviceCardAbstract {
+
 		protected ToggleButton mToggle;
 		protected boolean mState;
-		protected boolean readwrite = true;
 
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
@@ -683,23 +697,14 @@ public class DeviceListFragment extends BaseFragment {
 		};
 
 		public ListContactCard(Context context, DeviceEntry entry) {
-			super(context, R.layout.contactcard_inner);
-			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
+			super(context, entry, R.layout.contactcard_inner);
 			for (SettingEntry sentry : entry.getSettings()) {
-				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
-				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
 				if (sentry.getKey().equals("state")) {
 					if (sentry.getValue().equals("opened")) mState = true;
 					if (sentry.getValue().equals("closed")) mState = false;
 				}
 				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
-			init();
-		}
-
-		private void init() {
-			CardHeader header = new CustomHeaderInnerCard(getContext(), mTitleDevice, mTitleLocation);
-			addCardHeader(header);
 		}
 
 		@Override
@@ -710,11 +715,13 @@ public class DeviceListFragment extends BaseFragment {
 			if (mToggle != null) {
 				mToggle.setChecked(mState);
 				mToggle.setOnCheckedChangeListener(toggleListener);
+                mToggle.setClickable(readwrite);
 			}
-			mToggle.setClickable(readwrite);
+
 			// if (!readwrite) mToggle.setAlpha((float) 0.5); // I don't think we need this for the contacts
 		}
 
+        @Override
 		public void update(DeviceEntry entry) {
 			mToggle.setOnCheckedChangeListener(null);
 			for (SettingEntry sentry : entry.getSettings()) {
@@ -727,4 +734,63 @@ public class DeviceListFragment extends BaseFragment {
 			mToggle.setOnCheckedChangeListener(toggleListener);
 		}
 	}
+
+
+    /*
+     * Pending_SW device type *********************************************************** *****************************************
+     */
+    public class ListPendingSwitchCard extends DeviceCardAbstract {
+
+        protected ToggleButton mToggle;
+        protected boolean mState;
+
+        protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                String action = "\"state\":\"stopped\"";
+                if (isChecked) action = "\"state\":\"running\"";
+                mState = isChecked;
+                deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
+            }
+        };
+
+        public ListPendingSwitchCard(Context context, DeviceEntry entry) {
+            // reuse the switch card
+            super(context, entry, R.layout.switchcard_inner);
+            for (SettingEntry sentry : entry.getSettings()) {
+                if (sentry.getKey().equals("state")) {
+                    if (sentry.getValue().equals("running")) mState = true;
+                    if (sentry.getValue().equals("pending")) mState = true;
+                    if (sentry.getValue().equals("stopped")) mState = false;
+                }
+            }
+        }
+
+        @Override
+        public void setupInnerViewElements(ViewGroup parent, View view) {
+            // Retrieve elements
+            mToggle = (ToggleButton) parent.findViewById(R.id.card_inner_tb);
+
+            if (mToggle != null) {
+                mToggle.setChecked(mState);
+                mToggle.setOnCheckedChangeListener(toggleListener);
+                mToggle.setClickable(readwrite);
+                if (!readwrite) mToggle.setAlpha((float) 0.5);
+            }
+        }
+
+        @Override
+        public void update(DeviceEntry entry) {
+            mToggle.setOnCheckedChangeListener(null);
+            for (SettingEntry sentry : entry.getSettings()) {
+                if (sentry.getKey().equals("state")) {
+                    if (sentry.getValue().equals("running")) mState = true;
+                    if (sentry.getValue().equals("pending")) mState = true;
+                    if (sentry.getValue().equals("stopped")) mState = false;
+                    mToggle.setChecked(mState);
+                }
+            }
+            mToggle.setOnCheckedChangeListener(toggleListener);
+        }
+    }
 }

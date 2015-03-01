@@ -326,17 +326,17 @@ public class DeviceListFragment extends BaseFragment {
 				mToggle.setOnCheckedChangeListener(toggleListener);
 				mToggle.setText(Integer.toString(mSeekValue));
 				mToggle.getBackground().setAlpha((int) ((float) (mSeekValue + 1) / (maxSeekValue + 1) * 80) + 70);
+                mToggle.setClickable(readwrite);
+                if (!readwrite) mToggle.setAlpha((float) 0.5);
 			}
 
 			if (mSeekBar != null) {
 				mSeekBar.setMax(maxSeekValue - minSeekValue);
 				mSeekBar.setProgress(mSeekValue - minSeekValue);
 				mSeekBar.setOnSeekBarChangeListener(seekListener);
+                mSeekBar.setClickable(readwrite);
+                if (!readwrite) mSeekBar.setAlpha((float) 0.5);
 			}
-			mToggle.setClickable(readwrite);
-			mSeekBar.setClickable(readwrite);
-			if (!readwrite) mToggle.setAlpha((float) 0.5);
-			if (!readwrite) mSeekBar.setAlpha((float) 0.5);
 		}
 
 		public void update(DeviceEntry entry) {
@@ -395,10 +395,9 @@ public class DeviceListFragment extends BaseFragment {
 			if (mToggle != null) {
 				mToggle.setChecked(mState);
 				mToggle.setOnCheckedChangeListener(toggleListener);
+                mToggle.setClickable(readwrite);
+                if (!readwrite) mToggle.setAlpha((float) 0.5);
 			}
-			mToggle.setClickable(readwrite);
-			if (!readwrite) mToggle.setAlpha((float) 0.5);
-
 		}
 
 		public void update(DeviceEntry entry) {
@@ -520,16 +519,25 @@ public class DeviceListFragment extends BaseFragment {
 			mSunsetView = (TextView) parent.findViewById(R.id.card_main_inner_sunset);
 			mBatteryView = (ImageView) parent.findViewById(R.id.card_main_inner_battery);
 
-			if (mTemperatureView != null && mTemperature != null && showTemperature) {
+			if ((mTemperatureView != null) && (mTemperature != null) && showTemperature) {
                 mTemperatureView.setVisibility(View.VISIBLE);
+                mTemperatureView.setText(mTemperature);
             }
-			mTemperatureView.setText(mTemperature);
-			if (mHumidityView != null && mHumidity != null && showHumidity) mHumidityView.setVisibility(View.VISIBLE);
-			mHumidityView.setText(mHumidity);
-			if (mSunriseView != null && mSunriseTime != null) mSunriseView.setVisibility(View.VISIBLE);
-			mSunriseView.setText(mSunriseTime);
-			if (mSunsetView != null && mSunsetTime != null) mSunsetView.setVisibility(View.VISIBLE);
-			mSunsetView.setText(mSunsetTime);
+
+			if ((mHumidityView != null) && (mHumidity != null) && showHumidity) {
+                mHumidityView.setVisibility(View.VISIBLE);
+                mHumidityView.setText(mHumidity);
+            }
+
+			if ((mSunriseView != null) && (mSunriseTime != null)) {
+                mSunriseView.setVisibility(View.VISIBLE);
+                mSunriseView.setText(mSunriseTime);
+            }
+
+			if (mSunsetView != null && mSunsetTime != null) {
+                mSunsetView.setVisibility(View.VISIBLE);
+                mSunsetView.setText(mSunsetTime);
+            }
 
 			if (mBatteryView != null && showBattery) {
 				mBatteryView.setVisibility(View.VISIBLE);
@@ -595,8 +603,9 @@ public class DeviceListFragment extends BaseFragment {
 			if (mToggle != null) {
 				mToggle.setChecked(mState);
 				mToggle.setOnCheckedChangeListener(toggleListener);
+                mToggle.setClickable(readwrite);
 			}
-			mToggle.setClickable(readwrite);
+
 			if (!readwrite) mToggle.setAlpha((float) 0.5);
 		}
 
@@ -699,8 +708,9 @@ public class DeviceListFragment extends BaseFragment {
 			if (mToggle != null) {
 				mToggle.setChecked(mState);
 				mToggle.setOnCheckedChangeListener(toggleListener);
+                mToggle.setClickable(readwrite);
 			}
-			mToggle.setClickable(readwrite);
+
 			// if (!readwrite) mToggle.setAlpha((float) 0.5); // I don't think we need this for the contacts
 		}
 

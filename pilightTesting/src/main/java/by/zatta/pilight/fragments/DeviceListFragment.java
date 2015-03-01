@@ -755,10 +755,12 @@ public class DeviceListFragment extends BaseFragment {
         };
 
         public ListPendingSwitchCard(Context context, DeviceEntry entry) {
+            // reuse the switch card
             super(context, entry, R.layout.switchcard_inner);
             for (SettingEntry sentry : entry.getSettings()) {
                 if (sentry.getKey().equals("state")) {
                     if (sentry.getValue().equals("running")) mState = true;
+                    if (sentry.getValue().equals("pending")) mState = true;
                     if (sentry.getValue().equals("stopped")) mState = false;
                 }
             }
@@ -783,6 +785,7 @@ public class DeviceListFragment extends BaseFragment {
             for (SettingEntry sentry : entry.getSettings()) {
                 if (sentry.getKey().equals("state")) {
                     if (sentry.getValue().equals("running")) mState = true;
+                    if (sentry.getValue().equals("pending")) mState = true;
                     if (sentry.getValue().equals("stopped")) mState = false;
                     mToggle.setChecked(mState);
                 }

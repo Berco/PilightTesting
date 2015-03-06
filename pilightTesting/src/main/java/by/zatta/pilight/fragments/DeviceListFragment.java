@@ -1,23 +1,23 @@
 /******************************************************************************************
- * 
+ *
  * Copyright (C) 2013 Zatta
- * 
+ *
  * This file is part of pilight for android.
- * 
+ *
  * pilight for android is free software: you can redistribute it and/or modify 
  * it under the terms of the GNU General Public License as published by the 
  * Free Software Foundation, either version 3 of the License, or (at your option)
  * any later version.
- * 
+ *
  * pilight for android is distributed in the hope that it will be useful, but 
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along 
  * with pilightfor android.
  * If not, see <http://www.gnu.org/licenses/>
- * 
+ *
  * Copyright (c) 2013 pilight project
  ********************************************************************************************/
 
@@ -40,6 +40,10 @@ import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -64,17 +68,17 @@ import it.gmariotti.cardslib.library.view.CardListView;
 
 public class DeviceListFragment extends BaseFragment {
 
+	private static final String TAG = "Zatta::DevicelistFragement";
 	static DeviceListListener deviceListListener;
-	protected ScrollView mScrollView;
 	static ArrayList<Card> cards;
-	private static final String TAG = "ListBase";
 	static CardArrayAdapter mCardArrayAdapter;
 	static CardGridArrayAdapter mCardGridArrayAdapter;
 	static CardGridStaggeredArrayAdapter mCardStaggeredGridArrayAdapter;
 	static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
-	public final int GIMME_DEVICES = 1002;
 	private static String mFilter;
 	private static boolean forceList;
+	public final int GIMME_DEVICES = 1002;
+	protected ScrollView mScrollView;
 
 	public static DeviceListFragment newInstance(List<DeviceEntry> list, String filter) {
 		DeviceListFragment f = new DeviceListFragment();
@@ -83,6 +87,32 @@ public class DeviceListFragment extends BaseFragment {
 		args.putString("filter", filter);
 		f.setArguments(args);
 		return f;
+	}
+
+	public static void updateUI(List<DeviceEntry> list) {
+		mDevices = list;
+		int i = 0;
+		for (DeviceEntry device : mDevices) {
+			if (device.getLocationID().equals(mFilter) || mFilter == null) {
+				if (device.getType() == 1) {
+					((ListSwitchCard) cards.get(i)).update(device);
+				} else if (device.getType() == 2) {
+					((ListDimmerCard) cards.get(i)).update(device);
+				} else if (device.getType() == 3) {
+					((ListWeatherCard) cards.get(i)).update(device);
+				} else if (device.getType() == 4) {
+					((ListRelayCard) cards.get(i)).update(device);
+				} else if (device.getType() == 5) {
+					((ListScreenCard) cards.get(i)).update(device);
+				} else if (device.getType() == 6) {
+					((ListContactCard) cards.get(i)).update(device);
+				}
+				i++;
+			}
+		}
+
+		if (forceList) mCardArrayAdapter.notifyDataSetChanged();
+		else mCardStaggeredGridArrayAdapter.notifyDataSetChanged();
 	}
 
 	@Override
@@ -132,7 +162,7 @@ public class DeviceListFragment extends BaseFragment {
 		cards = new ArrayList<Card>();
 		for (DeviceEntry device : mDevices) {
 			Card card = null;
-			if (device.getLocationID().equals(mFilter) || mFilter == null) {
+			if (device.hasGroup(mFilter) || mFilter == null) {
 				if (device.getType() == 1) card = new ListSwitchCard(getActivity().getApplicationContext(), device);
 				else if (device.getType() == 2) card = new ListDimmerCard(getActivity().getApplicationContext(), device);
 				else if (device.getType() == 3) card = new ListWeatherCard(getActivity().getApplicationContext(), device);
@@ -152,13 +182,6 @@ public class DeviceListFragment extends BaseFragment {
 				listView.setAdapter(mCardArrayAdapter);
 			}
 		} else {
-			// mCardGridArrayAdapter = new CardGridArrayAdapter(getActivity(), cards);
-			// mCardGridArrayAdapter.setInnerViewTypeCount(2);
-			//
-			// CardGridView gridView = (CardGridView) getActivity().findViewById(R.id.carddemo_grid_base);
-			// if (gridView != null) {
-			// gridView.setAdapter(mCardGridArrayAdapter);
-			// }
 
 			mCardStaggeredGridArrayAdapter = new CardGridStaggeredArrayAdapter(getActivity(), cards);
 			mCardStaggeredGridArrayAdapter.setInnerViewTypeCount(2);
@@ -169,33 +192,6 @@ public class DeviceListFragment extends BaseFragment {
 			}
 
 		}
-	}
-
-	public static void updateUI(List<DeviceEntry> list) {
-		mDevices = list;
-		int i = 0;
-		for (DeviceEntry device : mDevices) {
-			if (device.getLocationID().equals(mFilter) || mFilter == null) {
-				if (device.getType() == 1) {
-					((ListSwitchCard) cards.get(i)).update(device);
-				} else if (device.getType() == 2) {
-					((ListDimmerCard) cards.get(i)).update(device);
-				} else if (device.getType() == 3) {
-					((ListWeatherCard) cards.get(i)).update(device);
-				} else if (device.getType() == 4) {
-					((ListRelayCard) cards.get(i)).update(device);
-				} else if (device.getType() == 5) {
-					((ListScreenCard) cards.get(i)).update(device);
-				} else if (device.getType() == 6) {
-					((ListContactCard) cards.get(i)).update(device);
-				}
-				i++;
-			}
-		}
-
-		if (forceList) mCardArrayAdapter.notifyDataSetChanged();
-		// else mCardGridArrayAdapter.notifyDataSetChanged();
-		else mCardStaggeredGridArrayAdapter.notifyDataSetChanged();
 	}
 
 	public interface DeviceListListener {
@@ -257,7 +253,7 @@ public class DeviceListFragment extends BaseFragment {
 				}
 				if (sentry.getKey().equals("dimlevel-minimum")) minSeekValue = Integer.valueOf(sentry.getValue());
 				if (sentry.getKey().equals("dimlevel-maximum")) maxSeekValue = Integer.valueOf(sentry.getValue());
-				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
+				if (sentry.getKey().equals("readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}
@@ -315,9 +311,10 @@ public class DeviceListFragment extends BaseFragment {
 	}
 
 	/*
-	 * LISTSWITCHCARD *********************************************************** *****************************************
+	 * LISTSWITCHCARD ****************************************************************************************************
 	 */
 	public class ListSwitchCard extends Card {
+		protected JSONObject codeJSON = new JSONObject();
 		protected String who;
 		protected String mValue;
 		protected String mTitleDevice;
@@ -328,15 +325,30 @@ public class DeviceListFragment extends BaseFragment {
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				String action = "\"state\":\"off\"";
-				if (isChecked) action = "\"state\":\"on\"";
+
+				JSONObject actionJSON = null;
+				try {
+					if (isChecked) codeJSON.put("state", "on");
+					else codeJSON.put("state", "off");
+					actionJSON = new JSONObject();
+					actionJSON.put("action", "control");
+					actionJSON.put("code", codeJSON);
+				} catch (JSONException e) {
+					Log.d(TAG, "could not create actionJSON");
+				}
 				mState = isChecked;
-				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
+				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, actionJSON.toString());
 			}
 		};
 
 		public ListSwitchCard(Context context, DeviceEntry entry) {
 			super(context, R.layout.switchcard_inner);
+			try {
+				codeJSON.put("device", entry.getNameID());
+			} catch (JSONException e) {
+				Log.d(TAG, "could not create codeJSON");
+			}
+
 			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
 			for (SettingEntry sentry : entry.getSettings()) {
 				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
@@ -345,7 +357,7 @@ public class DeviceListFragment extends BaseFragment {
 					if (sentry.getValue().equals("on")) mState = true;
 					if (sentry.getValue().equals("off")) mState = false;
 				}
-				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
+				if (sentry.getKey().equals("readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}
@@ -383,7 +395,7 @@ public class DeviceListFragment extends BaseFragment {
 	}
 
 	/*
-	 * LISTWEATHERCARD ********************************************************** ******************************************
+	 * LISTWEATHERCARD ****************************************************************************************************
 	 */
 	public class ListWeatherCard extends Card {
 
@@ -412,49 +424,37 @@ public class DeviceListFragment extends BaseFragment {
 				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
 				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
 				if (sentry.getKey().equals("temperature")) mTemperature = sentry.getValue();
-				if (sentry.getKey().equals("humidity")) mHumidity = sentry.getValue();
+				if (sentry.getKey().equals("humidity")) mHumidity = sentry.getValue() + " %";
 				if (sentry.getKey().equals("sunrise")) mSunriseTime = sentry.getValue();
 				if (sentry.getKey().equals("sunset")) mSunsetTime = sentry.getValue();
 				if (sentry.getKey().equals("battery") && (sentry.getValue().equals("1"))) mBattery = true;
 				if (sentry.getKey().equals("device-decimals")) decimals = Integer.valueOf(sentry.getValue());
-				if (sentry.getKey().equals("gui-decimals")) gui_decimals = Integer.valueOf(sentry.getValue());
-				if (sentry.getKey().equals("gui-show-battery") && (sentry.getValue().equals("1"))) showBattery = true;
-				if (sentry.getKey().equals("gui-show-temperature") && (sentry.getValue().equals("1"))) showTemperature = true;
-				if (sentry.getKey().equals("gui-show-humidity") && (sentry.getValue().equals("1"))) showHumidity = true;
+				if (sentry.getKey().equals("decimals")) gui_decimals = Integer.valueOf(sentry.getValue());
+				if (sentry.getKey().equals("show-battery") && (sentry.getValue().equals("1"))) showBattery = true;
+				if (sentry.getKey().equals("show-temperature") && (sentry.getValue().equals("1"))) showTemperature = true;
+				if (sentry.getKey().equals("show-humidity") && (sentry.getValue().equals("1"))) showHumidity = true;
 			}
 
 			switch (gui_decimals) {
-			case 1:
-				digits = new DecimalFormat("#,##0.0");// format to 1 decimal place
-				break;
-			case 2:
-				digits = new DecimalFormat("#,##0.00");// format to 1 decimal place
-				break;
-			case 3:
-				digits = new DecimalFormat("#,##0.000");// format to 1 decimal place
-				break;
-			case 4:
-				digits = new DecimalFormat("#,##0.0000");// format to 1 decimal place
-				break;
-			default:
-				digits = new DecimalFormat("#,##0.0");// format to 1 decimal place
-				break;
+				case 1:
+					digits = new DecimalFormat("#,##0.0");// format to 1 decimal place
+					break;
+				case 2:
+					digits = new DecimalFormat("#,##0.00");// format to 1 decimal place
+					break;
+				case 3:
+					digits = new DecimalFormat("#,##0.000");// format to 1 decimal place
+					break;
+				case 4:
+					digits = new DecimalFormat("#,##0.0000");// format to 1 decimal place
+					break;
+				default:
+					digits = new DecimalFormat("#,##0.0");// format to 1 decimal place
+					break;
 			}
 
 			if (mTemperature != null)
-				mTemperature =  digits.format(Integer.valueOf(mTemperature) / (Math.pow(10, decimals))) + " \u2103";
-			if (mHumidity != null) mHumidity = digits.format(Integer.valueOf(mHumidity) / (Math.pow(10, decimals))) + " %";
-
-			// SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-
-			// DecimalFormat timeDigit = new DecimalFormat("#0000.###");
-			// timeDigit.setDecimalSeparatorAlwaysShown(false);
-
-			// Date date = new SimpleDateFormat("hhmm").parse(String.format("%04d", milTime));
-			// Set format: print the hours and minutes of the date, with AM or PM at the end
-			// SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
-			// Print the date!
-			// System.out.println(sdf.format(date));
+				mTemperature = digits.format(Float.valueOf(mTemperature)) + " \u2103";
 
 			if (mSunriseTime != null) {
 				try {
@@ -474,10 +474,10 @@ public class DeviceListFragment extends BaseFragment {
 		private String makeTimeString(String time) throws ParseException {
 			DecimalFormat timeDigit = new DecimalFormat("#0000.###");
 			timeDigit.setDecimalSeparatorAlwaysShown(false);
+			time = time.replace(".", "");
 			time = timeDigit.format(Integer.valueOf(time));
 			Date date = new SimpleDateFormat("hhmm").parse(time);
 			SimpleDateFormat sdf = (SimpleDateFormat) DateFormat.getTimeFormat(mContext);
-			// SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault()); //"hh:mm a" for AM/PM weergave
 			time = sdf.format(date);
 			return time;
 		}
@@ -515,10 +515,10 @@ public class DeviceListFragment extends BaseFragment {
 		public void update(DeviceEntry entry) {
 			for (SettingEntry sentry : entry.getSettings()) {
 				if (sentry.getKey().equals("temperature")) {
-					mTemperature = digits.format(Integer.valueOf(sentry.getValue()) / (Math.pow(10, decimals))) + " \u2103";
+					mTemperature = digits.format(Float.valueOf(sentry.getValue())) + " \u2103";
 				}
 				if (sentry.getKey().equals("humidity")) {
-					mHumidity = digits.format(Integer.valueOf(sentry.getValue()) / (Math.pow(10, decimals))) + " %";
+					mHumidity = sentry.getValue() + " %";
 				}
 				if (sentry.getKey().equals("battery")) {
 					if (sentry.getValue().equals("1")) {
@@ -565,7 +565,7 @@ public class DeviceListFragment extends BaseFragment {
 					if (sentry.getValue().equals("on")) mState = true;
 					if (sentry.getValue().equals("off")) mState = false;
 				}
-				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
+				if (sentry.getKey().equals("readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}
@@ -617,12 +617,12 @@ public class DeviceListFragment extends BaseFragment {
 			public void onClick(View v) {
 				String action = "";
 				switch (v.getId()) {
-				case R.id.card_inner_btnUp:
-					action = "\"state\":\"up\"";
-					break;
-				case R.id.card_inner_btnDown:
-					action = "\"state\":\"down\"";
-					break;
+					case R.id.card_inner_btnUp:
+						action = "\"state\":\"up\"";
+						break;
+					case R.id.card_inner_btnDown:
+						action = "\"state\":\"down\"";
+						break;
 				}
 				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
 			}
@@ -634,7 +634,7 @@ public class DeviceListFragment extends BaseFragment {
 			for (SettingEntry sentry : entry.getSettings()) {
 				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
 				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
-				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
+				if (sentry.getKey().equals("readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}
@@ -692,7 +692,7 @@ public class DeviceListFragment extends BaseFragment {
 					if (sentry.getValue().equals("opened")) mState = true;
 					if (sentry.getValue().equals("closed")) mState = false;
 				}
-				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
+				if (sentry.getKey().equals("readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}

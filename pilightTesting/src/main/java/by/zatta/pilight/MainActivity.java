@@ -109,29 +109,36 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 
 	@Override
 	public void onChangedStatusListener(int what) {
-		switch (what)
-		{
-		case SetupConnectionFragment.DISMISS:
-			closeDialogFragments();
-            FragmentManager fm = getFragmentManager();
-            BaseFragment prev = (BaseFragment) fm.findFragmentByTag("SetupConnectionFragment");
-            if (!(prev == null)){
-                FragmentTransaction ft = fm.beginTransaction();
-                ft.remove(prev);
-                ft.commit();
-                fm.popBackStack();
-            }
-			break;
-		case SetupConnectionFragment.FINISH:
-			closeDialogFragments();
-			doUnbindService();
-			stopService(new Intent(MainActivity.this, ConnectionService.class));
-			finish();
-			break;
-		case SetupConnectionFragment.RECONNECT:
-			this.sendBroadcast(new Intent("pilight-reconnect"));
-			break;
-		}
+		switch (what) {
+            case SetupConnectionFragment.DISMISS:
+                closeDialogFragments();
+                FragmentManager fm = getFragmentManager();
+                BaseFragment prev = (BaseFragment) fm.findFragmentByTag("SetupConnectionFragment");
+                if (!(prev == null)) {
+                    FragmentTransaction ft = fm.beginTransaction();
+                    ft.remove(prev);
+                    ft.commit();
+                    fm.popBackStack();
+                }
+                break;
+            case SetupConnectionFragment.FINISH:
+                closeDialogFragments();
+                doUnbindService();
+                stopService(new Intent(MainActivity.this, ConnectionService.class));
+                finish();
+                break;
+            case SetupConnectionFragment.RECONNECT:
+                this.sendBroadcast(new Intent("pilight-reconnect"));
+                break;
+
+            case SetupConnectionFragment.CUSTOM_SERVER:
+                Intent custom = new Intent("pilight-reconnect");
+                Bundle bundle = new Bundle();
+                bundle.putString("server", "bercobosker.ddns.net");
+                bundle.putInt("port", 7003);
+                this.sendBroadcast(custom);
+                break;
+        }
 	}
 	
 	@Override
@@ -306,7 +313,7 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 			for (DeviceEntry dentry : mDevices) {
 				if (!allLocations.containsValue(dentry.getLocationID())) {
 					for (SettingEntry sentry : dentry.getSettings()) {
-						if (sentry.getKey().equals("locationName")) allLocations.put(sentry.getValue(), dentry.getLocationID());
+						if (sentry.getKey().equals("group")) allLocations.put(sentry.getValue(), sentry.getValue());//dentry.getLocationID());
 					}
 				}
 			}
@@ -419,9 +426,6 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 
 	/**
 	 * Send data to the service
-	 * 
-	 * @param intvaluetosend
-	 *            The data to send
 	 */
 	private void sendMessageToService(String switchCommand) {
 		if (mIsBound) {
@@ -576,7 +580,7 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 				try {
 					DeviceListFragment.updateUI(mDevices);
 				} catch (Exception e) {
-					// Log.v(TAG, "ListBaseFragment isn't made yet");
+					//Log.w(TAG, "ListBaseFragment isn't made yet or something wrong inside the fragment");
 				}
 				break;
 			default:

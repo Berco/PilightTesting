@@ -1,29 +1,31 @@
 /******************************************************************************************
- * 
+ *
  * Copyright (C) 2013 Zatta
- * 
+ *
  * This file is part of pilight for android.
- * 
+ *
  * pilight for android is free software: you can redistribute it and/or modify 
  * it under the terms of the GNU General Public License as published by the 
  * Free Software Foundation, either version 3 of the License, or (at your option)
  * any later version.
- * 
+ *
  * pilight for android is distributed in the hope that it will be useful, but 
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along 
  * with pilightfor android.
  * If not, see <http://www.gnu.org/licenses/>
- * 
+ *
  * Copyright (c) 2013 pilight project
  ********************************************************************************************/
 
 package by.zatta.pilight.connection;
 
 import android.util.Log;
+
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -37,19 +39,19 @@ import java.util.concurrent.ArrayBlockingQueue;
 public enum Server {
 	CONNECTION;
 	private static final String TAG = "Zatta::Server";
-	private ArrayBlockingQueue<String> output;
-	private ArrayBlockingQueue<String> command;
-	private transient SetUp setupThread;
 	private transient static ReaderThread reader;
 	private transient static WriterThread writer;
 	private static Socket socket;
 	private static BufferedReader bufferedReader = null;
 	private static PrintStream printStream = null;
 	private static boolean isWriting = false;
+	private ArrayBlockingQueue<String> output;
+	private ArrayBlockingQueue<String> command;
+	private transient SetUp setupThread;
 
 	public synchronized String setup() {
 		disconnect();
-		
+
 		String toBeReturned = "";
 		output = new ArrayBlockingQueue<String>(1);
 		setupThread = new SetUp(output);
@@ -122,15 +124,13 @@ public enum Server {
 	}
 
 	private static class SetUp extends Thread {
-		private enum Step {
-			ADRESS, SOCKET, GUI, LIST
-		};
-
+		InetSocketAddress adress = null;
+		;
 		private ArrayBlockingQueue<String> output;
 		private Step step = Step.ADRESS;
 		private int runs = 0;
 		private String line = "";
-		InetSocketAddress adress = null;
+		private JSONObject collectJSON = new JSONObject();
 
 		SetUp(ArrayBlockingQueue<String> output) {
 			Log.v(TAG, "constructed SetUp thread");
@@ -149,88 +149,133 @@ public enum Server {
 			while (runs < 5) {
 				Log.d(TAG, step.name() + " " + Integer.toString(runs));
 				switch (step) {
-				case ADRESS:
-					runs++;
-					try {
-						adress = SSDPfinder.pi();
-					} catch (Exception e1) {
-						Log.w(TAG, "no adress by exception");
+					case ADRESS:
+						runs++;
+						if (runs == 3) {
+							////// TEMPORARILY CONNECTING HARDCODED OVER THE INTERNET ///
+							adress = new InetSocketAddress("my.home.adress", 1404);
+							//Log.d(TAG, "OKAY " + adress.toString());
+							step = Step.SOCKET;
+							runs = 0;
+						}
+						try {
+							adress = SSDPfinder.pi();
+						} catch (Exception e1) {
+							Log.w(TAG, "no adress by exception");
+							break;
+						}
+						if (!(adress.toString().equals("null:0"))) {
+							step = Step.SOCKET;
+							runs = 0;
+						}
 						break;
-					}
-					if (!(adress.toString().equals("null:0"))) {
-						step = Step.SOCKET;
-						runs = 0;
-					}
-					break;
-				case SOCKET:
-					runs++;
-					try {
-						socket = new Socket();
-						socket.setSoTimeout(0);
-						socket.connect(adress, 300);
-					} catch (SocketException e) {
-						Log.w(TAG, "SocketExeption");
-					} catch (IOException e) {
-						Log.w(TAG, "IOExeption");
-					}
-					if (socket.isConnected()) {
-						step = Step.GUI;
-						runs = 0;
-					}
-					break;
-				case GUI:
-					try {
-						if (bufferedReader == null) {
-							bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"), 1025);
+					case SOCKET:
+						runs++;
+						try {
+							socket = new Socket();
+							socket.connect(adress, 5000);
+							socket.setSoTimeout(8000);
+						} catch (SocketException e) {
+							Log.w(TAG, "SocketExeption " + e);
+						} catch (IOException e) {
+							Log.w(TAG, "IOExeption " + e);
 						}
-						if (bufferedReader.ready()) {
-							if ((line = bufferedReader.readLine()) != null) if (line.equals("{\"message\":\"accept client\"}")) {
-								step = Step.LIST;
-								runs = 0;
-								bufferedReader = null;
-								break;
+						if (socket.isConnected()) {
+							step = Step.GUI;
+							runs = 0;
+						}
+						break;
+					case GUI:
+						try {
+							if (bufferedReader == null) {
+								bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"), 1025);
 							}
-						}
-						if (printStream == null) {
-							printStream = new PrintStream(socket.getOutputStream(), false);
-						}
-						printStream.print("{\"message\":\"client gui\"}\n");
-						printStream.flush();
-						Thread.sleep(10);
-					} catch (Exception e) {
-						Log.w(TAG, e);
-					}
-					runs++;
-					break;
-				case LIST:
-					try {
-						if (bufferedReader == null) {
-							bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"), 102500);
-						}
-						if (bufferedReader.ready()) {
-							if ((line = bufferedReader.readLine()) != null) if (line.contains("{\"config\":")) {
-								step = Step.LIST;
-								runs = 6;
-								bufferedReader = null;
-								break;
+							if (bufferedReader.ready()) {
+								if ((line = bufferedReader.readLine()) != null) if (line.equals("{\"status\":\"success\"}")) {
+									step = Step.LIST;
+									runs = 0;
+									bufferedReader = null;
+									break;
+								}
 							}
+							if (printStream == null) {
+								printStream = new PrintStream(socket.getOutputStream(), false);
+							}
+							String identify = "{\"action\": \"identify\",\"options\": {\"core\": 0,\"stats\": 0,\"receiver\": 0,\"config\": 1,\"forward\": 0},\"uuid\": \"0000-d0-63-00-000000\",\"media\": \"mobile\"}";
+							printStream.print(identify);
+							printStream.flush();
+							Thread.sleep(1000);
+						} catch (Exception e) {
+							Log.w(TAG, e);
 						}
-						if (printStream == null) {
-							printStream = new PrintStream(socket.getOutputStream(), false);
+						runs++;
+						break;
+					case LIST:
+						try {
+							if (bufferedReader == null) {
+								bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"), 102500);
+							}
+							if (bufferedReader.ready()) {
+								if ((line = bufferedReader.readLine()) != null) {
+									String goodConfig = "{\"message\":\"config\"";
+									if (line.contains(goodConfig)) {
+										JSONObject json = new JSONObject(line);
+										JSONObject config = json.getJSONObject("config");
+										collectJSON.put("gui", config.getJSONObject("gui"));
+										step = Step.VALUES;
+										runs = 0;
+										bufferedReader = null;
+										break;
+									}
+								}
+							}
+							if (printStream == null) {
+								printStream = new PrintStream(socket.getOutputStream(), false);
+							}
+							String request = "{\"action\": \"request config\"}\n";
+							printStream.print(request);
+							printStream.flush();
+							Thread.sleep(1000);
+						} catch (Exception e) {
+							Log.w(TAG, e);
 						}
-						printStream.print("{\"message\":\"request config\"}\n");
-						printStream.flush();
-						Thread.sleep(10);
-					} catch (Exception e) {
-						Log.w(TAG, e);
-					}
-					runs++;
-					break;
+						runs++;
+						break;
+					case VALUES:
+						try {
+							if (bufferedReader == null) {
+								bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"), 102500);
+							}
+							if (bufferedReader.ready()) {
+								if ((line = bufferedReader.readLine()) != null) {
+									String goodConfig = "{\"message\":\"values\"";
+									if (line.contains(goodConfig)) {
+										JSONObject json = new JSONObject(line);
+										collectJSON.put("values", json.getJSONArray("values"));
+										step = Step.VALUES;
+										runs = 6;
+										bufferedReader = null;
+										break;
+									}
+								}
+							}
+							if (printStream == null) {
+								printStream = new PrintStream(socket.getOutputStream(), false);
+							}
+							String request = "{\"action\": \"request values\"}\n";
+							printStream.print(request);
+							printStream.flush();
+							Thread.sleep(1000);
+						} catch (Exception e) {
+							Log.w(TAG, e);
+						}
+						runs++;
+						break;
 				}
 			}
 			try {
-				if (!(line.equals(""))) {
-					output.put(line);
+				if ((collectJSON.has("gui") && collectJSON.has("values"))) {
+					output.put(collectJSON.toString());
 					if (reader == null || !reader.isAlive()) {
 						Log.v(TAG, "starting new reader from SetupThread");
 						reader = new ReaderThread();
@@ -245,6 +290,10 @@ public enum Server {
 			} catch (InterruptedException e) {
 				Log.w(TAG, "ohnoooo, couldn't put output! Now everything hangs!");
 			}
+		}
+
+		private enum Step {
+			ADRESS, SOCKET, GUI, LIST, VALUES
 		}
 	}
 
@@ -310,7 +359,7 @@ public enum Server {
 					bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"), 1025);
 				if (bufferedReader.ready()) {
 					while ((line = bufferedReader.readLine()) != null) {
-						int start =0;
+						int start = 0;
 						start = line.indexOf("{");
 						if (start == -1) start = 0;
 						ConnectionService.postUpdate(line.substring(start));

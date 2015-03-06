@@ -1,27 +1,29 @@
 /******************************************************************************************
- * 
+ *
  * Copyright (C) 2013 Zatta
- * 
+ *
  * This file is part of pilight for android.
- * 
+ *
  * pilight for android is free software: you can redistribute it and/or modify 
  * it under the terms of the GNU General Public License as published by the 
  * Free Software Foundation, either version 3 of the License, or (at your option)
  * any later version.
- * 
+ *
  * pilight for android is distributed in the hope that it will be useful, but 
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along 
  * with pilightfor android.
  * If not, see <http://www.gnu.org/licenses/>
- * 
+ *
  * Copyright (c) 2013 pilight project
  ********************************************************************************************/
 
 package by.zatta.pilight.model;
+
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,7 +36,7 @@ import java.util.List;
 public class Origin {
 
 	@SuppressWarnings("unused")
-	private static final String TAG = "Origin";
+	private static final String TAG = "Zatta::Origin";
 
 	private static OriginEntry originEntry = new OriginEntry();
 
@@ -48,75 +50,57 @@ public class Origin {
 	}
 
 	public static void parse(JSONObject jMessage) {
-		// Log.v(TAG, jMessage.toString());
+		//Log.d(TAG, jMessage.toString());
+		String updateDeviceId = null;
+		JSONObject devValuesJSON = null;
+		//iterate over the VALUES
+		try {
+			updateDeviceId = jMessage.getJSONArray("devices").getString(0);
+			devValuesJSON = jMessage.getJSONObject("values");
+			originEntry.setNameID(updateDeviceId);
+		} catch (JSONException e) {
+			Log.w(TAG, "something wrong with jMessage");
+		}
 
-		Iterator<?> fit = jMessage.keys();
-		/* Iterate through all entries */
-		while (fit.hasNext()) {
-			String firstKey = (String) fit.next();
+		Iterator<?> vit = devValuesJSON.keys();
+		List<SettingEntry> settings = new ArrayList<SettingEntry>();
+		while (vit.hasNext()) {
+			String vkey = (String) vit.next();
+			SettingEntry sentry = new SettingEntry();
 			try {
-				JSONObject jSecond = jMessage.getJSONObject(firstKey);
-				// Log.v(TAG, "firstKey: " + firstKey); //devices, values
-				// Log.v(TAG, "jSecond: "+ jSecond.toString()); // {"living":["KamerTemp"]} & {"temperature":"20062"}
 
-				if (firstKey.equals("devices")) {
-					Iterator<?> sit = jSecond.keys();
-					while (sit.hasNext()) {
-						String secondKey = (String) sit.next();
-						JSONArray jSecArr = jSecond.optJSONArray(secondKey);
-						String jSecStr = jSecond.optString(secondKey);
+				JSONArray jvalarr = devValuesJSON.optJSONArray(vkey);
+				String jvalstr = devValuesJSON.optString(vkey);
+				Double jvaldbl = devValuesJSON.optDouble(vkey);
+				Long jvallng = devValuesJSON.optLong(vkey);
 
-						if (jSecArr != null) {
-							/* Iterate through all values for this setting */
-							for (Short i = 0; i < jSecArr.length(); i++) {
-								// Log.v(TAG, "Uit array:" + jSecArr.get(i).toString());
-								originEntry.setNameID(jSecArr.get(i).toString());
-							}
-						} else if (jSecStr != null) {
-							// Log.v(TAG, "Uit string: " + jSecStr);
-							originEntry.setNameID(jSecStr);
-						}
+				if (jvalarr != null) {
+					for (Short l = 0; l < jvalarr.length(); l++) {
+						sentry = new SettingEntry(); // WHY DO I NEED THIS ONE??
+						sentry.setKey(vkey);
+						sentry.setValue(jvalarr.get(l).toString());
+						if (sentry != null) settings.add(sentry);
 					}
-				}
-				if (firstKey.equals("values")) {
-					Iterator<?> sit = jSecond.keys();
-					List<SettingEntry> settings = new ArrayList<SettingEntry>();
-
-					while (sit.hasNext()) {
-						String secondKey = (String) sit.next();
-						JSONArray jSecArr = jSecond.optJSONArray(secondKey);
-						String jSecStr = jSecond.optString(secondKey);
-						Double jSecDbl = jSecond.optDouble(secondKey);
-						Long jSecLng = jSecond.optLong(secondKey);
-						
-						
-						SettingEntry sentry = new SettingEntry();
-						if (jSecArr != null) {
-							/* Iterate through all values for this setting */
-							for (Short i = 0; i < jSecArr.length(); i++) {
-								// Log.v(TAG, "Uit array:" + jSecArr.get(i).toString());
-								sentry.setKey(secondKey);
-								sentry.setValue(jSecArr.get(i).toString());
-							}
-						} else if (jSecStr != null) {
-							// Log.v(TAG, "Uit string: " + jSecStr);
-							sentry.setKey(secondKey);
-							sentry.setValue(jSecStr);
-						}else if (jSecDbl != null) {
-							// Log.v(TAG, "Uit string: " + jSecStr);
-							sentry.setKey(secondKey);
-							sentry.setValue(Double.toString(jSecDbl));
-						}else if (jSecLng != null) {
-							// Log.v(TAG, "Uit string: " + jSecStr);
-							sentry.setKey(secondKey);
-							sentry.setValue(Long.toString(jSecLng));
-						}
-						settings.add(sentry);
-					}
-					originEntry.setSettings(settings);
+				} else if (jvalstr != null) {
+					sentry = new SettingEntry();
+					sentry.setKey(vkey);
+					sentry.setValue(jvalstr.toString());
+					if (sentry != null) settings.add(sentry);
+				} else if (jvaldbl != null) {
+					sentry = new SettingEntry();
+					sentry.setKey(vkey);
+					sentry.setValue(jvaldbl.toString());
+					if (sentry != null) settings.add(sentry);
+				} else if (jvallng != null) {
+					sentry = new SettingEntry();
+					sentry.setKey(vkey);
+					sentry.setValue(jvallng.toString());
+					if (sentry != null) settings.add(sentry);
 				}
 			} catch (JSONException e) {
+				Log.w(TAG, "The received VALUE is of an incorrent format");
 			}
 		}
+		originEntry.setSettings(settings);
 	}
 }

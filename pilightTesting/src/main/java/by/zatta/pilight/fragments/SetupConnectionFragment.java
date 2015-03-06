@@ -51,6 +51,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
     public final static int DISMISS = 1187639657;
     public final static int FINISH = 1432084755;
     public final static int RECONNECT = 1873475293;
+    public final static int CUSTOM_SERVER = 98273234;
 
     public static SetupConnectionFragment newInstance(String status) {
         SetupConnectionFragment f = new SetupConnectionFragment();
@@ -131,6 +132,10 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
             tv.setText(R.string.status_failed);
             mBtnCancel.setVisibility(View.VISIBLE);
             mBtnSetup.setVisibility(View.VISIBLE);
+        } else if (status.equals("NO_SERVER")) {
+            tv.setText(status);
+            mBtnCancel.setVisibility(View.VISIBLE);
+            mBtnSetup.setVisibility(View.VISIBLE);
         } else if (status.equals("LOST_CONNECTION")) {
             tv.setText(R.string.status_lost);
             mBtnCancel.setVisibility(View.VISIBLE);
@@ -150,7 +155,11 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
                 changedStatusListener.onChangedStatusListener(FINISH);
                 break;
             case R.id.btnSetupConnection:
-                changedStatusListener.onChangedStatusListener(RECONNECT);
+                if (status.equals("NO_SERVER")) {
+                    changedStatusListener.onChangedStatusListener(CUSTOM_SERVER);
+                }else{
+                    changedStatusListener.onChangedStatusListener(RECONNECT);
+                }
                 break;
         }
     }

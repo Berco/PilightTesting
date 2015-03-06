@@ -60,16 +60,16 @@ public class SSDPfinder {
 	public static String findServerAndPort() {
 		server = null;
 		port = 0;
-		line = null;
+        line = null;
 		find();
-		// Log.v(TAG, server + ":" + Integer.toString(port));
-		return server + ":" + Integer.toString(port);
+		Log.v(TAG, server + ":" + Integer.toString(port));
+        return server + ":" + Integer.toString(port);
 	}
 
 	public static InetSocketAddress pi() {
-		server = null;
-		port = 0;
-		line = null;
+        server = null;
+        port = 0;
+        line = null;
 		find();
 		Log.v(TAG, server + ":" + Integer.toString(port));
 		return new InetSocketAddress(server, port);

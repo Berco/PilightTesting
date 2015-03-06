@@ -82,6 +82,14 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable {
 		return this.name_id;
 	}
 
+	public boolean hasGroup(String filter){
+		for (SettingEntry sentry : settings){
+			if (sentry.getKey().equals("group") && sentry.getValue().equals(filter))
+				return true;
+		}
+		return false;
+	}
+
 	public DeviceEntry(Parcel in) {
 		this();
 		readFromParcel(in);

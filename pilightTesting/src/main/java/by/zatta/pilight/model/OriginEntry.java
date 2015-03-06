@@ -1,23 +1,23 @@
 /******************************************************************************************
- * 
+ *
  * Copyright (C) 2013 Zatta
- * 
+ *
  * This file is part of pilight for android.
- * 
+ *
  * pilight for android is free software: you can redistribute it and/or modify 
  * it under the terms of the GNU General Public License as published by the 
  * Free Software Foundation, either version 3 of the License, or (at your option)
  * any later version.
- * 
+ *
  * pilight for android is distributed in the hope that it will be useful, but 
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along 
  * with pilightfor android.
  * If not, see <http://www.gnu.org/licenses/>
- * 
+ *
  * Copyright (c) 2013 pilight project
  ********************************************************************************************/
 
@@ -31,11 +31,28 @@ import java.util.List;
 
 public class OriginEntry implements Parcelable {
 
+	@SuppressWarnings("rawtypes")
+	public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+		@Override
+		public OriginEntry createFromParcel(Parcel in) {
+			return new OriginEntry(in);
+		}
+
+		@Override
+		public OriginEntry[] newArray(int size) {
+			return new OriginEntry[size];
+		}
+	};
+	public List<SettingEntry> settings = new ArrayList<SettingEntry>();
 	private String name_id;
 	private String popular_name;
-	public List<SettingEntry> settings = new ArrayList<SettingEntry>();
 
 	public OriginEntry() {
+	}
+
+	public OriginEntry(Parcel in) {
+		this();
+		readFromParcel(in);
 	}
 
 	public String getNameID() {
@@ -64,16 +81,11 @@ public class OriginEntry implements Parcelable {
 
 	@Override
 	public String toString() {
-		String toBeReturned = this.popular_name;
+		String toBeReturned = this.getNameID();
 		for (SettingEntry sentry : settings) {
 			toBeReturned = toBeReturned + "\n" + sentry.getValue();
 		}
 		return toBeReturned;
-	}
-
-	public OriginEntry(Parcel in) {
-		this();
-		readFromParcel(in);
 	}
 
 	@Override
@@ -92,17 +104,4 @@ public class OriginEntry implements Parcelable {
 		this.name_id = in.readString();
 		this.settings = in.readArrayList(SettingEntry.class.getClassLoader());
 	}
-
-	@SuppressWarnings("rawtypes")
-	public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
-		@Override
-		public OriginEntry createFromParcel(Parcel in) {
-			return new OriginEntry(in);
-		}
-
-		@Override
-		public OriginEntry[] newArray(int size) {
-			return new OriginEntry[size];
-		}
-	};
 }

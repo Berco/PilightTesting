@@ -557,21 +557,25 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 				FragmentManager fm = getFragmentManager();
 				Fragment prev = fm.findFragmentByTag("SetupConnectionFragment");
 
-				if (prev == null) {
-					// Log.v(TAG, "there was not a fragment with tag dialog");
-                    openSetupConnectionFragment(SetupConnectionFragment.newInstance(status));
-					break;
-				} else if (!(prev.getClass().equals(SetupConnectionFragment.class))) {
-					// Log.v(TAG, "there was fragment with tag SetupConnectionFragment not being StatusDialog");
-                    openSetupConnectionFragment(SetupConnectionFragment.newInstance(status));
-					break;
-				} else {
-					// Log.v(TAG, "there was a SetupConnectionFragment running");
-                    SetupConnectionFragment.setChangedStatus(status);
-					break;
+				try {
+					if (prev == null) {
+						// Log.v(TAG, "there was not a fragment with tag dialog");
+						openSetupConnectionFragment(SetupConnectionFragment.newInstance(status));
+						break;
+					} else if (!(prev.getClass().equals(SetupConnectionFragment.class))) {
+						// Log.v(TAG, "there was fragment with tag SetupConnectionFragment not being StatusDialog");
+						openSetupConnectionFragment(SetupConnectionFragment.newInstance(status));
+						break;
+					} else {
+						// Log.v(TAG, "there was a SetupConnectionFragment running");
+						SetupConnectionFragment.setChangedStatus(status);
+						break;
+					}
+				} catch (IllegalStateException e) {
+					Log.w(TAG, "most likely the activity wasn't made yet");
 				}
 
-			case ConnectionService.MSG_SET_BUNDLE:
+				case ConnectionService.MSG_SET_BUNDLE:
 				mDevices = bundle.getParcelableArrayList("config");
 				if (allLocations.isEmpty()) {
 					initMenu();

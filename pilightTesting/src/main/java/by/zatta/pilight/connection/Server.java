@@ -154,6 +154,7 @@ public enum Server {
 						if (runs == 2) {
 							////// TEMPORARILY CONNECTING HARDCODED OVER THE INTERNET ///
 							adress = new InetSocketAddress("my.home.adress", 1404);
+							adress = new InetSocketAddress("bercobosker.ddns.net", 7003);
 							//Log.d(TAG, "OKAY " + adress.toString());
 							step = Step.SOCKET;
 							runs = 0;
@@ -175,7 +176,7 @@ public enum Server {
 						try {
 							socket = new Socket();
 							socket.connect(adress, 5000);
-							socket.setSoTimeout(8000);
+							socket.setSoTimeout(0); //VERY LONG, WORK TODO ON THIS SECTION
 						} catch (SocketException e) {
 							Log.w(TAG, "SocketExeption " + e);
 						} catch (IOException e) {

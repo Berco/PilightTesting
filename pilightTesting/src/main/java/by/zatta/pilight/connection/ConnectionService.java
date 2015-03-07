@@ -537,7 +537,7 @@ public class ConnectionService extends Service {
 						postUpdate("LOST_CONNECTION");
 						isConnectionUp = false;
 					}
-					Thread.sleep(30000);
+					Thread.sleep(10000);
 				}
 				Log.v(TAG, "heart-beat thread comes to an end");
 			} catch (Exception e) {

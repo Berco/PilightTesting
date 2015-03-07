@@ -134,7 +134,7 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
             case SetupConnectionFragment.CUSTOM_SERVER:
                 Intent custom = new Intent("pilight-reconnect");
                 Bundle bundle = new Bundle();
-                bundle.putString("server", "bercobosker.ddns.net");
+                bundle.putString("server", "my.adress.net");
                 bundle.putInt("port", 7003);
                 this.sendBroadcast(custom);
                 break;
@@ -407,8 +407,9 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 
         Fragment pref = fm.findFragmentByTag("SetupConnectionFragment");
         if (pref == null) {
-            fm.popBackStack();
+			fm.popBackStack();
             ft.replace(R.id.fragment_main, mBaseFragment, "SetupConnectionFragment");
+			ft.addToBackStack(null);
             ft.commit();
         }
     }

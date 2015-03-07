@@ -167,7 +167,7 @@ public class TaskerActionFragment extends BaseFragment {
 			else if (device.getType() == 6) card = new ListContactCard(getActivity().getApplicationContext(), device);
 
 			for (SettingEntry sentry : device.getSettings()) { // don't show readonly devices, it's useless
-				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) card = null;
+				if (sentry.getKey().equals("readonly") && sentry.getValue().equals("1")) card = null;
 			}
 
 			if (!(card == null)) {

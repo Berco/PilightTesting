@@ -138,11 +138,7 @@ public class DeviceListFragment extends BaseFragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mDevices = getArguments().getParcelableArrayList("config");
-		mFilter = getArguments().getString("filter", null);
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
-		forceList = prefs.getBoolean("forceList", false);
-		setRetainInstance(false);
+		setRetainInstance(true);
 	}
 
 	@Override
@@ -154,8 +150,14 @@ public class DeviceListFragment extends BaseFragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+		mDevices = getArguments().getParcelableArrayList("config");
+		mFilter = getArguments().getString("filter", null);
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+		forceList = prefs.getBoolean("forceList", false);
 		initCards();
 	}
+
+
 
 	private void initCards() {
 		Log.v(TAG, "initCards");

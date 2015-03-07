@@ -321,7 +321,7 @@ public enum Server {
 		}
 
 		private boolean write(String message) {
-			Log.v(TAG, "write called: " + message);
+			Log.d(TAG, "write called: " + message);
 			try {
 				if (printStream == null) {
 					printStream = new PrintStream(socket.getOutputStream(), false);

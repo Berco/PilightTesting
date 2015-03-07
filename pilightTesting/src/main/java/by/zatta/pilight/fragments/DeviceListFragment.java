@@ -202,7 +202,7 @@ public class DeviceListFragment extends BaseFragment {
 	 * CARDS START FROM HERE: ListDimmerCard ************************************ ******************************************
 	 */
 	public class ListDimmerCard extends Card {
-		protected String who;
+		protected JSONObject codeJSON = new JSONObject();
 		protected boolean mState;
 		protected boolean readwrite = true;
 		protected int mSeekValue;
@@ -216,10 +216,18 @@ public class DeviceListFragment extends BaseFragment {
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				String action = "\"state\":\"off\"";
-				if (isChecked) action = "\"state\":\"on\"";
+				JSONObject actionJSON = null;
+				try {
+					if (isChecked) codeJSON.put("state", "on");
+					else codeJSON.put("state", "off");
+					actionJSON = new JSONObject();
+					actionJSON.put("action", "control");
+					actionJSON.put("code", codeJSON);
+				} catch (JSONException e) {
+					Log.d(TAG, "could not create actionJSON");
+				}
 				mState = isChecked;
-				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
+				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, actionJSON.toString());
 			}
 		};
 		protected CircularSeekBar.OnCircularSeekBarChangeListener seekListener = new CircularSeekBar.OnCircularSeekBarChangeListener() {
@@ -227,8 +235,21 @@ public class DeviceListFragment extends BaseFragment {
 			public void onStopTrackingTouch(CircularSeekBar seekBar) {
 				mValueView.setText("");
 				mToggle.setText(Integer.toString(mSeekValue));
-				String action = "\"state\":\"on\",\"values\":{\"dimlevel\":" + String.valueOf(mSeekValue) + "}";
-				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
+				JSONObject actionJSON = null;
+				JSONObject valuesJSON = null;
+				try {
+					valuesJSON = new JSONObject();
+					valuesJSON.put("dimlevel", mSeekValue);
+					codeJSON.put("state", "on");
+					codeJSON.put("values", valuesJSON);
+					actionJSON = new JSONObject();
+					actionJSON.put("action", "control");
+					actionJSON.put("code", codeJSON);
+				} catch (JSONException e) {
+					Log.d(TAG, "could not create actionJSON");
+				}
+				mState = true;
+				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, actionJSON.toString());
 			}
 
 			@Override
@@ -242,7 +263,11 @@ public class DeviceListFragment extends BaseFragment {
 
 		public ListDimmerCard(Context context, DeviceEntry entry) {
 			super(context, R.layout.dimmercard_inner);
-			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
+			try {
+				codeJSON.put("device", entry.getNameID());
+			} catch (JSONException e) {
+				Log.d(TAG, "could not create codeJSON");
+			}
 			for (SettingEntry sentry : entry.getSettings()) {
 				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
 				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
@@ -315,8 +340,6 @@ public class DeviceListFragment extends BaseFragment {
 	 */
 	public class ListSwitchCard extends Card {
 		protected JSONObject codeJSON = new JSONObject();
-		protected String who;
-		protected String mValue;
 		protected String mTitleDevice;
 		protected String mTitleLocation;
 		protected ToggleButton mToggle;
@@ -325,7 +348,6 @@ public class DeviceListFragment extends BaseFragment {
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
 				JSONObject actionJSON = null;
 				try {
 					if (isChecked) codeJSON.put("state", "on");
@@ -349,7 +371,6 @@ public class DeviceListFragment extends BaseFragment {
 				Log.d(TAG, "could not create codeJSON");
 			}
 
-			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
 			for (SettingEntry sentry : entry.getSettings()) {
 				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
 				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();

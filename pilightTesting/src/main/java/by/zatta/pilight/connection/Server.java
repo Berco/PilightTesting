@@ -151,12 +151,13 @@ public enum Server {
 				switch (step) {
 					case ADRESS:
 						runs++;
-						if (runs == 3) {
+						if (runs == 2) {
 							////// TEMPORARILY CONNECTING HARDCODED OVER THE INTERNET ///
 							adress = new InetSocketAddress("my.home.adress", 1404);
 							//Log.d(TAG, "OKAY " + adress.toString());
 							step = Step.SOCKET;
 							runs = 0;
+							break;
 						}
 						try {
 							adress = SSDPfinder.pi();
@@ -188,7 +189,7 @@ public enum Server {
 					case GUI:
 						try {
 							if (bufferedReader == null) {
-								bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"), 1025);
+								bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
 							}
 							if (bufferedReader.ready()) {
 								if ((line = bufferedReader.readLine()) != null) if (line.equals("{\"status\":\"success\"}")) {
@@ -213,7 +214,7 @@ public enum Server {
 					case LIST:
 						try {
 							if (bufferedReader == null) {
-								bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"), 102500);
+								bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
 							}
 							if (bufferedReader.ready()) {
 								if ((line = bufferedReader.readLine()) != null) {
@@ -244,7 +245,7 @@ public enum Server {
 					case VALUES:
 						try {
 							if (bufferedReader == null) {
-								bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"), 102500);
+								bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
 							}
 							if (bufferedReader.ready()) {
 								if ((line = bufferedReader.readLine()) != null) {
@@ -356,7 +357,7 @@ public enum Server {
 
 			try {
 				if (bufferedReader == null)
-					bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"), 1025);
+					bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
 				if (bufferedReader.ready()) {
 					while ((line = bufferedReader.readLine()) != null) {
 						int start = 0;
@@ -370,6 +371,7 @@ public enum Server {
 				}
 			} catch (Exception e) {
 				Log.w(TAG, "exception caught in read");
+				Log.w(TAG, e);
 			}
 		}
 	}

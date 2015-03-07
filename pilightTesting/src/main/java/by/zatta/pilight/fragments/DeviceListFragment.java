@@ -558,8 +558,7 @@ public class DeviceListFragment extends BaseFragment {
 	 * LISTRELAYCARD *********************************************************** *****************************************
 	 */
 	public class ListRelayCard extends Card {
-		protected String who;
-		protected String mValue;
+		protected JSONObject codeJSON = new JSONObject();
 		protected String mTitleDevice;
 		protected String mTitleLocation;
 		protected ToggleButton mToggle;
@@ -569,16 +568,28 @@ public class DeviceListFragment extends BaseFragment {
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				String action = "\"state\":\"off\"";
-				if (isChecked) action = "\"state\":\"on\"";
+				JSONObject actionJSON = null;
+				try {
+					if (isChecked) codeJSON.put("state", "on");
+					else codeJSON.put("state", "off");
+					actionJSON = new JSONObject();
+					actionJSON.put("action", "control");
+					actionJSON.put("code", codeJSON);
+				} catch (JSONException e) {
+					Log.d(TAG, "could not create actionJSON");
+				}
 				mState = isChecked;
-				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
+				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, actionJSON.toString());
 			}
 		};
 
 		public ListRelayCard(Context context, DeviceEntry entry) {
 			super(context, R.layout.relaycard_inner);
-			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
+			try {
+				codeJSON.put("device", entry.getNameID());
+			} catch (JSONException e) {
+				Log.d(TAG, "could not create codeJSON");
+			}
 			for (SettingEntry sentry : entry.getSettings()) {
 				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
 				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
@@ -626,7 +637,7 @@ public class DeviceListFragment extends BaseFragment {
 	 * LISTSCREENCARD *********************************************************** *****************************************
 	 */
 	public class ListScreenCard extends Card {
-		protected String who;
+		protected JSONObject codeJSON = new JSONObject();
 		protected String mTitleDevice;
 		protected String mTitleLocation;
 		protected Button mBtnUp;
@@ -636,22 +647,33 @@ public class DeviceListFragment extends BaseFragment {
 		protected Button.OnClickListener clickListener = new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				String action = "";
-				switch (v.getId()) {
-					case R.id.card_inner_btnUp:
-						action = "\"state\":\"up\"";
-						break;
-					case R.id.card_inner_btnDown:
-						action = "\"state\":\"down\"";
-						break;
+				JSONObject actionJSON = null;
+				try {
+					switch (v.getId()) {
+						case R.id.card_inner_btnUp:
+							codeJSON.put("state", "up");
+							break;
+						case R.id.card_inner_btnDown:
+							codeJSON.put("state", "down");
+							break;
+					}
+					actionJSON = new JSONObject();
+					actionJSON.put("action", "control");
+					actionJSON.put("code", codeJSON);
+				} catch (JSONException e) {
+					Log.d(TAG, "could not create actionJSON");
 				}
-				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
+				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, actionJSON.toString());
 			}
 		};
 
 		public ListScreenCard(Context context, DeviceEntry entry) {
 			super(context, R.layout.screencard_inner);
-			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
+			try {
+				codeJSON.put("device", entry.getNameID());
+			} catch (JSONException e) {
+				Log.d(TAG, "could not create codeJSON");
+			}
 			for (SettingEntry sentry : entry.getSettings()) {
 				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
 				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
@@ -685,8 +707,7 @@ public class DeviceListFragment extends BaseFragment {
 	 * LISTCONTACTCARD *********************************************************** *****************************************
 	 */
 	public class ListContactCard extends Card {
-		protected String who;
-		protected String mValue;
+		protected JSONObject codeJSON = new JSONObject();
 		protected String mTitleDevice;
 		protected String mTitleLocation;
 		protected ToggleButton mToggle;
@@ -696,16 +717,28 @@ public class DeviceListFragment extends BaseFragment {
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				String action = "\"state\":\"closed\"";
-				if (isChecked) action = "\"state\":\"opened\"";
+				JSONObject actionJSON = null;
+				try {
+					if (isChecked) codeJSON.put("state", "opened");
+					else codeJSON.put("state", "closed");
+					actionJSON = new JSONObject();
+					actionJSON.put("action", "control");
+					actionJSON.put("code", codeJSON);
+				} catch (JSONException e) {
+					Log.d(TAG, "could not create actionJSON");
+				}
 				mState = isChecked;
-				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
+				deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, actionJSON.toString());
 			}
 		};
 
 		public ListContactCard(Context context, DeviceEntry entry) {
 			super(context, R.layout.contactcard_inner);
-			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
+			try {
+				codeJSON.put("device", entry.getNameID());
+			} catch (JSONException e) {
+				Log.d(TAG, "could not create codeJSON");
+			}
 			for (SettingEntry sentry : entry.getSettings()) {
 				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
 				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();

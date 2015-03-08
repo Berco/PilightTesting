@@ -24,6 +24,9 @@ public final class FireReceiver extends BroadcastReceiver {
 	public void onReceive(final Context context, final Intent intent) {
 		Bundle extraBundle = intent.getBundleExtra(com.twofortyfouram.locale.api.Intent.EXTRA_BUNDLE);
 		String[] what = extraBundle.getStringArray("Extra");
+		Log.v(TAG, Integer.toString(what.length));
+		Log.v(TAG, what[0]);
+		Log.v(TAG, what[1]);
 		String command = what[2];
 		
 		if (isConnectionServiceActive(context)){
@@ -36,7 +39,8 @@ public final class FireReceiver extends BroadcastReceiver {
 				context.startService(new Intent(context, ConnectionService.class).putExtra("command", command));
 			} else {
 				Log.v(TAG, "But not at home, not even trying..");
-				Toast.makeText(context, "Can not fire pilight action",Toast.LENGTH_SHORT).show();
+				context.startService(new Intent(context, ConnectionService.class).putExtra("command", command));
+				Toast.makeText(context, "Trying over the internet",Toast.LENGTH_SHORT).show();
 			}
 		}
 		return;

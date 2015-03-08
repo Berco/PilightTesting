@@ -108,7 +108,7 @@ public class ConnectionService extends Service {
 				else isConnectionUp = makeConnection();
 			} else if (action.equals("pilight-switch-device")) {
 				if (isConnectionUp) Log.v(TAG, "broadcastReceiver: " + intent.getStringExtra("command"));
-				Server.CONNECTION.sentCommand("{\"message\":\"send\",\"code\":{" + intent.getStringExtra("command") + "}}");
+				Server.CONNECTION.sentCommand(intent.getStringExtra("command"));
 			}
 		}
 	};
@@ -374,7 +374,7 @@ public class ConnectionService extends Service {
 
 		sendMessageToUI(MSG_SET_STATUS, mCurrentNotif.name());
 		if (intent.hasExtra("command") && isConnectionUp) {
-			Server.CONNECTION.sentCommand("{\"message\":\"send\",\"code\":{" + intent.getStringExtra("command") + "}}");
+			Server.CONNECTION.sentCommand(intent.getStringExtra("command"));
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(aCtx);
 			boolean useService = prefs.getBoolean("useService", true);
 			if (!useService) {

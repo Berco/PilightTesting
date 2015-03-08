@@ -27,9 +27,9 @@ import java.util.List;
 
 import by.zatta.pilight.R;
 import by.zatta.pilight.connection.ConnectionService;
-import by.zatta.pilight.dialogs.StatusDialog;
-import by.zatta.pilight.dialogs.StatusDialog.OnChangedStatusListener;
+import by.zatta.pilight.fragments.SetupConnectionFragment.OnChangedStatusListener;
 import by.zatta.pilight.fragments.BaseFragment;
+import by.zatta.pilight.fragments.SetupConnectionFragment;
 import by.zatta.pilight.fragments.TaskerActionFragment;
 import by.zatta.pilight.fragments.TaskerActionFragment.ActionReadyListener;
 import by.zatta.pilight.model.DeviceEntry;
@@ -38,13 +38,11 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 
 	private static final String TAG = "Zatta::ActionActivity";
 	private static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
-
-	private ServiceConnection mConnection = this;
 	private final Messenger mMessenger = new Messenger(new IncomingMessageHandler());
-	private Messenger mServiceMessenger = null;
 	boolean mIsBound;
-	
 	Bundle localeBundle;
+	private ServiceConnection mConnection = this;
+	private Messenger mServiceMessenger = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -113,6 +111,7 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 	 * Check if the service is running. If the service is running when the activity starts, we want to automatically bind to it.
 	 */
 	private void automaticBind() {
+		openSetupConnectionFragment(SetupConnectionFragment.newInstance("CONNECTING"));
 		startService(new Intent(ActionActivity.this, ConnectionService.class));
 		if (isConnectionServiceActive()) {
 			doBindService();
@@ -194,6 +193,58 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 		}
 	}
 
+	private void openSetupConnectionFragment(BaseFragment mBaseFragment) {
+		FragmentManager fm = getFragmentManager();
+		FragmentTransaction ft = fm.beginTransaction();
+
+		Fragment pref = fm.findFragmentByTag("SetupConnectionFragment");
+		if (pref == null) {
+			fm.popBackStack();
+			ft.replace(R.id.fragment_main, mBaseFragment, "SetupConnectionFragment");
+			ft.addToBackStack(null);
+			ft.commit();
+		}
+	}
+
+	@Override
+	public void onChangedStatusListener(int what) {
+		switch (what) {
+			case SetupConnectionFragment.DISMISS:
+				closeDialogFragments();
+				FragmentManager fm = getFragmentManager();
+				BaseFragment prev = (BaseFragment) fm.findFragmentByTag("SetupConnectionFragment");
+				if (!(prev == null)) {
+					FragmentTransaction ft = fm.beginTransaction();
+					ft.remove(prev);
+					ft.commit();
+					fm.popBackStack();
+				}
+				break;
+			case SetupConnectionFragment.FINISH:
+				closeDialogFragments();
+				doUnbindService();
+				stopService(new Intent(ActionActivity.this, ConnectionService.class));
+				finish();
+				break;
+			case SetupConnectionFragment.RECONNECT:
+				this.sendBroadcast(new Intent("pilight-reconnect"));
+				break;
+			case SetupConnectionFragment.CUSTOM_SERVER:
+				Intent custom = new Intent("pilight-reconnect");
+				Bundle bundle = new Bundle();
+				bundle.putString("server", "my.adress.net");
+				bundle.putInt("port", 7003);
+				this.sendBroadcast(custom);
+				break;
+		}
+	}
+
+	@Override
+	public void actionReadyListener(Intent localeIntent) {
+		setResult(-1, localeIntent);
+		finish();
+	}
+
 	/**
 	 * Handle incoming messages from ConnectionService
 	 */
@@ -205,79 +256,48 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 			Bundle bundle = msg.getData();
 			bundle.setClassLoader(getApplicationContext().getClassLoader());
 
-			switch (msg.what)
-			{
-			case ConnectionService.MSG_SET_STATUS:
-				String status = bundle.getString("status", "no status received yet");
-				//Log.v(TAG, "status received in activity: " + status);
-				if (status.equals("UPDATE")) break;
+			switch (msg.what) {
+				case ConnectionService.MSG_SET_STATUS:
+					String status = bundle.getString("status", "no status received yet");
+					//Log.v(TAG, "status received in activity: " + status);
+					if (status.equals("UPDATE")) break;
 
-				FragmentManager fm = getFragmentManager();
-				Fragment prev = fm.findFragmentByTag("dialog");
+					FragmentManager fm = getFragmentManager();
+					Fragment prev = fm.findFragmentByTag("dialog");
 
-				if (prev == null) {
-					//Log.v(TAG, "there was not a fragment with tag dialog");
-					openDialogFragment(StatusDialog.newInstance(status));
+					try {
+						if (prev == null) {
+							// Log.v(TAG, "there was not a fragment with tag dialog");
+							openSetupConnectionFragment(SetupConnectionFragment.newInstance(status));
+							break;
+						} else if (!(prev.getClass().equals(SetupConnectionFragment.class))) {
+							// Log.v(TAG, "there was fragment with tag SetupConnectionFragment not being StatusDialog");
+							openSetupConnectionFragment(SetupConnectionFragment.newInstance(status));
+							break;
+						} else {
+							// Log.v(TAG, "there was a SetupConnectionFragment running");
+							SetupConnectionFragment.setChangedStatus(status);
+							break;
+						}
+					} catch (IllegalStateException e) {
+						Log.w(TAG, "most likely the activity wasn't made yet");
+					}
+
+				case ConnectionService.MSG_SET_BUNDLE:
+					mDevices = bundle.getParcelableArrayList("config");
+
+					FragmentManager fm2 = getFragmentManager();
+					Fragment prev2 = fm2.findFragmentByTag("piTasker");
+
+					if ((prev2 == null)) {
+						openFragment(TaskerActionFragment.newInstance(localeBundle, mDevices));
+					}
+
 					break;
-				} else if (!(prev.getClass().equals(StatusDialog.class))) {
-					//Log.v(TAG, "there was fragment with tag dialog not being StatusDialog");
-					openDialogFragment(StatusDialog.newInstance(status));
-					break;
-				} else {
-					//Log.v(TAG, "there was a statusdialog running");
-					StatusDialog.setChangedStatus(status);
-					break;
-				}
-
-			case ConnectionService.MSG_SET_BUNDLE:
-				mDevices = bundle.getParcelableArrayList("config");
-				//Log.v(TAG, "received a MSG_SET_BUNDLE");
-
-				// if (allLocations.isEmpty())
-				// initMenu();
-
-				FragmentManager fm2 = getFragmentManager();
-				Fragment prev2 = fm2.findFragmentByTag("piTasker");
-
-				if ((prev2 == null)) {
-					//Log.v(TAG, "setting up new Fragment");
-					// openFragment(GridBaseFragment.newInstance(mDevices));
-					openFragment(TaskerActionFragment.newInstance(localeBundle, mDevices));
-				}
-
-				break;
-			default:
-				super.handleMessage(msg);
+				default:
+					super.handleMessage(msg);
 			}
 		}
-	}
-
-	@Override
-	public void onChangedStatusListener(int what) {
-
-		//Log.d(TAG, "onChangedStatusListener called");
-		switch (what)
-		{
-		case StatusDialog.DISMISS:
-			closeDialogFragments();
-			break;
-		case StatusDialog.FINISH:
-			closeDialogFragments();
-			doUnbindService();
-			stopService(new Intent(ActionActivity.this, ConnectionService.class));
-			finish();
-			break;
-		case StatusDialog.RECONNECT:
-			this.sendBroadcast(new Intent("pilight-reconnect"));
-			// TODO after a reconnection it takes a while before a new mDevices is received..
-			break;
-		}
-	}
-
-	@Override
-	public void actionReadyListener(Intent localeIntent) {
-		setResult(-1,localeIntent);
-		finish();
 	}
 
 }

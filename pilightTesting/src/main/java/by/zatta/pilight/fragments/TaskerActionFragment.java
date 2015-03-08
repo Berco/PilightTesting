@@ -41,6 +41,9 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +52,8 @@ import by.zatta.pilight.model.DeviceEntry;
 import by.zatta.pilight.model.SettingEntry;
 import by.zatta.pilight.views.CircularSeekBar;
 import by.zatta.pilight.views.CustomHeaderInnerCard;
+import it.gmariotti.cardslib.library.extra.staggeredgrid.internal.CardGridStaggeredArrayAdapter;
+import it.gmariotti.cardslib.library.extra.staggeredgrid.view.CardGridStaggeredView;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.internal.CardGridArrayAdapter;
@@ -64,6 +69,7 @@ public class TaskerActionFragment extends BaseFragment {
 	private boolean forceList;
 	static CardArrayAdapter mCardArrayAdapter;
 	static CardGridArrayAdapter mCardGridArrayAdapter;
+	static CardGridStaggeredArrayAdapter mCardStaggeredGridArrayAdapter;
 	Bundle localeBundle;
 	CardView resultCardView;
 	static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
@@ -157,7 +163,7 @@ public class TaskerActionFragment extends BaseFragment {
 		ArrayList<Card> cards = new ArrayList<Card>();
 		for (DeviceEntry device : mDevices) {
 			Card card = null;
-
+			Log.v(TAG, device.getNameID());
 			if (device.getType() == 1)
 				card = new ListSwitchCard(getActivity().getApplicationContext(), device);
 			else if (device.getType() == 2)
@@ -184,17 +190,18 @@ public class TaskerActionFragment extends BaseFragment {
 				listView.setAdapter(mCardArrayAdapter);
 			}
 		} else {
-			mCardGridArrayAdapter = new CardGridArrayAdapter(getActivity(), cards);
-			mCardGridArrayAdapter.setInnerViewTypeCount(2);
+			mCardStaggeredGridArrayAdapter = new CardGridStaggeredArrayAdapter(getActivity(), cards);
+			mCardStaggeredGridArrayAdapter.setInnerViewTypeCount(2);
 
-			CardGridView gridView = (CardGridView) getActivity().findViewById(R.id.carddemo_grid_base);
-			if (gridView != null) {
-				gridView.setAdapter(mCardGridArrayAdapter);
+			CardGridStaggeredView mGridView = (CardGridStaggeredView) getActivity().findViewById(R.id.carddemo_extras_grid_stag);
+			if (mGridView != null) {
+				mGridView.setAdapter(mCardStaggeredGridArrayAdapter);
 			}
 		}
 	}
 
 	private void makeAction(String[] action) {
+		Log.e(TAG, action.toString());
 		actionArray = action;
 		resultCardView.setVisibility(View.VISIBLE);
 		setHasOptionsMenu(true);
@@ -222,7 +229,7 @@ public class TaskerActionFragment extends BaseFragment {
 	 * CARDS START FROM HERE: ListDimmerCard ******************************************************************************
 	 */
 	public class ListDimmerCard extends Card {
-		protected String who;
+		protected JSONObject codeJSON = new JSONObject();
 		protected boolean mState;
 		protected boolean readwrite = true;
 		protected int mSeekValue;
@@ -236,20 +243,28 @@ public class TaskerActionFragment extends BaseFragment {
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				String[] what = new String[4];
-				what[NAME]=mTitleDevice;
-				what[WHERE]=mTitleLocation;			
-				
-				String action = "\"state\":\"off\"";
-				what[BLURP] = mTitleDevice + " off";
-				
-				if (isChecked){
-					action = "\"state\":\"on\"";
-					what[BLURP]=mTitleDevice + " on with previous dimlevel";
+				JSONObject actionJSON = null;
+				try {
+					if (isChecked) codeJSON.put("state", "on");
+					else codeJSON.put("state", "off");
+					actionJSON = new JSONObject();
+					actionJSON.put("action", "control");
+					actionJSON.put("code", codeJSON);
+				} catch (JSONException e) {
+					Log.d(TAG, "could not create actionJSON");
 				}
-				what[COMMAND]=who+action;	
 				mState = isChecked;
-				
+
+				String[] what = new String[4];
+				what[NAME] = mTitleDevice;
+				what[WHERE] = mTitleLocation;
+
+				what[BLURP] = mTitleDevice + " off";
+				if (isChecked) {
+					what[BLURP] = mTitleDevice + " on with previous dimlevel";
+				}
+				what[COMMAND] = actionJSON.toString();
+
 				makeAction(what);
 			}
 		};
@@ -258,12 +273,25 @@ public class TaskerActionFragment extends BaseFragment {
 			public void onStopTrackingTouch(CircularSeekBar seekBar) {
 				mTitleMainView.setText("");
 				mToggle.setText(Integer.toString(mSeekValue));
-				String action = "\"state\":\"on\",\"values\":{\"dimlevel\":" + String.valueOf(mSeekValue) + "}";
+				JSONObject actionJSON = null;
+				JSONObject valuesJSON = null;
+				try {
+					valuesJSON = new JSONObject();
+					valuesJSON.put("dimlevel", mSeekValue);
+					codeJSON.put("state", "on");
+					codeJSON.put("values", valuesJSON);
+					actionJSON = new JSONObject();
+					actionJSON.put("action", "control");
+					actionJSON.put("code", codeJSON);
+				} catch (JSONException e) {
+					Log.d(TAG, "could not create actionJSON");
+				}
+
 				String[] what = new String[4];
-				what[NAME]=mTitleDevice;
-				what[WHERE]=mTitleLocation;
-				what[COMMAND]=who+action;
-				what[BLURP]=mTitleDevice + " set \"on\" with level " + String.valueOf(mSeekValue);
+				what[NAME] = mTitleDevice;
+				what[WHERE] = mTitleLocation;
+				what[COMMAND] = actionJSON.toString();
+				what[BLURP] = mTitleDevice + " set \"on\" with level " + String.valueOf(mSeekValue);
 				makeAction(what);
 				// deviceListListener.deviceListListener(ConnectionService.MSG_SWITCH_DEVICE, who + action);
 			}
@@ -279,10 +307,14 @@ public class TaskerActionFragment extends BaseFragment {
 
 		public ListDimmerCard(Context context, DeviceEntry entry) {
 			super(context, R.layout.dimmercard_inner);
-			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
+			try {
+				codeJSON.put("device", entry.getNameID());
+			} catch (JSONException e) {
+				Log.d(TAG, "could not create codeJSON");
+			}
 			for (SettingEntry sentry : entry.getSettings()) {
 				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
-				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
+				if (sentry.getKey().equals("group")) mTitleLocation = sentry.getValue();
 				if (sentry.getKey().equals("dimlevel")) mSeekValue = Integer.valueOf(sentry.getValue());
 				if (sentry.getKey().equals("state")) {
 					if (sentry.getValue().equals("on")) mState = true;
@@ -290,7 +322,7 @@ public class TaskerActionFragment extends BaseFragment {
 				}
 				if (sentry.getKey().equals("dimlevel-minimum")) minSeekValue = Integer.valueOf(sentry.getValue());
 				if (sentry.getKey().equals("dimlevel-maximum")) maxSeekValue = Integer.valueOf(sentry.getValue());
-				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
+				if (sentry.getKey().equals("readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}
@@ -327,32 +359,13 @@ public class TaskerActionFragment extends BaseFragment {
 			if (!readwrite) mSeekBar.setAlpha((float) 0.5);
 		}
 
-		public void update(DeviceEntry entry) {
-			mToggle.setOnCheckedChangeListener(null);
-			mSeekBar.setOnSeekBarChangeListener(null);
-			for (SettingEntry sentry : entry.getSettings()) {
-				if (sentry.getKey().equals("state")) {
-					if (sentry.getValue().equals("on")) mState = true;
-					if (sentry.getValue().equals("off")) mState = false;
-					mToggle.setChecked(mState);
-				}
-				if (sentry.getKey().equals("dimlevel")) {
-					mSeekValue = Integer.valueOf(sentry.getValue());
-					this.mSeekBar.setProgress(mSeekValue - minSeekValue);
-				}
-			}
-			mSeekBar.setOnSeekBarChangeListener(seekListener);
-			mToggle.setText(Integer.toString(mSeekValue));
-			mToggle.setOnCheckedChangeListener(toggleListener);
-		}
 	}
 
 	/*
 	 * LISTSWITCHCARD ****************************************************************************************************
 	 */
 	public class ListSwitchCard extends Card {
-		protected String who;
-		protected String mValue;
+		protected JSONObject codeJSON = new JSONObject();
 		protected String mTitleDevice;
 		protected String mTitleLocation;
 		protected ToggleButton mToggle;
@@ -361,35 +374,48 @@ public class TaskerActionFragment extends BaseFragment {
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				String[] what = new String[4];
-				what[NAME]=mTitleDevice;
-				what[WHERE]=mTitleLocation;			
-				
-				String action = "\"state\":\"off\"";
-				what[BLURP] = mTitleDevice + " off";
-				
-				if (isChecked){
-					action = "\"state\":\"on\"";
-					what[BLURP]=mTitleDevice + " on";
+
+				JSONObject actionJSON = null;
+				try {
+					if (isChecked) codeJSON.put("state", "on");
+					else codeJSON.put("state", "off");
+					actionJSON = new JSONObject();
+					actionJSON.put("action", "control");
+					actionJSON.put("code", codeJSON);
+				} catch (JSONException e) {
+					Log.d(TAG, "could not create actionJSON");
 				}
-				what[COMMAND]=who+action;	
 				mState = isChecked;
-				
+
+				String[] what = new String[4];
+				what[NAME] = mTitleDevice;
+				what[WHERE] = mTitleLocation;
+
+				what[BLURP] = mTitleDevice + " off";
+				if (isChecked) {
+					what[BLURP] = mTitleDevice + " on";
+				}
+				what[COMMAND] = actionJSON.toString();
+
 				makeAction(what);
 			}
 		};
 
 		public ListSwitchCard(Context context, DeviceEntry entry) {
 			super(context, R.layout.switchcard_inner);
-			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
+			try {
+				codeJSON.put("device", entry.getNameID());
+			} catch (JSONException e) {
+				Log.d(TAG, "could not create codeJSON");
+			}
 			for (SettingEntry sentry : entry.getSettings()) {
 				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
-				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
+				if (sentry.getKey().equals("group")) mTitleLocation = sentry.getValue();
 				if (sentry.getKey().equals("state")) {
 					if (sentry.getValue().equals("on")) mState = true;
 					if (sentry.getValue().equals("off")) mState = false;
 				}
-				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
+				if (sentry.getKey().equals("readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}
@@ -411,18 +437,6 @@ public class TaskerActionFragment extends BaseFragment {
 			mToggle.setClickable(readwrite);
 			if (!readwrite) mToggle.setAlpha((float) 0.5);
 
-		}
-
-		public void update(DeviceEntry entry) {
-			mToggle.setOnCheckedChangeListener(null);
-			for (SettingEntry sentry : entry.getSettings()) {
-				if (sentry.getKey().equals("state")) {
-					if (sentry.getValue().equals("on")) mState = true;
-					if (sentry.getValue().equals("off")) mState = false;
-					mToggle.setChecked(mState);
-				}
-			}
-			mToggle.setOnCheckedChangeListener(toggleListener);
 		}
 	}
 
@@ -430,8 +444,7 @@ public class TaskerActionFragment extends BaseFragment {
 	 * LISTRELAYCARD ****************************************************************************************************
 	 */
 	public class ListRelayCard extends Card {
-		protected String who;
-		protected String mValue;
+		protected JSONObject codeJSON = new JSONObject();
 		protected String mTitleDevice;
 		protected String mTitleLocation;
 		protected ToggleButton mToggle;
@@ -441,35 +454,47 @@ public class TaskerActionFragment extends BaseFragment {
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				String[] what = new String[4];
-				what[NAME]=mTitleDevice;
-				what[WHERE]=mTitleLocation;			
-				
-				String action = "\"state\":\"off\"";
-				what[BLURP] = mTitleDevice + " off";
-				
-				if (isChecked){
-					action = "\"state\":\"on\"";
-					what[BLURP]=mTitleDevice + " on";
+				JSONObject actionJSON = null;
+				try {
+					if (isChecked) codeJSON.put("state", "on");
+					else codeJSON.put("state", "off");
+					actionJSON = new JSONObject();
+					actionJSON.put("action", "control");
+					actionJSON.put("code", codeJSON);
+				} catch (JSONException e) {
+					Log.d(TAG, "could not create actionJSON");
 				}
-				what[COMMAND]=who+action;	
 				mState = isChecked;
-				
+
+				String[] what = new String[4];
+				what[NAME] = mTitleDevice;
+				what[WHERE] = mTitleLocation;
+
+				what[BLURP] = mTitleDevice + " off";
+				if (isChecked) {
+					what[BLURP] = mTitleDevice + " on";
+				}
+				what[COMMAND] = actionJSON.toString();
+
 				makeAction(what);
 			}
 		};
 
 		public ListRelayCard(Context context, DeviceEntry entry) {
 			super(context, R.layout.relaycard_inner);
-			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
+			try {
+				codeJSON.put("device", entry.getNameID());
+			} catch (JSONException e) {
+				Log.d(TAG, "could not create codeJSON");
+			}
 			for (SettingEntry sentry : entry.getSettings()) {
 				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
-				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
+				if (sentry.getKey().equals("group")) mTitleLocation = sentry.getValue();
 				if (sentry.getKey().equals("state")) {
 					if (sentry.getValue().equals("on")) mState = true;
 					if (sentry.getValue().equals("off")) mState = false;
 				}
-				if (sentry.getKey().equals("gui-readonly") && sentry.getValue().equals("1")) readwrite = false;
+				if (sentry.getKey().equals("readonly") && sentry.getValue().equals("1")) readwrite = false;
 			}
 			init();
 		}
@@ -491,26 +516,13 @@ public class TaskerActionFragment extends BaseFragment {
 			mToggle.setClickable(readwrite);
 			if (!readwrite) mToggle.setAlpha((float) 0.5);
 		}
-
-		public void update(DeviceEntry entry) {
-			mToggle.setOnCheckedChangeListener(null);
-			for (SettingEntry sentry : entry.getSettings()) {
-				if (sentry.getKey().equals("state")) {
-					if (sentry.getValue().equals("on")) mState = true;
-					if (sentry.getValue().equals("off")) mState = false;
-					mToggle.setChecked(mState);
-				}
-			}
-			mToggle.setOnCheckedChangeListener(toggleListener);
-		}
 	}
 
 	/*
 	 * LISTCONTACTCARD ****************************************************************************************************
 	 */
 	public class ListContactCard extends Card {
-		protected String who;
-		protected String mValue;
+		protected JSONObject codeJSON = new JSONObject();
 		protected String mTitleDevice;
 		protected String mTitleLocation;
 		protected ToggleButton mToggle;
@@ -520,30 +532,42 @@ public class TaskerActionFragment extends BaseFragment {
 		protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				String[] what = new String[4];
-				what[NAME]=mTitleDevice;
-				what[WHERE]=mTitleLocation;			
-				
-				String action = "\"state\":\"off\"";
-				what[BLURP] = mTitleDevice + " off";
-				
-				if (isChecked){
-					action = "\"state\":\"on\"";
-					what[BLURP]=mTitleDevice + " on";
+				JSONObject actionJSON = null;
+				try {
+					if (isChecked) codeJSON.put("state", "on");
+					else codeJSON.put("state", "off");
+					actionJSON = new JSONObject();
+					actionJSON.put("action", "control");
+					actionJSON.put("code", codeJSON);
+				} catch (JSONException e) {
+					Log.d(TAG, "could not create actionJSON");
 				}
-				what[COMMAND]=who+action;	
 				mState = isChecked;
-				
+
+				String[] what = new String[4];
+				what[NAME] = mTitleDevice;
+				what[WHERE] = mTitleLocation;
+
+				what[BLURP] = mTitleDevice + " off";
+				if (isChecked) {
+					what[BLURP] = mTitleDevice + " on";
+				}
+				what[COMMAND] = actionJSON.toString();
+
 				makeAction(what);
 			}
 		};
 
 		public ListContactCard(Context context, DeviceEntry entry) {
 			super(context, R.layout.contactcard_inner);
-			who = "\"device\":\"" + entry.getNameID() + "\",\"location\":\"" + entry.getLocationID() + "\",";
+			try {
+				codeJSON.put("device", entry.getNameID());
+			} catch (JSONException e) {
+				Log.d(TAG, "could not create codeJSON");
+			}
 			for (SettingEntry sentry : entry.getSettings()) {
 				if (sentry.getKey().equals("name")) mTitleDevice = sentry.getValue();
-				if (sentry.getKey().equals("locationName")) mTitleLocation = sentry.getValue();
+				if (sentry.getKey().equals("group")) mTitleLocation = sentry.getValue();
 				if (sentry.getKey().equals("state")) {
 					if (sentry.getValue().equals("opened")) mState = true;
 					if (sentry.getValue().equals("closed")) mState = false;
@@ -569,18 +593,6 @@ public class TaskerActionFragment extends BaseFragment {
 			}
 			mToggle.setClickable(readwrite);
 			// if (!readwrite) mToggle.setAlpha((float) 0.5); // I don't think we need this for the contacts
-		}
-
-		public void update(DeviceEntry entry) {
-			mToggle.setOnCheckedChangeListener(null);
-			for (SettingEntry sentry : entry.getSettings()) {
-				if (sentry.getKey().equals("state")) {
-					if (sentry.getValue().equals("opened")) mState = true;
-					if (sentry.getValue().equals("closed")) mState = false;
-					mToggle.setChecked(mState);
-				}
-			}
-			mToggle.setOnCheckedChangeListener(toggleListener);
 		}
 	}
 

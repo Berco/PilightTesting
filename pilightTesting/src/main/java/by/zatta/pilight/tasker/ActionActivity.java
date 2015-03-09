@@ -22,6 +22,7 @@ import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -207,7 +208,7 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 	}
 
 	@Override
-	public void onChangedStatusListener(int what) {
+	public void onChangedStatusListener(int what, String adress) {
 		switch (what) {
 			case SetupConnectionFragment.DISMISS:
 				closeDialogFragments();
@@ -231,9 +232,7 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 				break;
 			case SetupConnectionFragment.CUSTOM_SERVER:
 				Intent custom = new Intent("pilight-reconnect");
-				Bundle bundle = new Bundle();
-				bundle.putString("server", "my.adress.net");
-				bundle.putInt("port", 7003);
+				custom.putExtra("server", adress);
 				this.sendBroadcast(custom);
 				break;
 		}

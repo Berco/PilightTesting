@@ -39,6 +39,9 @@
     <string name="status_failed">A failure occurred during establishing a connection to the pilight deamon on your raspberry pi.</string>
     <string name="status_lost">The connection to the deamon was lost.</string>
     <string name="status_destroyed">The service that maintains the connection from this app to the pilight daemon was destroyed.</string>
+    <string name="hostname_or_ip">Hostname / IP</string>
+    <string name="colon">:</string>
+    <string name="port">Port</string>
     <string name="btn_close">Close</string>
     <string name="btn_abort">Abort</string>
     <string name="btn_retry">Retry</string>

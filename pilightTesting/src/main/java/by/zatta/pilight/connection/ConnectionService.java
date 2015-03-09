@@ -100,12 +100,13 @@ public class ConnectionService extends Service {
 				// Log.v(TAG, "kill recieved");
 				stopSelf();
 			} else if (action.equals("pilight-reconnect")) {
-
+				String server = intent.getStringExtra("server");
+				Log.v(TAG, server);
 				stopForeground(false);
 				makeNotification(NotificationType.CONNECTING, aCtx.getString(R.string.noti_reconnect));
 				if (isConnectionUp)
 					dropConnection();
-				else isConnectionUp = makeConnection();
+				else isConnectionUp = makeConnection(server);
 			} else if (action.equals("pilight-switch-device")) {
 				if (isConnectionUp) Log.v(TAG, "broadcastReceiver: " + intent.getStringExtra("command"));
 				Server.CONNECTION.sentCommand(intent.getStringExtra("command"));
@@ -350,7 +351,7 @@ public class ConnectionService extends Service {
 		this.registerReceiver(mMessageReceiver, filter);
 
 		mNotMan = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		isConnectionUp = makeConnection();
+		isConnectionUp = makeConnection(null);
 		isDestroying = false;
 		Log.v(TAG, "onCreate done");
 
@@ -398,10 +399,10 @@ public class ConnectionService extends Service {
 				getBaseContext().getResources().getDisplayMetrics());
 	}
 
-	private boolean makeConnection() {
+	private boolean makeConnection(String server) {
 		if (mCurrentNotif == NotificationType.DESTROYED)
 			makeNotification(NotificationType.CONNECTING, aCtx.getString(R.string.noti_connecting));
-		String serverString = Server.CONNECTION.setup();
+		String serverString = Server.CONNECTION.setup(server);
 		String goodConfig = "{\"gui\":{";
 		if (serverString.contains(goodConfig)) {
 			try {

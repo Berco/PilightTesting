@@ -38,6 +38,9 @@
     <string name="status_failed">Het maken van een verbinding met de pilight deamon op uw raspberry pi is mislukt.</string>
     <string name="status_lost">De verbinding met de daemon is verbroken.</string>
     <string name="status_destroyed">De service van deze app die de verbinding met de daemon verzorgt is gestopt.</string>
+    <string name="hostname_or_ip">Hostnaam / IP</string>
+    <string name="colon">:</string>
+    <string name="port">Poort</string>
     <string name="btn_close">Sluiten</string>
     <string name="btn_abort">Onderbreken</string>
     <string name="btn_retry">Nogmaals</string>

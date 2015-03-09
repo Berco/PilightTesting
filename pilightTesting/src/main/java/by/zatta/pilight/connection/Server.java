@@ -41,6 +41,8 @@ public enum Server {
 	private static final String TAG = "Zatta::Server";
 	private transient static ReaderThread reader;
 	private transient static WriterThread writer;
+	private static String host;
+	private static int port;
 	private static Socket socket;
 	private static BufferedReader bufferedReader = null;
 	private static PrintStream printStream = null;
@@ -49,9 +51,13 @@ public enum Server {
 	private ArrayBlockingQueue<String> command;
 	private transient SetUp setupThread;
 
-	public synchronized String setup() {
+	public synchronized String setup(String hostandport) {
 		disconnect();
-
+		if (!(hostandport==null)){
+			String[] myAdressArray = hostandport.split(":");
+			host = myAdressArray[0];
+			port = Integer.valueOf(myAdressArray[1]);
+		}
 		String toBeReturned = "";
 		output = new ArrayBlockingQueue<String>(1);
 		setupThread = new SetUp(output);
@@ -96,6 +102,8 @@ public enum Server {
 	}
 
 	public synchronized void disconnect() {
+		host = null;
+		port = 0;
 		try {
 			socket.close();
 		} catch (Exception e) {
@@ -151,11 +159,8 @@ public enum Server {
 				switch (step) {
 					case ADRESS:
 						runs++;
-						if (runs == 2) {
-							////// TEMPORARILY CONNECTING HARDCODED OVER THE INTERNET ///
-							adress = new InetSocketAddress("my.home.adress", 1404);
-							adress = new InetSocketAddress("bercobosker.ddns.net", 7003);
-							//Log.d(TAG, "OKAY " + adress.toString());
+						if (!(host == null) && !(port == 0)) {
+							adress = new InetSocketAddress(host, port);
 							step = Step.SOCKET;
 							runs = 0;
 							break;

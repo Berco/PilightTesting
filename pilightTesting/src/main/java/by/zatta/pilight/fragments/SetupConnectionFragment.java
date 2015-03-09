@@ -31,9 +31,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 
 import by.zatta.pilight.R;
@@ -45,6 +47,8 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
     private static Button mBtnCancel;
     private static Button mBtnSetup;
     private static ProgressBar pbConnecting;
+	private static EditText mEtHost;
+	private static EditText mEtPort;
     private String status;
     private static TextView tv;
 
@@ -93,6 +97,8 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
         View v = inflater.inflate(R.layout.setup_connection_layout, container, false);
         tv = (TextView) v.findViewById(R.id.tvStatusDisplay);
         pbConnecting = (ProgressBar) v.findViewById(R.id.pbConnecting);
+		mEtHost = (EditText) v.findViewById(R.id.etHost);
+		mEtPort = (EditText) v.findViewById(R.id.etPort);
         mBtnCancel = (Button) v.findViewById(R.id.btnCancelStart);
         mBtnSetup = (Button) v.findViewById(R.id.btnSetupConnection);
         mBtnCancel.setOnClickListener(this);
@@ -119,7 +125,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
         mBtnCancel.setText(R.string.btn_close);
         mBtnSetup.setText(R.string.btn_retry);
         if (status.equals("CONNECTED")) {
-            changedStatusListener.onChangedStatusListener(DISMISS);
+            changedStatusListener.onChangedStatusListener(DISMISS, null);
         } else if (status.equals("CONNECTING")) {
             pbConnecting.setVisibility(View.VISIBLE);
             tv.setText(R.string.status_connecting);
@@ -144,7 +150,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
     }
 
     public interface OnChangedStatusListener {
-        public void onChangedStatusListener(int what);
+        public void onChangedStatusListener(int what, String adress);
     }
 
     @Override
@@ -152,13 +158,16 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
         switch (v.getId())
         {
             case R.id.btnCancelStart:
-                changedStatusListener.onChangedStatusListener(FINISH);
+                changedStatusListener.onChangedStatusListener(FINISH, null);
                 break;
             case R.id.btnSetupConnection:
-                if (status.equals("NO_SERVER")) {
-                    changedStatusListener.onChangedStatusListener(CUSTOM_SERVER);
+				String host = mEtHost.getText().toString();
+				String port = mEtPort.getText().toString();
+				if (!(host == null) && !(port == null)) {
+					String adress = host+ ":" + port;
+					changedStatusListener.onChangedStatusListener(CUSTOM_SERVER, adress);
                 }else{
-                    changedStatusListener.onChangedStatusListener(RECONNECT);
+                    changedStatusListener.onChangedStatusListener(RECONNECT, null);
                 }
                 break;
         }

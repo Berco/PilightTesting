@@ -59,6 +59,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -108,7 +109,7 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 	}
 
 	@Override
-	public void onChangedStatusListener(int what) {
+	public void onChangedStatusListener(int what, String adress) {
 		switch (what) {
             case SetupConnectionFragment.DISMISS:
                 closeDialogFragments();
@@ -132,10 +133,8 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
                 break;
 
             case SetupConnectionFragment.CUSTOM_SERVER:
-                Intent custom = new Intent("pilight-reconnect");
-                Bundle bundle = new Bundle();
-                bundle.putString("server", "my.adress.net");
-                bundle.putInt("port", 7003);
+				Intent custom = new Intent("pilight-reconnect");
+				custom.putExtra("server", adress);
                 this.sendBroadcast(custom);
                 break;
         }

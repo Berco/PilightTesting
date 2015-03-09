@@ -3,6 +3,7 @@
   ~ /********************************************************************************
   ~  * 
   ~  * Copyright (C) 2013 Zatta
+  ~  * Copyright (c) 2014 Peter Heisig <http://google.com/+PeterHeisig>
   ~  * 
   ~  * This file is part of pilight for android.
   ~  * 
@@ -25,65 +26,123 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:gravity="center_horizontal"
-    android:orientation="vertical"
-    android:padding="4dip" >
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:gravity="center_horizontal"
+              android:orientation="vertical"
+              android:padding="4dip">
 
-    <TextView
-        android:id="@+id/tvStatusDisplay"
-        android:text="Some TEXT"
-        android:layout_width="wrap_content"
-        android:layout_height="0dip"
-        android:layout_gravity="center_vertical|center_horizontal"
-        android:layout_marginBottom="10dip"
-        android:layout_marginTop="10dip"
-        android:layout_weight="1"
-        android:gravity="top|center_horizontal"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <ProgressBar
-        android:id="@+id/pbConnecting"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:descendantFocusability="beforeDescendants"
+                    android:focusableInTouchMode="true">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:divider="?android:attr/dividerHorizontal"
-        android:orientation="vertical"
-        android:showDividers="middle" >
-
-        <View
+        <ProgressBar
+            android:id="@+id/pbConnecting"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_centerHorizontal="true"
             android:layout_width="wrap_content"
-            android:layout_height="3dp" />
+            android:layout_height="wrap_content"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/centered_layout"
+            android:layout_alignLeft="@id/centered_layout"
+            android:layout_alignRight="@id/centered_layout"
+            android:layout_marginBottom="16dip"
+            android:src="@drawable/logo"/>
+
+        <TextView
+            android:id="@+id/tvStatusDisplay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/centered_layout"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="40dip"
+            android:text="Some TEXT"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+        <RelativeLayout
+            android:id="@id/centered_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true">
+
+            <EditText
+                android:id="@+id/etHost"
+                android:layout_width="160dp"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="right"
+                android:hint="@string/hostname_or_ip"
+                android:lines="1"
+                android:scrollHorizontally="true"
+                android:singleLine="true"/>
+
+            <TextView
+                android:id="@+id/colon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@id/etHost"
+                android:layout_toRightOf="@id/etHost"
+                android:text="@string/colon"/>
+
+            <EditText
+                android:id="@+id/etPort"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/etHost"
+                android:layout_toRightOf="@id/colon"
+                android:ellipsize="end"
+                android:hint="@string/port"
+                android:inputType="number"
+                android:lines="1"
+                android:scrollHorizontally="true"
+                android:singleLine="true"/>
+
+        </RelativeLayout>
 
         <LinearLayout
-            style="?android:attr/buttonBarStyle"
+            android:id="@+id/pbButtonbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+            android:layout_alignParentBottom="true"
+            android:divider="?android:attr/dividerHorizontal"
+            android:orientation="vertical"
+            android:showDividers="middle">
 
-            <Button
-                android:id="@+id/btnSetupConnection"
-                style="?android:attr/buttonBarButtonStyle"
-                android:text="ONE"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                 />
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="3dp"/>
 
-            <Button
-                android:id="@+id/btnCancelStart"
-                style="?android:attr/buttonBarButtonStyle"
-                android:text="TWO"
-                android:layout_width="0dp"
+            <LinearLayout
+                style="?android:attr/buttonBarStyle"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                 />
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnSetupConnection"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="ONE"
+                    />
+
+                <Button
+                    android:id="@+id/btnCancelStart"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="TWO"
+                    />
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
+    </RelativeLayout>
 
 </LinearLayout>

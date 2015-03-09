@@ -77,6 +77,7 @@ public class ConnectionService extends Service {
 	public static final int MSG_SWITCH_DEVICE = 1755547587;
 	public static final int MSG_UNREGISTER_CLIENT = 1873487903;
 	private static final String TAG = "Zatta::ConnectionService";
+	private static String hostandport;
 	public static NotificationType mCurrentNotif = NotificationType.DESTROYED;
 	public static List<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track of all current registered clients (activities,
 	private static Context aCtx;
@@ -101,6 +102,7 @@ public class ConnectionService extends Service {
 				stopSelf();
 			} else if (action.equals("pilight-reconnect")) {
 				String server = intent.getStringExtra("server");
+				hostandport = server;
 				Log.v(TAG, server);
 				stopForeground(false);
 				makeNotification(NotificationType.CONNECTING, aCtx.getString(R.string.noti_reconnect));
@@ -154,7 +156,7 @@ public class ConnectionService extends Service {
 		} else if (update.contains("LOST_CONNECTION") && !isDestroying) {
 			makeNotification(NotificationType.LOST_CONNECTION, aCtx.getString(R.string.noti_lost));
 			dropConnection();
-			ctx.sendBroadcast(new Intent("pilight-reconnect"));
+			ctx.sendBroadcast(new Intent("pilight-reconnect").putExtra("server", hostandport));
 		}
 	}
 

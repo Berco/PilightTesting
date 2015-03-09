@@ -24,8 +24,10 @@
 package by.zatta.pilight.fragments;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -103,6 +105,13 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
         mBtnSetup = (Button) v.findViewById(R.id.btnSetupConnection);
         mBtnCancel.setOnClickListener(this);
         mBtnSetup.setOnClickListener(this);
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+		String known_host = prefs.getString("known_host", null);
+		String known_port = prefs.getString("known_port", null);
+		if (!(known_host == null) && !(known_port == null)) {
+			mEtHost.setText(known_host);
+			mEtPort.setText(known_port);
+		}
         return v;
     }
 
@@ -164,6 +173,11 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 				String host = mEtHost.getText().toString();
 				String port = mEtPort.getText().toString();
 				if (!(host == null) && !(port == null)) {
+					SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+					SharedPreferences.Editor edit = prefs.edit();
+					edit.putString("known_host", host);
+					edit.putString("known_port", port);
+					edit.commit();
 					String adress = host+ ":" + port;
 					changedStatusListener.onChangedStatusListener(CUSTOM_SERVER, adress);
                 }else{

@@ -101,14 +101,16 @@ public class ConnectionService extends Service {
 				// Log.v(TAG, "kill recieved");
 				stopSelf();
 			} else if (action.equals("pilight-reconnect")) {
-				String server = intent.getStringExtra("server");
-				hostandport = server;
-				Log.v(TAG, server);
+				if (intent.hasExtra("server")) {
+					hostandport = intent.getStringExtra("server");
+					if (hostandport.equals(":")) hostandport = null;
+				}
+				Log.v(TAG, "pilight-reconnect: " + hostandport);
 				stopForeground(false);
 				makeNotification(NotificationType.CONNECTING, aCtx.getString(R.string.noti_reconnect));
 				if (isConnectionUp)
 					dropConnection();
-				else isConnectionUp = makeConnection(server);
+				else isConnectionUp = makeConnection(hostandport);
 			} else if (action.equals("pilight-switch-device")) {
 				if (isConnectionUp) Log.v(TAG, "broadcastReceiver: " + intent.getStringExtra("command"));
 				Server.CONNECTION.sentCommand(intent.getStringExtra("command"));

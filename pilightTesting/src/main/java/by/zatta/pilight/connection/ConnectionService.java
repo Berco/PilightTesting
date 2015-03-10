@@ -504,7 +504,7 @@ public class ConnectionService extends Service {
 					mClients.clear(); // Bit hackery, I admit
 					mClients.add(msg.replyTo);
 					sendMessageToUI(MSG_SET_STATUS, mCurrentNotif.name());
-					if (!mDevices.isEmpty()) sendMessageToUI(MSG_SET_BUNDLE, null);
+					if (!mDevices.isEmpty() && isConnectionUp) sendMessageToUI(MSG_SET_BUNDLE, null);
 					break;
 				case MSG_UNREGISTER_CLIENT:
 					mClients.remove(msg.replyTo);

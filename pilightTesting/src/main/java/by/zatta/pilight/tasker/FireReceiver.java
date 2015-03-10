@@ -55,24 +55,17 @@ public final class FireReceiver extends BroadcastReceiver {
 		}
 		return false;
 	}
-	
+
 	boolean isConnectedToKnownHome(Context ctx) {
-		/*
-		 * WifiManager is a hidden API so not really realiable. So using the connectivity manager is saver, but
-		 * ConnectivityManager.getActiveNetwork.getExtraInfo doesn't have proper documentation. So, trying both....
-		 */
 		String currentNetwork = null;
 		ConnectivityManager cm = (ConnectivityManager) ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo info = cm.getActiveNetworkInfo();
-		if (!(info == null)) {
-			// Log.d(TAG, "networkInfo: " + info.getExtraInfo());
-			currentNetwork = info.getExtraInfo();
-		}
+		if (!(info == null))
+			if (!(info.getType() == ConnectivityManager.TYPE_WIFI)) return false;
 
 		WifiManager wifiManager = (WifiManager) ctx.getSystemService(Context.WIFI_SERVICE);
 		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-		if (!(wifiInfo == null) && currentNetwork == null) {
-			// Log.d(TAG, "wifiInfo:" + wifiInfo.getSSID());
+		if (!(wifiInfo == null)) {
 			currentNetwork = wifiInfo.getSSID();
 		}
 		if (currentNetwork == null) return false;

@@ -87,6 +87,7 @@ public class ConnectionService extends Service {
 	private static NotificationManager mNotMan;
 	private static Notification.Builder builder;
 	private static HeartBeat mHB = null;
+	private static KillDelay mKD = null;
 	private static long timeBeat = new Date().getTime();
 	private static WriteMonitor mWM = null;
 	private static boolean isConnectionUp = false;
@@ -125,15 +126,21 @@ public class ConnectionService extends Service {
 		try {
 			mHB.interrupt();
 		} catch (Throwable e) {
-			Log.w(TAG, "couldnt interrupt the heart-beat");
+			//Log.w(TAG, "couldnt interrupt the heart-beat");
 		}
 		try {
 			mWM.interrupt();
 		} catch (Throwable e) {
-			Log.w(TAG, "couldnt interrupt the WriteMonitor");
+			//Log.w(TAG, "couldnt interrupt the WriteMonitor");
+		}
+		try {
+			mKD.interrupt();
+		} catch (Throwable e) {
+			//Log.w(TAG, "couldnt interrupt the kill delay");
 		}
 		mHB = null;
 		mWM = null;
+		mKD = null;
 		Server.CONNECTION.disconnect();
 		isConnectionUp = false;
 		return false;
@@ -326,14 +333,23 @@ public class ConnectionService extends Service {
 
 	@Override
 	public void onRebind(Intent intent) {
-		// Log.v(TAG, "onRebind");
+		Log.v(TAG, "onRebind");
 		super.onRebind(intent);
 	}
 
 	@Override
 	public boolean onUnbind(Intent intent) {
-		// Log.v(TAG, "onUnbind");
+		Log.v(TAG, "onUnbind");
 		super.onUnbind(intent);
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(aCtx);
+		boolean useService = prefs.getBoolean("useService", true);
+		Log.e(TAG, "useService: " + useService);
+		if (!useService) {
+			if (mKD == null || !mKD.isAlive()) {
+				mKD = new KillDelay();
+				mKD.start();
+			}
+		}
 		return true;
 	}
 
@@ -517,13 +533,6 @@ public class ConnectionService extends Service {
 
 	public class HeartBeat extends Thread {
 		long timeHeart;
-		long runs = 0;
-
-		@Override
-		public void interrupt() {
-			// Log.v(TAG, "interrupted HEARTBEAT");
-			super.interrupt();
-		}
 
 		@Override
 		public void run() {
@@ -544,6 +553,20 @@ public class ConnectionService extends Service {
 			} catch (Exception e) {
 				Log.w(TAG, "something wrong in the heart-beat");
 			}
+		}
+	}
+
+	public class KillDelay extends Thread {
+
+		@Override
+		public void run() {
+			try {
+					Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				Log.d(TAG, "oops, killDelay interruted");
+			}
+			if (mClients.isEmpty())
+				stopSelf();
 		}
 	}
 }

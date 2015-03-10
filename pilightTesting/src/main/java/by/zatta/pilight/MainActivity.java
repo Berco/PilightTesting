@@ -463,11 +463,6 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 			// Log.v(TAG, "onPause::unbinding");
 			doUnbindService();
 		}
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		boolean useService = prefs.getBoolean("useService", true);
-		if (!useService) {
-			stopService(new Intent(MainActivity.this, ConnectionService.class));
-		}
 		super.onPause();
 	}
 

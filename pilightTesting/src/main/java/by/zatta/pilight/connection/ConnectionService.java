@@ -441,28 +441,24 @@ public class ConnectionService extends Service {
 		String currentNetwork = null;
 		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo info = cm.getActiveNetworkInfo();
-		if (!(info == null)) {
-			// Log.d(TAG, "networkInfo: " + info.getExtraInfo());
-			currentNetwork = info.getExtraInfo();
-		}
+		if (!(info == null))
+			if (!(info.getType() == ConnectivityManager.TYPE_WIFI)) return false;
+
 		WifiManager wifiManager = (WifiManager) ctx.getSystemService(Context.WIFI_SERVICE);
 		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
 		if (!(wifiInfo == null)) {
-			// Log.d(TAG, "wifiInfo:" + wifiInfo.getSSID());
 			currentNetwork = wifiInfo.getSSID();
 		}
 		if (currentNetwork == null) return false;
 
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(aCtx);
 		String previous = prefs.getString("networks_known", "");
-		// Log.d(TAG, previous);
 		currentNetwork = currentNetwork.replace("\"", "");
+
 		if (previous.contains(currentNetwork)) {
-			// Log.d(TAG, previous + " did contain " + currentNetwork);
 			return false;
 		} else {
 			previous = previous + "|&|" + currentNetwork;
-			// Log.d(TAG, previous);
 			Editor edit = prefs.edit();
 			edit.putString("networks_known", previous);
 			edit.commit();

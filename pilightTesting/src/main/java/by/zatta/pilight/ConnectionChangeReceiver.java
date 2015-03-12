@@ -57,7 +57,7 @@ public class ConnectionChangeReceiver extends BroadcastReceiver {
 		}
 		if (currentNetwork == null) return false;
 
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+		SharedPreferences prefs = ctx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
 		String previous = prefs.getString("networks_known", "");
 		// Log.d(TAG, previous);
 		currentNetwork = currentNetwork.replace("\"", "");
@@ -89,7 +89,7 @@ public class ConnectionChangeReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		// Log.v(TAG, "received connectivity change: " + intent.getAction());
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		SharedPreferences prefs = context.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
 		boolean useService = prefs.getBoolean("useService", true);
 		boolean dontShowNotification = prefs.getBoolean("destroySilent", false);
 

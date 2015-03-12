@@ -71,6 +71,9 @@ public class PrefFragment extends BasePreferenceFragment {
 		Context context = this.getActivity().getLayoutInflater().getContext();
 		setPreferenceScreen(createPreferenceHierarchy(context));
 		manager = getPreferenceManager();
+		manager.setSharedPreferencesName("ZattaPrefs");
+		manager.setSharedPreferencesMode(Context.MODE_MULTI_PROCESS);
+
 	}
 
 	private PreferenceScreen createPreferenceHierarchy(Context mContext) {

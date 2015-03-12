@@ -71,11 +71,6 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 			// Log.v(TAG, "onPause::unbinding");
 			doUnbindService();
 		}
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		boolean useService = prefs.getBoolean("useService", true);
-		if (!useService) {
-			stopService(new Intent(ActionActivity.this, ConnectionService.class));
-		}
 		finish();
 		super.onPause();
 	}
@@ -262,7 +257,7 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 					if (status.equals("UPDATE")) break;
 
 					FragmentManager fm = getFragmentManager();
-					Fragment prev = fm.findFragmentByTag("dialog");
+					Fragment prev = fm.findFragmentByTag("SetupConnectionFragment");
 
 					try {
 						if (prev == null) {

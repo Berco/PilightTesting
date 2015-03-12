@@ -377,7 +377,6 @@ public enum Server {
 				}
 			} catch (Exception e) {
 				Log.w(TAG, "exception caught in read");
-				Log.w(TAG, e);
 			}
 		}
 	}

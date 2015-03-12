@@ -173,7 +173,7 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 		setContentView(R.layout.mainactivity_layout);
 		mCurrentTitle = getString(R.string.app_name);
 		
-		SharedPreferences getPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+		SharedPreferences getPrefs = getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
         String language = getPrefs.getString("languagePref", "unknown");        
         if (!language.equals("unknown")) makeLocale(language);
 
@@ -323,7 +323,7 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 	}
 	
 	private void startInitialFragment(){
-		SharedPreferences getPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+		SharedPreferences getPrefs = getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
         boolean showAll = getPrefs.getBoolean("showAllByDefault", false);
         int menuStart;
         if (showAll) menuStart = 0; else menuStart = 1;

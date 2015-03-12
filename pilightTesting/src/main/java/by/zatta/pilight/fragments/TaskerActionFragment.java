@@ -113,7 +113,7 @@ public class TaskerActionFragment extends BaseFragment {
 		super.onCreate(savedInstanceState);
 		mDevices = getArguments().getParcelableArrayList("config");
 		localeBundle = getArguments().getBundle("localeBundle");
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+		SharedPreferences prefs = getActivity().getApplicationContext().getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
 		forceList = prefs.getBoolean("forceList", false);
 		setRetainInstance(false);
 	}

@@ -24,6 +24,7 @@
 package by.zatta.pilight.fragments;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -105,7 +106,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
         mBtnSetup = (Button) v.findViewById(R.id.btnSetupConnection);
         mBtnCancel.setOnClickListener(this);
         mBtnSetup.setOnClickListener(this);
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+		SharedPreferences prefs = getActivity().getApplicationContext().getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
 		String known_host = prefs.getString("known_host", null);
 		String known_port = prefs.getString("known_port", null);
 		if (!(known_host == null) && !(known_port == null)) {
@@ -173,7 +174,8 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 				String host = mEtHost.getText().toString();
 				String port = mEtPort.getText().toString();
 				if (!(host == null) && !(port == null)) {
-					SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+					SharedPreferences prefs = getActivity().getApplicationContext().getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
+
 					SharedPreferences.Editor edit = prefs.edit();
 					edit.putString("known_host", host);
 					edit.putString("known_port", port);

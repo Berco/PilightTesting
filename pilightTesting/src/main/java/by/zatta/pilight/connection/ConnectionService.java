@@ -396,7 +396,7 @@ public class ConnectionService extends Service {
 		sendMessageToUI(MSG_SET_STATUS, mCurrentNotif.name());
 		if (intent.hasExtra("command") && isConnectionUp) {
 			Server.CONNECTION.sentCommand(intent.getStringExtra("command"));
-			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(aCtx);
+			SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
 			boolean useService = prefs.getBoolean("useService", true);
 			if (!useService) {
 				if (mWM == null || !mWM.isAlive()) {

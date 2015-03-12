@@ -69,10 +69,10 @@ public class PrefFragment extends BasePreferenceFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Context context = this.getActivity().getLayoutInflater().getContext();
-		setPreferenceScreen(createPreferenceHierarchy(context));
 		manager = getPreferenceManager();
 		manager.setSharedPreferencesName("ZattaPrefs");
 		manager.setSharedPreferencesMode(Context.MODE_MULTI_PROCESS);
+		setPreferenceScreen(createPreferenceHierarchy(context));
 
 	}
 

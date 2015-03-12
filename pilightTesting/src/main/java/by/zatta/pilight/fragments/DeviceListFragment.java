@@ -28,7 +28,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -152,7 +151,7 @@ public class DeviceListFragment extends BaseFragment {
 		super.onActivityCreated(savedInstanceState);
 		mDevices = getArguments().getParcelableArrayList("config");
 		mFilter = getArguments().getString("filter", null);
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+		SharedPreferences prefs = getActivity().getApplicationContext().getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
 		forceList = prefs.getBoolean("forceList", false);
 		initCards();
 	}

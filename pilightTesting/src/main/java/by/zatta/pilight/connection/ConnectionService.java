@@ -341,7 +341,7 @@ public class ConnectionService extends Service {
 	public boolean onUnbind(Intent intent) {
 		Log.v(TAG, "onUnbind");
 		super.onUnbind(intent);
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(aCtx);
+		SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
 		boolean useService = prefs.getBoolean("useService", true);
 		Log.e(TAG, "useService: " + useService);
 		if (!useService) {
@@ -360,8 +360,8 @@ public class ConnectionService extends Service {
 		ctx = this;
 		aCtx = getApplicationContext();
 
-		SharedPreferences getPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-		String language = getPrefs.getString("languagePref", "unknown");
+		SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
+		String language = prefs.getString("languagePref", "unknown");
 		if (!language.equals("unknown")) makeLocale(language);
 
 		IntentFilter filter = new IntentFilter();
@@ -423,11 +423,13 @@ public class ConnectionService extends Service {
 		if (mCurrentNotif == NotificationType.DESTROYED)
 			makeNotification(NotificationType.CONNECTING, aCtx.getString(R.string.noti_connecting));
 		String serverString = Server.CONNECTION.setup(server);
+		Log.d(TAG, "SERVER RETURNS " + serverString);
+		if (serverString.contains("ADRESS"))
+			serverString = Server.CONNECTION.setup(retrieveHostAndServer());
 		String goodConfig = "{\"gui\":{";
 		if (serverString.contains(goodConfig)) {
 			try {
 				mDevices = Config.getDevices(new JSONObject(serverString));
-				//mDevices = Config.getDevices(json.getJSONObject("config"));
 				Collections.sort(mDevices);
 				addedToPreferences();
 				makeNotification(NotificationType.CONNECTED, aCtx.getString(R.string.noti_connected));
@@ -444,13 +446,24 @@ public class ConnectionService extends Service {
 				Log.w(TAG, "problems in JSONning");
 				return false;
 			}
-		} else if (serverString.contains("ADRESS")) {
-			makeNotification(NotificationType.NO_SERVER, serverString);
-			return false;
+//		} else if (serverString.contains("ADRESS")) {
+//			makeNotification(NotificationType.NO_SERVER, serverString);
+//			return false;
 		} else {
 			makeNotification(NotificationType.FAILED, serverString);
 			return false;
 		}
+	}
+
+	private String retrieveHostAndServer(){
+
+		SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
+		String known_host = prefs.getString("known_host", null);
+		String known_port = prefs.getString("known_port", "0");
+
+		String adress = known_host + ":" + known_port;
+		if (adress.equals(":0")) adress = null;
+		return adress;
 	}
 
 	private boolean addedToPreferences() {
@@ -467,7 +480,8 @@ public class ConnectionService extends Service {
 		}
 		if (currentNetwork == null) return false;
 
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(aCtx);
+		SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
+
 		String previous = prefs.getString("networks_known", "");
 		currentNetwork = currentNetwork.replace("\"", "");
 

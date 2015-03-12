@@ -70,7 +70,7 @@ public final class FireReceiver extends BroadcastReceiver {
 		}
 		if (currentNetwork == null) return false;
 
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+		SharedPreferences prefs = ctx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
 		String previous = prefs.getString("networks_known", "");
 		// Log.d(TAG, previous);
 		currentNetwork = currentNetwork.replace("\"", "");

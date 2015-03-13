@@ -104,8 +104,7 @@ public class ConnectionService extends Service {
 			} else if (action.equals("pilight-reconnect")) {
 				if (intent.hasExtra("server")) {
 					hostandport = intent.getStringExtra("server");
-					if (hostandport != null)
-						if (hostandport.equals(":")) hostandport = null;
+					if (hostandport.equals(":")) hostandport = null;
 				}
 				Log.v(TAG, "pilight-reconnect: " + hostandport);
 				stopForeground(false);
@@ -395,17 +394,15 @@ public class ConnectionService extends Service {
 		//??
 
 		sendMessageToUI(MSG_SET_STATUS, mCurrentNotif.name());
-		if (!(intent == null)) {
-			if (intent.hasExtra("command") && isConnectionUp) {
-				Server.CONNECTION.sentCommand(intent.getStringExtra("command"));
-				SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
-				boolean useService = prefs.getBoolean("useService", true);
-				if (!useService) {
-					if (mWM == null || !mWM.isAlive()) {
-						mWM = new WriteMonitor();
-						mWM.setName("WriteMonitor");
-						mWM.start();
-					}
+		if (intent.hasExtra("command") && isConnectionUp) {
+			Server.CONNECTION.sentCommand(intent.getStringExtra("command"));
+			SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
+			boolean useService = prefs.getBoolean("useService", true);
+			if (!useService) {
+				if (mWM == null || !mWM.isAlive()) {
+					mWM = new WriteMonitor();
+					mWM.setName("WriteMonitor");
+					mWM.start();
 				}
 			}
 		}

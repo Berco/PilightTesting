@@ -29,8 +29,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
-
-import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,9 +41,7 @@ import android.widget.TextView;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 
-import by.zatta.pilight.MainActivity;
 import by.zatta.pilight.R;
-import by.zatta.pilight.connection.ConnectionService;
 
 public class SetupConnectionFragment extends BaseFragment implements View.OnClickListener{
 
@@ -172,7 +168,6 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 	public void onDestroyView() {
 		super.onDestroyView();
 		if (!(mStatus.equals("CONNECTED"))){
-			getActivity().getApplicationContext().stopService(new Intent(getActivity().getApplicationContext(), ConnectionService.class));
 			changedStatusListener.onChangedStatusListener(FINISH, null);
 		}
 	}

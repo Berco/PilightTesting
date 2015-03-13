@@ -145,6 +145,7 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 		FragmentManager fm = getFragmentManager();
 		BaseFragment prev = (BaseFragment) fm.findFragmentByTag("DeviceList");
 		if (prev != null) prev.onCreate(null);
+
 	}
 	
 	@Override

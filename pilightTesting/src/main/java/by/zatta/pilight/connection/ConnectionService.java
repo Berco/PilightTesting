@@ -427,8 +427,8 @@ public class ConnectionService extends Service {
 			makeNotification(NotificationType.CONNECTING, aCtx.getString(R.string.noti_connecting));
 		String serverString = Server.CONNECTION.setup(server);
 		Log.d(TAG, "SERVER RETURNS " + serverString);
-		if (serverString.contains("ADRESS"))
-			serverString = Server.CONNECTION.setup(retrieveHostAndServer());
+//		if (serverString.contains("ADRESS"))
+//			serverString = Server.CONNECTION.setup(retrieveHostAndServer());
 		String goodConfig = "{\"gui\":{";
 		if (serverString.contains(goodConfig)) {
 			try {

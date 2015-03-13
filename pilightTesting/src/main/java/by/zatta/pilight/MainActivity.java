@@ -241,6 +241,20 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 		return super.onOptionsItemSelected(item);
 	}
 
+	@Override
+	public void onBackPressed() {
+		FragmentManager fm = getFragmentManager();
+		Fragment setupFrag = fm.findFragmentByTag("SetupConnectionFragment");
+		if (setupFrag != null){
+			if (setupFrag.isVisible()) {
+				doUnbindService();
+				stopService(new Intent(MainActivity.this, ConnectionService.class));
+				finish();
+			}
+		}
+		super.onBackPressed();
+	}
+
 	/* Called whenever we call invalidateOptionsMenu() */
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
@@ -573,11 +587,11 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 
 				case ConnectionService.MSG_SET_BUNDLE:
 				mDevices = bundle.getParcelableArrayList("config");
-				if (allLocations.isEmpty()) {
-					initMenu();
-					startInitialFragment();
-				}
 				try {
+					if (allLocations.isEmpty()) {
+						initMenu();
+						startInitialFragment();
+					}
 					DeviceListFragment.updateUI(mDevices);
 				} catch (Exception e) {
 					//Log.w(TAG, "ListBaseFragment isn't made yet or something wrong inside the fragment");

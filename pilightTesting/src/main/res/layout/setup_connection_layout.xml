@@ -24,138 +24,109 @@
   ~  * Copyright (c) 2013 pilight project
   ~  ********************************************************************************/
 -->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-              android:gravity="center_horizontal"
-              android:orientation="vertical"
-              android:padding="4dip">
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="4dip">
 
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:descendantFocusability="beforeDescendants"
-                    android:focusableInTouchMode="true">
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:descendantFocusability="beforeDescendants"
+                        android:focusableInTouchMode="true">
 
-        <ProgressBar
-            android:id="@+id/pbConnecting"
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_centerHorizontal="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/centered_layout"
-            android:layout_alignLeft="@id/centered_layout"
-            android:layout_alignRight="@id/centered_layout"
-            android:layout_marginBottom="16dip"
-            android:src="@drawable/logo"/>
-
-        <TextView
-            android:id="@+id/tvStatusDisplay"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/centered_layout"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="40dip"
-            android:text="Some TEXT"
-            android:textAppearance="?android:attr/textAppearanceMedium"/>
-
-        <RelativeLayout
-            android:id="@id/centered_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true">
-
-            <EditText
-                android:id="@+id/etHost"
-                android:layout_width="160dp"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:gravity="right"
-                android:hint="@string/hostname_or_ip"
-                android:lines="1"
-                android:scrollHorizontally="true"
-                android:singleLine="true"/>
-
-            <TextView
-                android:id="@+id/colon"
+            <ProgressBar
+                android:id="@+id/pbConnecting"
+                style="?android:attr/progressBarStyleLarge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBaseline="@id/etHost"
-                android:layout_toRightOf="@id/etHost"
-                android:text="@string/colon"/>
+                android:layout_centerHorizontal="true"/>
 
-            <EditText
-                android:id="@+id/etPort"
-                android:layout_width="80dp"
+            <ImageView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBottom="@id/etHost"
-                android:layout_toRightOf="@id/colon"
-                android:ellipsize="end"
-                android:hint="@string/port"
-                android:inputType="number"
-                android:lines="1"
-                android:scrollHorizontally="true"
-                android:singleLine="true"/>
+                android:layout_above="@+id/centered_layout"
+                android:layout_alignLeft="@id/centered_layout"
+                android:layout_alignRight="@id/centered_layout"
+                android:layout_marginBottom="16dip"
+                android:src="@drawable/logo"/>
+
+            <TextView
+                android:id="@+id/tvStatusDisplay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/centered_layout"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="40dip"
+                android:text="Some TEXT"
+                android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+            <RelativeLayout
+                android:id="@id/centered_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true">
+
+                <EditText
+                    android:id="@+id/etHost"
+                    android:layout_width="160dp"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:gravity="right"
+                    android:hint="@string/hostname_or_ip"
+                    android:lines="1"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"/>
+
+                <TextView
+                    android:id="@+id/colon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@id/etHost"
+                    android:layout_toRightOf="@id/etHost"
+                    android:text="@string/colon"/>
+
+                <EditText
+                    android:id="@+id/etPort"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/etHost"
+                    android:layout_toRightOf="@id/colon"
+                    android:ellipsize="end"
+                    android:hint="@string/port"
+                    android:inputType="number"
+                    android:lines="1"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"/>
+
+            </RelativeLayout>
+
+
 
         </RelativeLayout>
 
-        <LinearLayout
-            android:id="@+id/pbButtonbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:divider="?android:attr/dividerHorizontal"
-            android:orientation="vertical"
-            android:showDividers="middle">
 
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="3dp"/>
-
-            <LinearLayout
-                style="?android:attr/buttonBarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/btnSetupConnection"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="ONE"
-                    />
-
-                <Button
-                    android:id="@+id/btnCancelStart"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="TWO"
-                    />
-            </LinearLayout>
-        </LinearLayout>
-    </RelativeLayout>
+    </LinearLayout>
 
     <by.zatta.pilight.views.FloatingActionButton
-        android:id="@+id/fabbutton"
+        android:id="@+id/btnFAB"
         android:layout_width="72dp"
         android:layout_height="72dp"
         android:layout_gravity="bottom|end"
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
-        android:onClick="fabClicked"
         app:color="#FFDF4D38"
-        app:drawable="@drawable/ic_av_play" />
+        app:drawable="@drawable/ic_av_play"/>
 
-</LinearLayout>
+</FrameLayout>

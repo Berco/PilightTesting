@@ -142,6 +142,8 @@ public class DeviceListFragment extends BaseFragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		SharedPreferences prefs = getActivity().getApplicationContext().getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
+		forceList = prefs.getBoolean("forceList", false);
 		if (forceList) return inflater.inflate(R.layout.devicelist_layout, container, false);
 		else return inflater.inflate(R.layout.devicegrid_layout, container, false);
 	}
@@ -151,8 +153,6 @@ public class DeviceListFragment extends BaseFragment {
 		super.onActivityCreated(savedInstanceState);
 		mDevices = getArguments().getParcelableArrayList("config");
 		mFilter = getArguments().getString("filter", null);
-		SharedPreferences prefs = getActivity().getApplicationContext().getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
-		forceList = prefs.getBoolean("forceList", false);
 		initCards();
 	}
 

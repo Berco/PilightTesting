@@ -22,5 +22,14 @@
         <attr name="end_angle" format="float"></attr>
         <attr name="circle_fill" format="string"></attr>
     </declare-styleable>
+	
+	<declare-styleable name="FloatingActionButton">
+        <attr name="drawable" format="integer"/>
+        <attr name="color" format="color"/>
+        <attr name="shadowRadius" format="float"/>
+        <attr name="shadowDx" format="float"/>
+        <attr name="shadowDy" format="float"/>
+        <attr name="shadowColor" format="integer"/>
+    </declare-styleable>
 
 </resources>

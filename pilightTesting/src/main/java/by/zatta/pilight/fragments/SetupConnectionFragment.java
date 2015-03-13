@@ -52,7 +52,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
     private static ProgressBar pbConnecting;
 	private static EditText mEtHost;
 	private static EditText mEtPort;
-    private String status;
+	private static String mStatus;
     private static TextView tv;
 
     public final static int DISMISS = 1187639657;
@@ -91,7 +91,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        status = getArguments().getString("status");
+        mStatus = getArguments().getString("status");
         setRetainInstance(true);
     }
 
@@ -119,7 +119,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        setChangedStatus(status);
+        setChangedStatus(mStatus);
     }
 
     public enum NotificationType {
@@ -127,6 +127,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
     }
 
     public static void setChangedStatus(String status) {
+		mStatus = status;
         Log.d(TAG, status);
         // TODO check for correctness
         mBtnCancel.setVisibility(View.GONE);
@@ -163,7 +164,15 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
         public void onChangedStatusListener(int what, String adress);
     }
 
-    @Override
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		if (!(mStatus.equals("CONNECTED"))){
+			changedStatusListener.onChangedStatusListener(FINISH, null);
+		}
+	}
+
+	@Override
     public void onClick(View v) {
         switch (v.getId())
         {

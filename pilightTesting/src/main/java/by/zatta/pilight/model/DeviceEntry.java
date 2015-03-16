@@ -159,26 +159,15 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable {
 
 	@Override
 	public int compareTo(DeviceEntry o) {
-		// TODO sort according to a) location, b)type and last c) order.
+		// Set weather cards on top, respect order for the rest.
 
-		if (this.location_id != null && this.name_id != null) {
-
-			if (this.location_id.compareTo(o.getLocationID()) != 0) {
-				return o.getLocationID().compareTo(this.location_id);
-			} else if (this.getType() != o.getType()) {
-				int num = 0;
-				// sorting type according deftype except the temperures, I want them on top.
+			if ((this.getType() != o.getType()) && ((this.getType() == DeviceType.WEATHER) || (o.getType() == DeviceType.WEATHER))) {
 				if (this.getType() == DeviceType.WEATHER && o.getType() != DeviceType.WEATHER) return -1;
 				if (this.getType() != DeviceType.WEATHER && o.getType() == DeviceType.WEATHER) return 1;
-				if (this.getType() < o.getType()) num = -1;
-				if (this.getType() > o.getType()) num = 1;
-				return num;
 			} else {
-				int num = 0;
-				if (this.getOrder() < o.getOrder()) num = -1;
-				if (this.getOrder() > o.getOrder()) num = 1;
-				return num;
+				if (this.getOrder() < o.getOrder()) return -1;
+				if (this.getOrder() > o.getOrder()) return 1;
 			}
-		} else throw new IllegalArgumentException();
+		return 0;
 	}
 }

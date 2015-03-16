@@ -102,9 +102,9 @@ public class Config {
 										sentry.setValue(jvalarr.get(i).toString());
 										if (sentry != null) settings.add(sentry);
 										// OKAY, USING FIRST GROUP AS LOCATION FOR THE TIME BEING
-										if ((device.getLocationID() == null) && (skey.equals("group"))) {
-											device.setLocationID(sentry.getValue());
-										}
+//										if ((device.getLocationID() == null) && (skey.equals("group"))) {
+//											device.setLocationID(sentry.getValue());
+//										}
 									}
 								} else if (jvalstr != null) {
 									sentry = new SettingEntry();

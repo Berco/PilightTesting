@@ -55,7 +55,7 @@ public class FloatingActionButton extends View {
 	private final Paint mDrawablePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 	private Bitmap mBitmap;
 	private int mColor;
-	private boolean mHidden = false;
+	private boolean mHidden = true;
 	private Rect rect;
 	private int mLeftDisplayed = -1;
 	private int mRightDisplayed = -1;

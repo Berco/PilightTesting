@@ -75,8 +75,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 		} else if (status.equals("CONNECTING")) {
 			pbConnecting.setVisibility(View.VISIBLE);
 			tv.setText(R.string.status_connecting);
-			mBtnFAB.setDrawable(aCtx.getResources().getDrawable(R.drawable.ic_action_cancel));
-			mBtnFAB.hide(false);
+			mBtnFAB.hide(true);
 		} else if (status.equals("DESTROYED")) {
 			tv.setText(R.string.status_destroyed);
 			mBtnFAB.setDrawable(aCtx.getResources().getDrawable(R.drawable.ic_av_play));
@@ -174,10 +173,6 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 				}
 				break;
 		}
-	}
-
-	public enum NotificationType {
-		CONNECTED, CONNECTING, DESTROYED, FAILED, LOST_CONNECTION, UPDATE,
 	}
 
 	public interface OnChangedStatusListener {

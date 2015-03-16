@@ -126,7 +126,7 @@
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
-        app:color="#FFDF4D38"
+        app:color="#FF81D4FA"
         app:drawable="@drawable/ic_av_play"/>
 
 </FrameLayout>

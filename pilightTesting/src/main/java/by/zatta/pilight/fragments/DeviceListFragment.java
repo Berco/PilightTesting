@@ -180,22 +180,22 @@ public class DeviceListFragment extends BaseFragment {
 			if (device.hasGroup(mFilter) || mFilter == null) {
 				switch (device.getType()){
 					case DeviceEntry.DeviceType.SWITCH:
-						new ListSwitchCard(getActivity().getApplicationContext(), device);
+						card = new ListSwitchCard(getActivity().getApplicationContext(), device);
 						break;
 					case DeviceEntry.DeviceType.DIMMER:
-						new ListDimmerCard(getActivity().getApplicationContext(), device);
+						card = new ListDimmerCard(getActivity().getApplicationContext(), device);
 						break;
 					case DeviceEntry.DeviceType.WEATHER:
-						new ListWeatherCard(getActivity().getApplicationContext(), device);
+						card = new ListWeatherCard(getActivity().getApplicationContext(), device);
 						break;
 					case DeviceEntry.DeviceType.RELAY:
-						new ListRelayCard(getActivity().getApplicationContext(), device);
+						card = new ListRelayCard(getActivity().getApplicationContext(), device);
 						break;
 					case DeviceEntry.DeviceType.SCREEN:
-						new ListScreenCard(getActivity().getApplicationContext(), device);
+						card = new ListScreenCard(getActivity().getApplicationContext(), device);
 						break;
 					case DeviceEntry.DeviceType.CONTACT:
-						new ListContactCard(getActivity().getApplicationContext(), device);
+						card = new ListContactCard(getActivity().getApplicationContext(), device);
 						break;
 					case DeviceEntry.DeviceType.PENDINGSW:
 						break;

@@ -97,14 +97,10 @@ public class Config {
 
 								if (jvalarr != null) {
 									for (Short i = 0; i < jvalarr.length(); i++) {
-										sentry = new SettingEntry(); // WHY DO I NEED THIS ONE??
+										sentry = new SettingEntry();
 										sentry.setKey(skey);
 										sentry.setValue(jvalarr.get(i).toString());
 										if (sentry != null) settings.add(sentry);
-										// OKAY, USING FIRST GROUP AS LOCATION FOR THE TIME BEING
-//										if ((device.getLocationID() == null) && (skey.equals("group"))) {
-//											device.setLocationID(sentry.getValue());
-//										}
 									}
 								} else if (jvalstr != null) {
 									sentry = new SettingEntry();
@@ -196,7 +192,6 @@ public class Config {
 		Log.d(TAG, "________________");
 		for (DeviceEntry device : mDevices) {
 			Log.d(TAG, "-" + device.getNameID());
-			Log.d(TAG, "-" + device.getLocationID());
 			Log.d(TAG, "-" + device.getType());
 			Log.d(TAG, "-" + device.getOrder());
 			for (SettingEntry sentry : device.getSettings()) {

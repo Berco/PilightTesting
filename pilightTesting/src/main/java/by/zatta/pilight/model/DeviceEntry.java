@@ -51,7 +51,6 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable {
 		public static final int PING = 14;
 	}
 
-	private String location_id;
 	private String name_id;
 	private int type;
 	private int order;
@@ -60,26 +59,12 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable {
 	public DeviceEntry() {
 	}
 
-	public DeviceEntry(String name_id, String location_id, List<SettingEntry> settings) {
-		this.name_id = name_id;
-		this.location_id = location_id;
-		this.settings = settings;
-	}
-
 	public String getNameID() {
 		return this.name_id;
 	}
 
 	public void setNameID(String name_id) {
 		this.name_id = name_id;
-	}
-
-	public String getLocationID() {
-		return this.location_id;
-	}
-
-	public void setLocationID(String location_id) {
-		this.location_id = location_id;
 	}
 
 	public int getType() {
@@ -128,7 +113,6 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable {
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(this.name_id);
-		dest.writeString(this.location_id);
 		dest.writeInt(this.type);
 		dest.writeInt(this.order);
 		dest.writeList(this.settings);
@@ -138,7 +122,6 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable {
 	@SuppressWarnings("unchecked")
 	private void readFromParcel(Parcel in) {
 		this.name_id = in.readString();
-		this.location_id = in.readString();
 		this.type = in.readInt();
 		this.order = in.readInt();
 		this.settings = in.readArrayList(SettingEntry.class.getClassLoader());

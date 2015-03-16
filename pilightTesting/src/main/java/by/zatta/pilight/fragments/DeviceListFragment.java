@@ -89,7 +89,7 @@ public class DeviceListFragment extends BaseFragment {
 		mDevices = list;
 		int i = 0;
 		for (DeviceEntry device : mDevices) {
-			if (device.getLocationID().equals(mFilter) || mFilter == null) {
+			if (device.hasGroup(mFilter) || mFilter == null) {
 				switch (device.getType()){
 					case DeviceEntry.DeviceType.SWITCH:
 						((ListSwitchCard) cards.get(i)).update(device);

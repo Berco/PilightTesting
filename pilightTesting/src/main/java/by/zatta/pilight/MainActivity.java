@@ -325,10 +325,9 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 		allLocations.put(getString(R.string.title_all), null);
 		if (mDevices != null) {
 			for (DeviceEntry dentry : mDevices) {
-				if (!allLocations.containsValue(dentry.getLocationID())) {
-					for (SettingEntry sentry : dentry.getSettings()) {
-						if (sentry.getKey().equals("group")) allLocations.put(sentry.getValue(), sentry.getValue());//dentry.getLocationID());
-					}
+				for (SettingEntry sentry : dentry.getSettings()) {
+					if ((sentry.getKey().equals("group")) && (!allLocations.containsValue(sentry.getValue())))
+						allLocations.put(sentry.getValue(), sentry.getValue());//dentry.getLocationID());
 				}
 			}
 		}

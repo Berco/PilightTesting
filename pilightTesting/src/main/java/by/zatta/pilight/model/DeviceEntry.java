@@ -46,6 +46,9 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable {
 		public static final int XBMC = 9;
 		public static final int LIRC = 10;
 		public static final int WEBCAM = 11;
+		public static final int MOTION = 12;
+		public static final int DUSK = 13;
+		public static final int PING = 14;
 	}
 
 	private String location_id;

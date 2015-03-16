@@ -85,6 +85,8 @@ public class Config {
 
 						if (skey.equals("type")) {
 							device.setType(Integer.valueOf(jset.getString(skey)));
+						}else if (skey.equals("order")) {
+								device.setOrder(Integer.valueOf(jset.getString(skey)));
 						} else {
 							try {
 
@@ -196,6 +198,7 @@ public class Config {
 			Log.d(TAG, "-" + device.getNameID());
 			Log.d(TAG, "-" + device.getLocationID());
 			Log.d(TAG, "-" + device.getType());
+			Log.d(TAG, "-" + device.getOrder());
 			for (SettingEntry sentry : device.getSettings()) {
 				Log.d(TAG, "*" + sentry.getKey() + " = " + sentry.getValue());
 			}

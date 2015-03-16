@@ -54,6 +54,7 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable {
 	private String location_id;
 	private String name_id;
 	private int type;
+	private int order;
 	public List<SettingEntry> settings = new ArrayList<SettingEntry>();
 
 	public DeviceEntry() {
@@ -88,6 +89,10 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable {
 	public void setType(int type) {
 		this.type = type;
 	}
+
+	public int getOrder() { return this.order; }
+
+	public void setOrder(int order) { this.order = order; }
 
 	public List<SettingEntry> getSettings() {
 		return this.settings;
@@ -125,6 +130,7 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable {
 		dest.writeString(this.name_id);
 		dest.writeString(this.location_id);
 		dest.writeInt(this.type);
+		dest.writeInt(this.order);
 		dest.writeList(this.settings);
 
 	}
@@ -134,6 +140,7 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable {
 		this.name_id = in.readString();
 		this.location_id = in.readString();
 		this.type = in.readInt();
+		this.order = in.readInt();
 		this.settings = in.readArrayList(SettingEntry.class.getClassLoader());
 	}
 
@@ -152,7 +159,7 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable {
 
 	@Override
 	public int compareTo(DeviceEntry o) {
-		// TODO sort according to a) location, b)type and last c) name. Rearrange types later on, for now okay.
+		// TODO sort according to a) location, b)type and last c) order.
 
 		if (this.location_id != null && this.name_id != null) {
 
@@ -167,7 +174,10 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable {
 				if (this.getType() > o.getType()) num = 1;
 				return num;
 			} else {
-				return o.getNameID().compareTo(this.name_id);
+				int num = 0;
+				if (this.getOrder() < o.getOrder()) num = -1;
+				if (this.getOrder() > o.getOrder()) num = 1;
+				return num;
 			}
 		} else throw new IllegalArgumentException();
 	}

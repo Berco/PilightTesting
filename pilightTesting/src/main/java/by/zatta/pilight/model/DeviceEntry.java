@@ -31,6 +31,23 @@ import java.util.List;
 
 public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable {
 
+	public final class DeviceType{
+		public static final int INTERNAL = -2;
+		public static final int PROC = -1;
+		public static final int RAW = -0;
+		public static final int SWITCH = 1;
+		public static final int DIMMER = 2;
+		public static final int WEATHER = 3;
+		public static final int RELAY = 4;
+		public static final int SCREEN = 5;
+		public static final int CONTACT = 6;
+		public static final int PENDINGSW = 7;
+		public static final int DATETIME = 8;
+		public static final int XBMC = 9;
+		public static final int LIRC = 10;
+		public static final int WEBCAM = 11;
+	}
+
 	private String location_id;
 	private String name_id;
 	private int type;
@@ -132,7 +149,7 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable {
 
 	@Override
 	public int compareTo(DeviceEntry o) {
-		// TODO sort accoring to a) location, b)type and last c) name. Rearrange types later on, for now okay.
+		// TODO sort according to a) location, b)type and last c) name. Rearrange types later on, for now okay.
 
 		if (this.location_id != null && this.name_id != null) {
 
@@ -141,8 +158,8 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable {
 			} else if (this.getType() != o.getType()) {
 				int num = 0;
 				// sorting type according deftype except the temperures, I want them on top.
-				if (this.getType() == 3 && o.getType() != 3) return -1;
-				if (this.getType() != 3 && o.getType() == 3) return 1;
+				if (this.getType() == DeviceType.WEATHER && o.getType() != DeviceType.WEATHER) return -1;
+				if (this.getType() != DeviceType.WEATHER && o.getType() == DeviceType.WEATHER) return 1;
 				if (this.getType() < o.getType()) num = -1;
 				if (this.getType() > o.getType()) num = 1;
 				return num;

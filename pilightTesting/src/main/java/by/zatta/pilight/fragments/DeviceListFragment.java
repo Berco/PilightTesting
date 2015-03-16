@@ -71,13 +71,10 @@ public class DeviceListFragment extends BaseFragment {
 	static DeviceListListener deviceListListener;
 	static ArrayList<Card> cards;
 	static CardArrayAdapter mCardArrayAdapter;
-	static CardGridArrayAdapter mCardGridArrayAdapter;
 	static CardGridStaggeredArrayAdapter mCardStaggeredGridArrayAdapter;
 	static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
 	private static String mFilter;
 	private static boolean forceList;
-	public final int GIMME_DEVICES = 1002;
-	protected ScrollView mScrollView;
 
 	public static DeviceListFragment newInstance(List<DeviceEntry> list, String filter) {
 		DeviceListFragment f = new DeviceListFragment();
@@ -93,18 +90,35 @@ public class DeviceListFragment extends BaseFragment {
 		int i = 0;
 		for (DeviceEntry device : mDevices) {
 			if (device.getLocationID().equals(mFilter) || mFilter == null) {
-				if (device.getType() == 1) {
-					((ListSwitchCard) cards.get(i)).update(device);
-				} else if (device.getType() == 2) {
-					((ListDimmerCard) cards.get(i)).update(device);
-				} else if (device.getType() == 3) {
-					((ListWeatherCard) cards.get(i)).update(device);
-				} else if (device.getType() == 4) {
-					((ListRelayCard) cards.get(i)).update(device);
-				} else if (device.getType() == 5) {
-					((ListScreenCard) cards.get(i)).update(device);
-				} else if (device.getType() == 6) {
-					((ListContactCard) cards.get(i)).update(device);
+				switch (device.getType()){
+					case DeviceEntry.DeviceType.SWITCH:
+						((ListSwitchCard) cards.get(i)).update(device);
+						break;
+					case DeviceEntry.DeviceType.DIMMER:
+						((ListDimmerCard) cards.get(i)).update(device);
+						break;
+					case DeviceEntry.DeviceType.WEATHER:
+						((ListWeatherCard) cards.get(i)).update(device);
+						break;
+					case DeviceEntry.DeviceType.RELAY:
+						((ListRelayCard) cards.get(i)).update(device);
+						break;
+					case DeviceEntry.DeviceType.SCREEN:
+						((ListScreenCard) cards.get(i)).update(device);
+						break;
+					case DeviceEntry.DeviceType.CONTACT:
+						((ListContactCard) cards.get(i)).update(device);
+						break;
+					case DeviceEntry.DeviceType.PENDINGSW:
+						break;
+					case DeviceEntry.DeviceType.DATETIME:
+						break;
+					case DeviceEntry.DeviceType.XBMC:
+						break;
+					case DeviceEntry.DeviceType.LIRC:
+						break;
+					case DeviceEntry.DeviceType.WEBCAM:
+						break;
 				}
 				i++;
 			}
@@ -164,12 +178,36 @@ public class DeviceListFragment extends BaseFragment {
 		for (DeviceEntry device : mDevices) {
 			Card card = null;
 			if (device.hasGroup(mFilter) || mFilter == null) {
-				if (device.getType() == 1) card = new ListSwitchCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 2) card = new ListDimmerCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 3) card = new ListWeatherCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 4) card = new ListRelayCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 5) card = new ListScreenCard(getActivity().getApplicationContext(), device);
-				else if (device.getType() == 6) card = new ListContactCard(getActivity().getApplicationContext(), device);
+				switch (device.getType()){
+					case DeviceEntry.DeviceType.SWITCH:
+						new ListSwitchCard(getActivity().getApplicationContext(), device);
+						break;
+					case DeviceEntry.DeviceType.DIMMER:
+						new ListDimmerCard(getActivity().getApplicationContext(), device);
+						break;
+					case DeviceEntry.DeviceType.WEATHER:
+						new ListWeatherCard(getActivity().getApplicationContext(), device);
+						break;
+					case DeviceEntry.DeviceType.RELAY:
+						new ListRelayCard(getActivity().getApplicationContext(), device);
+						break;
+					case DeviceEntry.DeviceType.SCREEN:
+						new ListScreenCard(getActivity().getApplicationContext(), device);
+						break;
+					case DeviceEntry.DeviceType.CONTACT:
+						new ListContactCard(getActivity().getApplicationContext(), device);
+						break;
+					case DeviceEntry.DeviceType.PENDINGSW:
+						break;
+					case DeviceEntry.DeviceType.DATETIME:
+						break;
+					case DeviceEntry.DeviceType.XBMC:
+						break;
+					case DeviceEntry.DeviceType.LIRC:
+						break;
+					case DeviceEntry.DeviceType.WEBCAM:
+						break;
+				}
 			}
 			if (!(card == null)) cards.add(card);
 		}

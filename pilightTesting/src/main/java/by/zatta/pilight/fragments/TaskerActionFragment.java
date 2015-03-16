@@ -164,13 +164,13 @@ public class TaskerActionFragment extends BaseFragment {
 		for (DeviceEntry device : mDevices) {
 			Card card = null;
 			Log.v(TAG, device.getNameID());
-			if (device.getType() == 1)
+			if (device.getType() == DeviceEntry.DeviceType.SWITCH)
 				card = new ListSwitchCard(getActivity().getApplicationContext(), device);
-			else if (device.getType() == 2)
+			else if (device.getType() == DeviceEntry.DeviceType.DIMMER)
 				card = new ListDimmerCard(getActivity().getApplicationContext(), device);
-			else if (device.getType() == 4)
+			else if (device.getType() == DeviceEntry.DeviceType.RELAY)
 				card = new ListRelayCard(getActivity().getApplicationContext(), device);
-			else if (device.getType() == 6) card = new ListContactCard(getActivity().getApplicationContext(), device);
+			else if (device.getType() == DeviceEntry.DeviceType.CONTACT) card = new ListContactCard(getActivity().getApplicationContext(), device);
 
 			for (SettingEntry sentry : device.getSettings()) { // don't show readonly devices, it's useless
 				if (sentry.getKey().equals("readonly") && sentry.getValue().equals("1")) card = null;

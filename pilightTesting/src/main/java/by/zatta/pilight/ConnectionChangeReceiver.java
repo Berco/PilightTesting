@@ -1,23 +1,23 @@
 /******************************************************************************************
- * 
+ *
  * Copyright (C) 2013 Zatta
- * 
+ *
  * This file is part of pilight for android.
- * 
+ *
  * pilight for android is free software: you can redistribute it and/or modify 
  * it under the terms of the GNU General Public License as published by the 
  * Free Software Foundation, either version 3 of the License, or (at your option)
  * any later version.
- * 
+ *
  * pilight for android is distributed in the hope that it will be useful, but 
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along 
  * with pilightfor android.
  * If not, see <http://www.gnu.org/licenses/>
- * 
+ *
  * Copyright (c) 2013 pilight project
  ********************************************************************************************/
 
@@ -35,7 +35,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.preference.PreferenceManager;
 
 import by.zatta.pilight.connection.ConnectionService;
 
@@ -98,15 +97,18 @@ public class ConnectionChangeReceiver extends BroadcastReceiver {
 				// Log.v(TAG, "we are connected to home!");
 				makeNotification(false, context);
 				// Added this sleep because often the connection isn't fully up (obtaining ip or so)
-				try { Thread.sleep(2000); } catch (InterruptedException e) {}
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+				}
 				context.startService(new Intent(context, ConnectionService.class));
 			} else {
 				// Log.v(TAG, "not at home anymore :(");
-				if (context.stopService(new Intent(context, ConnectionService.class))){
+				if (context.stopService(new Intent(context, ConnectionService.class))) {
 					if (!dontShowNotification)
 						makeNotification(true, context);
 				}
-					
+
 				// context.sendBroadcast(new Intent("pilight-left-network"));
 			}
 		}

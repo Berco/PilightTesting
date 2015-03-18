@@ -425,9 +425,6 @@ public class ConnectionService extends Service {
 		if (mCurrentNotif == NotificationType.DESTROYED)
 			makeNotification(NotificationType.CONNECTING, aCtx.getString(R.string.noti_connecting));
 		String serverString = Server.CONNECTION.setup(server);
-		Log.d(TAG, "SERVER RETURNS " + serverString);
-//		if (serverString.contains("ADRESS"))
-//			serverString = Server.CONNECTION.setup(retrieveHostAndServer());
 		String goodConfig = "{\"gui\":{";
 		if (serverString.contains(goodConfig)) {
 			try {
@@ -448,9 +445,9 @@ public class ConnectionService extends Service {
 				Log.w(TAG, "problems in JSONning");
 				return false;
 			}
-//		} else if (serverString.contains("ADRESS")) {
-//			makeNotification(NotificationType.NO_SERVER, serverString);
-//			return false;
+		} else if (serverString.contains("ADRESS")) {
+			makeNotification(NotificationType.NO_SERVER, serverString);
+			return false;
 		} else {
 			makeNotification(NotificationType.FAILED, serverString);
 			return false;

@@ -87,6 +87,14 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 			tv.setText(status);
 			mBtnFAB.setDrawable(aCtx.getResources().getDrawable(R.drawable.ic_av_play));
 			mBtnFAB.hide(false);
+
+			//TODO Make this behavior a preference
+			String host = mEtHost.getText().toString();
+			String port = mEtPort.getText().toString();
+			if (!(host == null) && !(port == null)) {
+				String adress = host + ":" + port;
+				changedStatusListener.onChangedStatusListener(CUSTOM_SERVER, adress);
+			}
 		} else if (status.equals("LOST_CONNECTION")) {
 			tv.setText(R.string.status_lost);
 			mBtnFAB.setDrawable(aCtx.getResources().getDrawable(R.drawable.ic_av_play));

@@ -115,9 +115,9 @@ public class WeatherCard extends DeviceCardAbstract {
 		timeDigit.setDecimalSeparatorAlwaysShown(false);
 		Log.e(TAG, time);
 		String[] timeArr = time.split("[^0-9]");
-		if (timeArr[0].length() < 2) timeArr[0] = "0"+timeArr[0];
-		if (timeArr[1].length() < 2) timeArr[1] = timeArr[1]+"0";
-		time = timeArr[0]+timeArr[1];
+		if (timeArr[0].length() < 2) timeArr[0] = "0" + timeArr[0];
+		if (timeArr[1].length() < 2) timeArr[1] = timeArr[1] + "0";
+		time = timeArr[0] + timeArr[1];
 		//time = time.replace(".", "");
 		time = timeDigit.format(Integer.valueOf(time));
 		Date date = new SimpleDateFormat("hhmm").parse(time);

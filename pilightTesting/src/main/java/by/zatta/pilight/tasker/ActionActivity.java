@@ -12,25 +12,22 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
 import by.zatta.pilight.R;
 import by.zatta.pilight.connection.ConnectionService;
-import by.zatta.pilight.fragments.SetupConnectionFragment.OnChangedStatusListener;
 import by.zatta.pilight.fragments.BaseFragment;
 import by.zatta.pilight.fragments.SetupConnectionFragment;
+import by.zatta.pilight.fragments.SetupConnectionFragment.OnChangedStatusListener;
 import by.zatta.pilight.fragments.TaskerActionFragment;
 import by.zatta.pilight.fragments.TaskerActionFragment.ActionReadyListener;
 import by.zatta.pilight.model.DeviceEntry;

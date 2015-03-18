@@ -27,26 +27,26 @@ import by.zatta.pilight.R;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 
 public class CustomHeaderInnerCard extends CardHeader {
-	
+
 	String device;
 	String location;
 
-    public CustomHeaderInnerCard(Context context, String deviceName, String locationName) {
-        super(context, R.layout.header_inner);
-        device = deviceName;
-        location = locationName;
-    }
+	public CustomHeaderInnerCard(Context context, String deviceName, String locationName) {
+		super(context, R.layout.header_inner);
+		device = deviceName;
+		location = locationName;
+	}
 
-    @Override
-    public void setupInnerViewElements(ViewGroup parent, View view) {
-        if (view != null) {
-            TextView t1 = (TextView) view.findViewById(R.id.tvHeaderDevice);
-            if (t1 != null)
-                t1.setText(device);
+	@Override
+	public void setupInnerViewElements(ViewGroup parent, View view) {
+		if (view != null) {
+			TextView t1 = (TextView) view.findViewById(R.id.tvHeaderDevice);
+			if (t1 != null)
+				t1.setText(device);
 
-            TextView t2 = (TextView) view.findViewById(R.id.tvHeaderLocation);
-            if (t2 != null)
-                t2.setText(location);
-        }
-    }
+			TextView t2 = (TextView) view.findViewById(R.id.tvHeaderLocation);
+			if (t2 != null)
+				t2.setText(location);
+		}
+	}
 }

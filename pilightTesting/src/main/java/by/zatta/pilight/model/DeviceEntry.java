@@ -1,23 +1,23 @@
 /******************************************************************************************
- * 
+ *
  * Copyright (C) 2013 Zatta
- * 
+ *
  * This file is part of pilight for android.
- * 
+ *
  * pilight for android is free software: you can redistribute it and/or modify 
  * it under the terms of the GNU General Public License as published by the 
  * Free Software Foundation, either version 3 of the License, or (at your option)
  * any later version.
- * 
+ *
  * pilight for android is distributed in the hope that it will be useful, but 
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along 
  * with pilightfor android.
  * If not, see <http://www.gnu.org/licenses/>
- * 
+ *
  * Copyright (c) 2013 pilight project
  ********************************************************************************************/
 
@@ -31,7 +31,7 @@ import java.util.List;
 
 public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable {
 
-	public final class DeviceType{
+	public final class DeviceType {
 		public static final int INTERNAL = -2;
 		public static final int PROC = -1;
 		public static final int RAW = -0;
@@ -75,9 +75,13 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable {
 		this.type = type;
 	}
 
-	public int getOrder() { return this.order; }
+	public int getOrder() {
+		return this.order;
+	}
 
-	public void setOrder(int order) { this.order = order; }
+	public void setOrder(int order) {
+		this.order = order;
+	}
 
 	public List<SettingEntry> getSettings() {
 		return this.settings;
@@ -92,8 +96,8 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable {
 		return this.name_id;
 	}
 
-	public boolean hasGroup(String filter){
-		for (SettingEntry sentry : settings){
+	public boolean hasGroup(String filter) {
+		for (SettingEntry sentry : settings) {
 			if (sentry.getKey().equals("group") && sentry.getValue().equals(filter))
 				return true;
 		}
@@ -144,13 +148,13 @@ public class DeviceEntry implements Comparable<DeviceEntry>, Parcelable {
 	public int compareTo(DeviceEntry o) {
 		// Set weather cards on top, respect order for the rest.
 
-			if ((this.getType() != o.getType()) && ((this.getType() == DeviceType.WEATHER) || (o.getType() == DeviceType.WEATHER))) {
-				if (this.getType() == DeviceType.WEATHER && o.getType() != DeviceType.WEATHER) return -1;
-				if (this.getType() != DeviceType.WEATHER && o.getType() == DeviceType.WEATHER) return 1;
-			} else {
-				if (this.getOrder() < o.getOrder()) return -1;
-				if (this.getOrder() > o.getOrder()) return 1;
-			}
+		if ((this.getType() != o.getType()) && ((this.getType() == DeviceType.WEATHER) || (o.getType() == DeviceType.WEATHER))) {
+			if (this.getType() == DeviceType.WEATHER && o.getType() != DeviceType.WEATHER) return -1;
+			if (this.getType() != DeviceType.WEATHER && o.getType() == DeviceType.WEATHER) return 1;
+		} else {
+			if (this.getOrder() < o.getOrder()) return -1;
+			if (this.getOrder() > o.getOrder()) return 1;
+		}
 		return 0;
 	}
 }

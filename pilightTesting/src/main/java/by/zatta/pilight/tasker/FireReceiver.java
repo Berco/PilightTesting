@@ -11,7 +11,6 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -19,7 +18,7 @@ import by.zatta.pilight.connection.ConnectionService;
 
 public final class FireReceiver extends BroadcastReceiver {
 	private static final String TAG = "FireReceiver";
-	
+
 	@Override
 	public void onReceive(final Context context, final Intent intent) {
 		Bundle extraBundle = intent.getBundleExtra(com.twofortyfouram.locale.api.Intent.EXTRA_BUNDLE);
@@ -28,24 +27,24 @@ public final class FireReceiver extends BroadcastReceiver {
 		Log.v(TAG, what[0]);
 		Log.v(TAG, what[1]);
 		String command = what[2];
-		
-		if (isConnectionServiceActive(context)){
+
+		if (isConnectionServiceActive(context)) {
 			//context.sendBroadcast(new Intent("pilight-switch-device").putExtra("command", command));
 			context.startService(new Intent(context, ConnectionService.class).putExtra("command", command));
-		}else{
+		} else {
 			Log.v(TAG, "ConnectionService found NOT active");
-			if (isConnectedToKnownHome(context)){
+			if (isConnectedToKnownHome(context)) {
 				Log.v(TAG, "Looks like we are home anyway");
 				context.startService(new Intent(context, ConnectionService.class).putExtra("command", command));
 			} else {
 				Log.v(TAG, "But not at home, not even trying..");
 				context.startService(new Intent(context, ConnectionService.class).putExtra("command", command));
-				Toast.makeText(context, "Trying over the internet",Toast.LENGTH_SHORT).show();
+				Toast.makeText(context, "Trying over the internet", Toast.LENGTH_SHORT).show();
 			}
 		}
 		return;
 	}
-	
+
 	boolean isConnectionServiceActive(Context context) {
 		ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
 		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {

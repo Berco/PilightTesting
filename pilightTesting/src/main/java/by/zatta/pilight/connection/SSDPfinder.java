@@ -1,24 +1,24 @@
 /******************************************************************************************
- * 
+ *
  * Copyright (C) 2013 Zatta
  * original file by Curlymo
- * 
+ *
  * This file is part of pilight for android.
- * 
+ *
  * pilight for android is free software: you can redistribute it and/or modify 
  * it under the terms of the GNU General Public License as published by the 
  * Free Software Foundation, either version 3 of the License, or (at your option)
  * any later version.
- * 
+ *
  * pilight for android is distributed in the hope that it will be useful, but 
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along 
  * with pilightfor android.
  * If not, see <http://www.gnu.org/licenses/>
- * 
+ *
  * Copyright (c) 2013 pilight project
  ********************************************************************************************/
 
@@ -60,16 +60,16 @@ public class SSDPfinder {
 	public static String findServerAndPort() {
 		server = null;
 		port = 0;
-        line = null;
+		line = null;
 		find();
 		Log.v(TAG, server + ":" + Integer.toString(port));
-        return server + ":" + Integer.toString(port);
+		return server + ":" + Integer.toString(port);
 	}
 
 	public static InetSocketAddress pi() {
-        server = null;
-        port = 0;
-        line = null;
+		server = null;
+		port = 0;
+		line = null;
 		find();
 		Log.v(TAG, server + ":" + Integer.toString(port));
 		return new InetSocketAddress(server, port);
@@ -100,7 +100,7 @@ public class SSDPfinder {
 									InputStreamReader recvInput = new InputStreamReader(new ByteArrayInputStream(recvData),
 											Charset.forName("UTF-8"));
 									StringBuilder recvOutput = new StringBuilder();
-									for (int value; (value = recvInput.read()) != -1;) {
+									for (int value; (value = recvInput.read()) != -1; ) {
 										recvOutput.append((char) value);
 									}
 									BufferedReader bufReader = new BufferedReader(new StringReader(recvOutput.toString()));

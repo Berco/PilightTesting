@@ -53,7 +53,7 @@ public enum Server {
 
 	public synchronized String setup(String hostandport) {
 		disconnect();
-		if (!(hostandport==null)){
+		if (!(hostandport == null)) {
 			String[] myAdressArray = hostandport.split(":");
 			host = myAdressArray[0];
 			port = Integer.valueOf(myAdressArray[1]);

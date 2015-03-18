@@ -1,23 +1,23 @@
 /******************************************************************************************
- * 
+ *
  * Copyright (C) 2013 Zatta
- * 
+ *
  * This file is part of pilight for android.
- * 
+ *
  * pilight for android is free software: you can redistribute it and/or modify 
  * it under the terms of the GNU General Public License as published by the 
  * Free Software Foundation, either version 3 of the License, or (at your option)
  * any later version.
- * 
+ *
  * pilight for android is distributed in the hope that it will be useful, but 
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along 
  * with pilightfor android.
  * If not, see <http://www.gnu.org/licenses/>
- * 
+ *
  * Copyright (c) 2013 pilight project
  ********************************************************************************************/
 
@@ -151,7 +151,7 @@ public class PrefFragment extends BasePreferenceFragment {
 		destroyedCheckBoxPref.setKey("destroySilent");
 		destroyedCheckBoxPref.setDefaultValue(false);
 		uInterfacePrefCat.addPreference(destroyedCheckBoxPref);
-		
+
 		CheckBoxPreference showAllByDefaultPref = new CheckBoxPreference(mContext);
 		showAllByDefaultPref.setTitle(R.string.prefTit_showAll);
 		showAllByDefaultPref.setSummary(R.string.prefSum_showAll);
@@ -191,7 +191,7 @@ public class PrefFragment extends BasePreferenceFragment {
 			pref.getEditor().putString("networks_known", "").commit();
 			return true;
 		}
-		
+
 		if (pref.getKey().contentEquals("languagePref")) {
 			pref.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
 				@Override
@@ -212,9 +212,9 @@ public class PrefFragment extends BasePreferenceFragment {
 	public interface OnLanguageListener {
 		public void onLanguageListener(String language);
 	}
-	
-	 public interface OnViewChangeListener{
-		 public void onViewChangeListener(Boolean forceList);
-	 }
+
+	public interface OnViewChangeListener {
+		public void onViewChangeListener(Boolean forceList);
+	}
 
 }

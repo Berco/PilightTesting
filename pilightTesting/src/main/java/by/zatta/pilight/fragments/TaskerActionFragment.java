@@ -1,23 +1,23 @@
 /******************************************************************************************
- * 
+ *
  * Copyright (C) 2013 Zatta
- * 
+ *
  * This file is part of pilight for android.
- * 
+ *
  * pilight for android is free software: you can redistribute it and/or modify 
  * it under the terms of the GNU General Public License as published by the 
  * Free Software Foundation, either version 3 of the License, or (at your option)
  * any later version.
- * 
+ *
  * pilight for android is distributed in the hope that it will be useful, but 
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along 
  * with pilightfor android.
  * If not, see <http://www.gnu.org/licenses/>
- * 
+ *
  * Copyright (c) 2013 pilight project
  ********************************************************************************************/
 
@@ -57,7 +57,6 @@ import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.internal.CardGridArrayAdapter;
 import it.gmariotti.cardslib.library.internal.CardHeader;
-import it.gmariotti.cardslib.library.view.CardGridView;
 import it.gmariotti.cardslib.library.view.CardListView;
 import it.gmariotti.cardslib.library.view.CardView;
 
@@ -138,23 +137,23 @@ public class TaskerActionFragment extends BaseFragment {
 		}
 		initCards();
 	}
-	
+
 	@Override
 	public void onCreateOptionsMenu(
-	      Menu menu, MenuInflater inflater) {
-	   inflater.inflate(R.menu.action_tasker, menu);
+			Menu menu, MenuInflater inflater) {
+		inflater.inflate(R.menu.action_tasker, menu);
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-	   // handle item selection
-	   switch (item.getItemId()) {
-	      case R.id.action_tasker_ok:
-	    	  makeIntent();
-	         return true;
-	      default:
-	         return super.onOptionsItemSelected(item);
-	   }
+		// handle item selection
+		switch (item.getItemId()) {
+			case R.id.action_tasker_ok:
+				makeIntent();
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
 	}
 
 	private void initCards() {
@@ -212,13 +211,13 @@ public class TaskerActionFragment extends BaseFragment {
 		resultCardView.setVisibility(View.VISIBLE);
 		setHasOptionsMenu(true);
 		Card card = new ResultCard(getActivity().getApplicationContext(), action);
-		if (resultCardView.getCard()!=null)
+		if (resultCardView.getCard() != null)
 			resultCardView.replaceCard(card);
-		else 
+		else
 			resultCardView.setCard(card);
 	}
-	
-	private void makeIntent(){
+
+	private void makeIntent() {
 		Bundle extraBundle = new Bundle();
 		extraBundle.putStringArray("Extra", actionArray);
 		Intent i = new Intent();
@@ -226,7 +225,7 @@ public class TaskerActionFragment extends BaseFragment {
 		i.putExtra(com.twofortyfouram.locale.api.Intent.EXTRA_STRING_BLURB, actionArray[BLURP]);
 		actionReadyListener.actionReadyListener(i);
 	}
-	
+
 	public interface ActionReadyListener {
 		public void actionReadyListener(Intent localeIntent);
 	}

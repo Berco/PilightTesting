@@ -85,8 +85,8 @@ public class Config {
 
 						if (skey.equals("type")) {
 							device.setType(Integer.valueOf(jset.getString(skey)));
-						}else if (skey.equals("order")) {
-								device.setOrder(Integer.valueOf(jset.getString(skey)));
+						} else if (skey.equals("order")) {
+							device.setOrder(Integer.valueOf(jset.getString(skey)));
 						} else {
 							try {
 
@@ -249,7 +249,7 @@ public class Config {
 						if (sentry.getKey().equals(orSentry.getKey())) {
 							sentry.setValue(orSentry.getValue());
 							if (sentry.getKey().equals("temperature") && (gui_decimals != -1)) {
-								String temp = digits.format(Float.valueOf(sentry.getValue()))+ " \u2103";
+								String temp = digits.format(Float.valueOf(sentry.getValue())) + " \u2103";
 								if (!value.contains("Temp:"))
 									value = value + "Temp: " + temp + "\n";
 							} else if (sentry.getKey().equals("humidity")) {

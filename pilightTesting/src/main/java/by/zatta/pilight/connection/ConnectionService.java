@@ -48,7 +48,6 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.Parcelable;
 import android.os.RemoteException;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -458,7 +457,7 @@ public class ConnectionService extends Service {
 		}
 	}
 
-	private String retrieveHostAndServer(){
+	private String retrieveHostAndServer() {
 
 		SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
 		String known_host = prefs.getString("known_host", null);
@@ -578,7 +577,7 @@ public class ConnectionService extends Service {
 		@Override
 		public void run() {
 			try {
-					Thread.sleep(2000);
+				Thread.sleep(2000);
 			} catch (InterruptedException e) {
 				Log.d(TAG, "oops, killDelay interruted");
 			}

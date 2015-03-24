@@ -64,11 +64,6 @@ public class SwitchCard extends DeviceCardAbstract {
 
 	public SwitchCard(Context context, DeviceEntry entry) {
 		super(context, entry, R.layout.switchcard_inner);
-		try {
-			codeJSON.put("device", entry.getNameID());
-		} catch (JSONException e) {
-			Log.d(TAG, "could not create codeJSON");
-		}
 
 		for (SettingEntry sentry : entry.getSettings()) {
 			if (sentry.getKey().equals("state")) {

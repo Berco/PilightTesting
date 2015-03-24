@@ -424,7 +424,16 @@ public class ConnectionService extends Service {
 	private boolean makeConnection(String server) {
 		if (mCurrentNotif == NotificationType.DESTROYED)
 			makeNotification(NotificationType.CONNECTING, aCtx.getString(R.string.noti_connecting));
-		String serverString = Server.CONNECTION.setup(server);
+
+		SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
+		boolean useSSDP = prefs.getBoolean("useSSDP", true);
+
+		String serverString;
+		if ((!useSSDP) && (server.equals("null:0")))
+			serverString = "NO_SERVER";
+		else
+			serverString = Server.CONNECTION.setup(server);
+
 		String goodConfig = "{\"gui\":{";
 		if (serverString.contains(goodConfig)) {
 			try {

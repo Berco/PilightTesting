@@ -57,6 +57,8 @@
     <string name="prefSum_connection">remove all remembered networks</string>
     <string name="prefTit_useService">Keep service running</string>
     <string name="prefSum_useService">also when not in the app</string>
+    <string name="prefTit_useSSDP">Auto detect your server</string>
+    <string name="prefSum_useSSDP">needs SSDP enabled in pilight</string>
     <string name="prefTit_UI">UI</string>
     <string name="prefTit_listgrid">Force list for devices</string>
     <string name="prefSum_listgrid">instead of a grid</string>

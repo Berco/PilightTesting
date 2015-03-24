@@ -123,6 +123,13 @@ public class PrefFragment extends BasePreferenceFragment {
 		serviceCheckBoxPref.setDefaultValue(true);
 		settingsPrefCat.addPreference(serviceCheckBoxPref);
 
+		CheckBoxPreference ssdpCheckBoxPref = new CheckBoxPreference(mContext);
+		ssdpCheckBoxPref.setTitle(R.string.prefTit_useSSDP);
+		ssdpCheckBoxPref.setSummary(R.string.prefSum_useSSDP);
+		ssdpCheckBoxPref.setKey("useSSDP");
+		ssdpCheckBoxPref.setDefaultValue(true);
+		settingsPrefCat.addPreference(ssdpCheckBoxPref);
+
 		PreferenceCategory uInterfacePrefCat = new PreferenceCategory(mContext);
 		uInterfacePrefCat.setTitle(R.string.prefTit_UI);
 		root.addPreference(uInterfacePrefCat);

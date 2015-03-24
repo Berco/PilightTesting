@@ -21,6 +21,7 @@ package by.zatta.pilight.views;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import by.zatta.pilight.R;
@@ -30,6 +31,7 @@ public class CustomHeaderInnerCard extends CardHeader {
 
 	String device;
 	String location;
+	CheckBox mCbAlways;
 
 	public CustomHeaderInnerCard(Context context, String deviceName, String locationName) {
 		super(context, R.layout.header_inner);
@@ -47,6 +49,17 @@ public class CustomHeaderInnerCard extends CardHeader {
 			TextView t2 = (TextView) view.findViewById(R.id.tvHeaderLocation);
 			if (t2 != null)
 				t2.setText(location);
+
+			mCbAlways = (CheckBox) view.findViewById((R.id.cbAlways));
 		}
+	}
+
+	public void showAlwaysCB(boolean show){
+		if (show) mCbAlways.setVisibility(View.VISIBLE);
+	}
+
+	public boolean doAlways(){
+		if (mCbAlways.isChecked()) return true;
+		else return false;
 	}
 }

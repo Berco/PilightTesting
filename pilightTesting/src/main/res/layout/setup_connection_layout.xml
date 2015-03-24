@@ -3,7 +3,6 @@
   ~ /********************************************************************************
   ~  * 
   ~  * Copyright (C) 2013 Zatta
-  ~  * Copyright (c) 2014 Peter Heisig <http://google.com/+PeterHeisig>
   ~  * 
   ~  * This file is part of pilight for android.
   ~  * 
@@ -53,65 +52,38 @@
                 android:layout_centerHorizontal="true"/>
 
             <ImageView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_above="@+id/centered_layout"
-                android:layout_alignLeft="@id/centered_layout"
-                android:layout_alignRight="@id/centered_layout"
-                android:layout_marginBottom="16dip"
+                android:layout_alignBottom="@+id/emptyView"
                 android:src="@drawable/logo"/>
+
+            <View
+                android:id="@+id/emptyView"
+                android:layout_width="0dip"
+                android:layout_height="0dip"
+                android:layout_centerInParent="true"
+                />
+
+            <it.gmariotti.cardslib.library.view.CardView
+                android:id="@+id/cvHostHolder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_below="@id/emptyView"
+                android:visibility="visible"/>
 
             <TextView
                 android:id="@+id/tvStatusDisplay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/centered_layout"
+                android:layout_below="@+id/cvHostHolder"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="40dip"
                 android:text="Some TEXT"
                 android:textAppearance="?android:attr/textAppearanceMedium"/>
-
-            <RelativeLayout
-                android:id="@id/centered_layout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true">
-
-                <EditText
-                    android:id="@+id/etHost"
-                    android:layout_width="160dp"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:gravity="right"
-                    android:hint="@string/hostname_or_ip"
-                    android:lines="1"
-                    android:scrollHorizontally="true"
-                    android:singleLine="true"/>
-
-                <TextView
-                    android:id="@+id/colon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBaseline="@id/etHost"
-                    android:layout_toRightOf="@id/etHost"
-                    android:text="@string/colon"/>
-
-                <EditText
-                    android:id="@+id/etPort"
-                    android:layout_width="80dp"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBottom="@id/etHost"
-                    android:layout_toRightOf="@id/colon"
-                    android:ellipsize="end"
-                    android:hint="@string/port"
-                    android:inputType="number"
-                    android:lines="1"
-                    android:scrollHorizontally="true"
-                    android:singleLine="true"/>
-
-            </RelativeLayout>
-
-
 
         </RelativeLayout>
 

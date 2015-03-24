@@ -36,7 +36,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import by.zatta.pilight.R;
+import by.zatta.pilight.views.CustomHeaderInnerCard;
 import by.zatta.pilight.views.FloatingActionButton;
+import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.view.CardView;
 
 public class SetupConnectionFragment extends BaseFragment implements View.OnClickListener {
 
@@ -44,15 +47,15 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 	public final static int FINISH = 1432084755;
 	public final static int RECONNECT = 1873475293;
 	public final static int CUSTOM_SERVER = 98273234;
-	private static FloatingActionButton mBtnFAB;
-	private static Context aCtx;
 	private static final String TAG = "SetupConnectionFragment";
 	static OnChangedStatusListener changedStatusListener;
+	private static FloatingActionButton mBtnFAB;
+	private static Context aCtx;
 	private static ProgressBar pbConnecting;
-	private static EditText mEtHost;
-	private static EditText mEtPort;
 	private static String mStatus;
 	private static TextView tv;
+	private static HostHolderCard mHostHolderCard;
+	private CardView holderCardView;
 
 	public static SetupConnectionFragment newInstance(String status) {
 		SetupConnectionFragment f = new SetupConnectionFragment();
@@ -60,6 +63,48 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 		args.putString("status", status);
 		f.setArguments(args);
 		return f;
+	}
+
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		try {
+			changedStatusListener = (OnChangedStatusListener) activity;
+		} catch (ClassCastException e) {
+			throw new ClassCastException(activity.toString() + " must implement OnChangedStatusListener");
+		}
+	}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		mStatus = getArguments().getString("status");
+		setRetainInstance(true);
+		aCtx = getActivity().getApplicationContext();
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		View v = inflater.inflate(R.layout.setup_connection_layout, container, false);
+		tv = (TextView) v.findViewById(R.id.tvStatusDisplay);
+		pbConnecting = (ProgressBar) v.findViewById(R.id.pbConnecting);
+		mBtnFAB = (FloatingActionButton) v.findViewById(R.id.btnFAB);
+
+		mBtnFAB.setOnClickListener(this);
+
+		holderCardView = (CardView) v.findViewById(R.id.cvHostHolder);
+		aCtx = getActivity().getApplicationContext();
+		mHostHolderCard = new HostHolderCard(aCtx);
+		holderCardView.setCard(mHostHolderCard);
+		return v;
+	}
+
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		setChangedStatus(mStatus);
+
+
 	}
 
 	public static void setChangedStatus(String status) {
@@ -89,8 +134,8 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 			mBtnFAB.hide(false);
 
 			//TODO Make this behavior a preference
-			String host = mEtHost.getText().toString();
-			String port = mEtPort.getText().toString();
+			String host = mHostHolderCard.getHost();
+			String port = mHostHolderCard.getPort();
 			if (!(host == null) && !(port == null)) {
 				String adress = host + ":" + port;
 				changedStatusListener.onChangedStatusListener(CUSTOM_SERVER, adress);
@@ -103,57 +148,13 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 	}
 
 	@Override
-	public int getTitleResourceId() {
-		return R.string.title_status_fragment;
-	}
-
-	@Override
 	public String getName() {
 		return "SetupConnectionFragment";
 	}
 
 	@Override
-	public void onAttach(Activity activity) {
-		super.onAttach(activity);
-		try {
-			changedStatusListener = (OnChangedStatusListener) activity;
-		} catch (ClassCastException e) {
-			throw new ClassCastException(activity.toString() + " must implement OnChangedStatusListener");
-		}
-	}
-
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		mStatus = getArguments().getString("status");
-		setRetainInstance(true);
-		aCtx = getActivity().getApplicationContext();
-	}
-
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.setup_connection_layout, container, false);
-		tv = (TextView) v.findViewById(R.id.tvStatusDisplay);
-		pbConnecting = (ProgressBar) v.findViewById(R.id.pbConnecting);
-		mEtHost = (EditText) v.findViewById(R.id.etHost);
-		mEtPort = (EditText) v.findViewById(R.id.etPort);
-		mBtnFAB = (FloatingActionButton) v.findViewById(R.id.btnFAB);
-
-		mBtnFAB.setOnClickListener(this);
-		SharedPreferences prefs = getActivity().getApplicationContext().getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
-		String known_host = prefs.getString("known_host", null);
-		String known_port = prefs.getString("known_port", null);
-		if (!(known_host == null) && !(known_port == null)) {
-			mEtHost.setText(known_host);
-			mEtPort.setText(known_port);
-		}
-		return v;
-	}
-
-	@Override
-	public void onActivityCreated(Bundle savedInstanceState) {
-		super.onActivityCreated(savedInstanceState);
-		setChangedStatus(mStatus);
+	public int getTitleResourceId() {
+		return R.string.title_status_fragment;
 	}
 
 	@Override
@@ -164,8 +165,8 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 				break;
 			case R.id.btnFAB:
 				mBtnFAB.hide(true);
-				String host = mEtHost.getText().toString();
-				String port = mEtPort.getText().toString();
+				String host = mHostHolderCard.getHost();
+				String port = mHostHolderCard.getPort();
 				if (!(host == null) && !(port == null)) {
 					SharedPreferences prefs = getActivity().getApplicationContext().getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
 
@@ -185,4 +186,51 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 	public interface OnChangedStatusListener {
 		public void onChangedStatusListener(int what, String adress);
 	}
+
+	/*
+	 * RESULTCARD ****************************************************************************************************
+	 */
+	public static class HostHolderCard extends Card {
+
+		CustomHeaderInnerCard header;
+		private EditText mEtHost;
+		private EditText mEtPort;
+
+		public HostHolderCard(Context context) {
+			//TODO make the card look pretty
+			super(context, R.layout.hostholdercard_inner);
+			header = new CustomHeaderInnerCard(context, "Server", null);
+			addCardHeader(header);
+		}
+
+		@Override
+		public void setupInnerViewElements(ViewGroup parent, View view) {
+			header.showAlwaysCB(true);
+			mEtHost = (EditText) view.findViewById(R.id.etHost);
+			mEtPort = (EditText) view.findViewById(R.id.etPort);
+
+			SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
+			String known_host = prefs.getString("known_host", null);
+			String known_port = prefs.getString("known_port", null);
+			if (!(known_host == null) && !(known_port == null)) {
+				mEtHost.setText(known_host);
+				mEtPort.setText(known_port);
+			}
+		}
+
+		public String getHost() {
+			return mEtHost.getText().toString();
+		}
+
+		public String getPort() {
+			return mEtPort.getText().toString();
+		}
+
+		public boolean doAlways() {
+			return header.doAlways();
+		}
+
+
+	}
+
 }

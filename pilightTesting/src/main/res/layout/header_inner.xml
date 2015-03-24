@@ -38,7 +38,7 @@
         android:maxLines="1"
         android:textColor="#BBB"
         android:textSize="14sp" />
-    
+
     <TextView
         android:id="@+id/tvHeaderDevice"
         style="@style/AppTheme.HeaderTitle"
@@ -46,5 +46,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="5dp" />
+
+    <CheckBox
+        android:id="@+id/cbAlways"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:visibility="gone"
+        />
 
 </RelativeLayout>

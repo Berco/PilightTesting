@@ -196,6 +196,8 @@ public class PrefFragment extends BasePreferenceFragment {
 		if (pref.getKey().contentEquals("remove_all_nets")) {
 			Toast.makeText(getActivity().getApplicationContext(), "forgot all known networks", Toast.LENGTH_LONG).show();
 			pref.getEditor().putString("networks_known", "").commit();
+			pref.getEditor().putString("known_host", "").commit();
+			pref.getEditor().putString("known_port", "").commit();
 			return true;
 		}
 

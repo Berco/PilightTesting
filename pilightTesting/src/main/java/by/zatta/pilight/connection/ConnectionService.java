@@ -428,9 +428,11 @@ public class ConnectionService extends Service {
 		SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
 		boolean useSSDP = prefs.getBoolean("useSSDP", true);
 
+		if (server == null) server = "null:0";
+
 		String serverString;
 		if ((!useSSDP) && (server.equals("null:0")))
-			serverString = "NO_SERVER";
+			serverString = "ADRESS";
 		else
 			serverString = Server.CONNECTION.setup(server);
 
@@ -455,6 +457,7 @@ public class ConnectionService extends Service {
 				return false;
 			}
 		} else if (serverString.contains("ADRESS")) {
+			//TODO create notification ADRESS for setup connection purposes
 			makeNotification(NotificationType.NO_SERVER, serverString);
 			return false;
 		} else {

@@ -136,7 +136,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 			//TODO Make this behavior a preference
 			String host = mHostHolderCard.getHost();
 			String port = mHostHolderCard.getPort();
-			if (!(host == null) && !(port == null)) {
+			if (!(host == null) && !(port == null) && !(host.equals("")) && !(port.equals(""))) {
 				String adress = host + ":" + port;
 				changedStatusListener.onChangedStatusListener(CUSTOM_SERVER, adress);
 			}
@@ -167,7 +167,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 				mBtnFAB.hide(true);
 				String host = mHostHolderCard.getHost();
 				String port = mHostHolderCard.getPort();
-				if (!(host == null) && !(port == null)) {
+				if (!(host == null) && !(port == null) && !(host.equals("")) && !(port.equals(""))) {
 					SharedPreferences prefs = getActivity().getApplicationContext().getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
 
 					SharedPreferences.Editor edit = prefs.edit();

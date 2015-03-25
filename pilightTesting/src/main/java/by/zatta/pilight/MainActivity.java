@@ -282,19 +282,6 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 		Log.v(TAG, "onCreate done");
 	}
 
-	private void openSetupConnectionFragment(BaseFragment mBaseFragment) {
-		FragmentManager fm = getFragmentManager();
-		FragmentTransaction ft = fm.beginTransaction();
-
-		Fragment pref = fm.findFragmentByTag("SetupConnectionFragment");
-		if (pref == null) {
-			fm.popBackStack();
-			ft.replace(R.id.fragment_main, mBaseFragment, "SetupConnectionFragment");
-			ft.addToBackStack(null);
-			ft.commit();
-		}
-	}
-
 	/**
 	 * Check if the service is running. If the service is running when the activity starts, we want to automatically bind to it.
 	 */
@@ -502,6 +489,18 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 			FragmentTransaction ft = fm.beginTransaction();
 			fm.popBackStack();
 			ft.replace(R.id.fragment_main, mBaseFragment2, mBaseFragment2.getName());
+			ft.commit();
+		}
+	}
+	private void openSetupConnectionFragment(BaseFragment mBaseFragment) {
+		FragmentManager fm = getFragmentManager();
+		FragmentTransaction ft = fm.beginTransaction();
+
+		Fragment pref = fm.findFragmentByTag("SetupConnectionFragment");
+		if (pref == null) {
+			fm.popBackStack();
+			ft.replace(R.id.fragment_main, mBaseFragment, "SetupConnectionFragment");
+			//ft.addToBackStack(null);
 			ft.commit();
 		}
 	}

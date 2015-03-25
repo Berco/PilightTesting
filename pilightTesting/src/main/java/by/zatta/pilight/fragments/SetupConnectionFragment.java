@@ -78,9 +78,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mStatus = getArguments().getString("status");
 		setRetainInstance(true);
-		aCtx = getActivity().getApplicationContext();
 	}
 
 	@Override
@@ -102,9 +100,10 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+		if (mStatus == null)
+			mStatus = getArguments().getString("status");
+		aCtx = getActivity().getApplicationContext();
 		setChangedStatus(mStatus);
-
-
 	}
 
 	public static void setChangedStatus(String status) {

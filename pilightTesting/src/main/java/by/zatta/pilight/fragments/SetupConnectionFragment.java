@@ -114,6 +114,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 		mBtnFAB.hide(false);
 		mBtnFAB.setDrawable(aCtx.getResources().getDrawable(R.drawable.ic_av_play));
 		if (status.equals("CONNECTED")) {
+			mStatus = null;
 			changedStatusListener.onChangedStatusListener(DISMISS, null);
 		} else if (status.equals("CONNECTING")) {
 			pbConnecting.setVisibility(View.VISIBLE);

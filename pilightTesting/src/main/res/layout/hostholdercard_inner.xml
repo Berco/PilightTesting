@@ -32,7 +32,7 @@
     <ImageView
         android:id="@+id/colorBorder"
         android:layout_width="10dp"
-        android:layout_height="@dimen/card_base_login_height"
+        android:layout_height="@dimen/card_base_empty_height"
         android:layout_marginTop="2dp"
         android:background="@drawable/rectangle"/>
 
@@ -49,9 +49,12 @@
 
     <RelativeLayout
         android:id="@+id/relativeLayout"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true">
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@id/colorBorder"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true">
 
         <EditText
             android:id="@+id/etHost"

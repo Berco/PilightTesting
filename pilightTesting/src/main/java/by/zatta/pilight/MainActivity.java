@@ -238,7 +238,6 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 
 	private String[] makeLocationList() {
 		allLocations.clear();
-		allLocations.put(getString(R.string.title_all), null);
 		if (mDevices != null) {
 			for (DeviceEntry dentry : mDevices) {
 				for (SettingEntry sentry : dentry.getSettings()) {
@@ -470,11 +469,7 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 	}
 
 	private void startInitialFragment() {
-		SharedPreferences getPrefs = getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
-		boolean showAll = getPrefs.getBoolean("showAllByDefault", false);
-		int menuStart;
-		if (showAll) menuStart = 0;
-		else menuStart = 1;
+		int menuStart = 0;
 		String location = allLocations.values().toArray(new String[allLocations.size()])[menuStart];
 		mCurrentTitle = allLocations.keySet().toArray(new String[allLocations.size()])[menuStart];
 		getActionBar().setTitle(mCurrentTitle);

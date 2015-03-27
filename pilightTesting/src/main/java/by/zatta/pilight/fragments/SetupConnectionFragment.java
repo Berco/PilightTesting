@@ -30,15 +30,20 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 import by.zatta.pilight.R;
 import by.zatta.pilight.views.CustomHeaderInnerCard;
 import by.zatta.pilight.views.FloatingActionButton;
 import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
+import it.gmariotti.cardslib.library.view.CardListView;
 import it.gmariotti.cardslib.library.view.CardView;
 
 public class SetupConnectionFragment extends BaseFragment implements View.OnClickListener {
@@ -54,8 +59,9 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 	private static ProgressBar pbConnecting;
 	private static String mStatus;
 	private static TextView tv;
-	private static HostHolderCard mHostHolderCard;
-	private CardView holderCardView;
+	private static CardArrayAdapter mCardArrayAdapter;
+	static ArrayList<Card> cards;
+	CardListView listView;
 
 	public static SetupConnectionFragment newInstance(String status) {
 		SetupConnectionFragment f = new SetupConnectionFragment();
@@ -87,13 +93,11 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 		tv = (TextView) v.findViewById(R.id.tvStatusDisplay);
 		pbConnecting = (ProgressBar) v.findViewById(R.id.pbConnecting);
 		mBtnFAB = (FloatingActionButton) v.findViewById(R.id.btnFAB);
-
 		mBtnFAB.setOnClickListener(this);
+		listView = (CardListView) v.findViewById(R.id.clCardList);
 
-		holderCardView = (CardView) v.findViewById(R.id.cvHostHolder);
-		aCtx = getActivity().getApplicationContext();
-		mHostHolderCard = new HostHolderCard(aCtx);
-		holderCardView.setCard(mHostHolderCard);
+
+
 		return v;
 	}
 
@@ -103,6 +107,19 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 		if (mStatus == null)
 			mStatus = getArguments().getString("status");
 		aCtx = getActivity().getApplicationContext();
+
+		cards = new ArrayList<Card>();
+
+		HostHolderCard card = new HostHolderCard(aCtx);
+		cards.add(card);
+		HostHolderCard card2 = new HostHolderCard(aCtx);
+		cards.add(card2);
+		mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
+
+		if (listView != null) {
+			listView.setAdapter(mCardArrayAdapter);
+		}
+
 		setChangedStatus(mStatus);
 	}
 
@@ -134,8 +151,9 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 			mBtnFAB.hide(false);
 
 			//TODO Make this behavior a preference
-			String host = mHostHolderCard.getHost();
-			String port = mHostHolderCard.getPort();
+			HostHolderCard card = (HostHolderCard) cards.get(0);
+			String host = card.getHost();
+			String port = card.getPort();
 			if (!(host == null) && !(port == null) && !(host.equals("")) && !(port.equals(""))) {
 				String adress = host + ":" + port;
 				changedStatusListener.onChangedStatusListener(CUSTOM_SERVER, adress);
@@ -165,11 +183,16 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 				break;
 			case R.id.btnFAB:
 				mBtnFAB.hide(true);
-				String host = mHostHolderCard.getHost();
-				String port = mHostHolderCard.getPort();
+				HostHolderCard card = (HostHolderCard) cards.get(0);
+				Log.d(TAG, "CARD = " + card.toString());
+
+				String host = card.getHost();
+				Log.d(TAG, "HOST = "+ host);
+				String port = card.getPort();
+				Log.d(TAG, "PORT = " + port);
+
 				if (!(host == null) && !(port == null) && !(host.equals("")) && !(port.equals(""))) {
 					SharedPreferences prefs = getActivity().getApplicationContext().getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
-
 					SharedPreferences.Editor edit = prefs.edit();
 					edit.putString("known_host", host);
 					edit.putString("known_port", port);
@@ -195,6 +218,8 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 		CustomHeaderInnerCard header;
 		private EditText mEtHost;
 		private EditText mEtPort;
+		private String host = "";
+		private String port = "";
 
 		public HostHolderCard(Context context) {
 			//TODO make the card look pretty
@@ -212,18 +237,34 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 			SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
 			String known_host = prefs.getString("known_host", null);
 			String known_port = prefs.getString("known_port", null);
-			if (!(known_host == null) && !(known_port == null)) {
+			if (!(known_host == null) && !(known_port == null) && !(known_host.equals("")) && !(known_port.equals(""))) {
 				mEtHost.setText(known_host);
 				mEtPort.setText(known_port);
+				host = known_host;
+				port = known_port;
 			}
+			mEtHost.setOnFocusChangeListener(new OnFocusChangeListener(){
+				@Override
+				public void onFocusChange(View v,boolean hasFocus){
+					host = ((EditText) v).getText().toString();
+				}
+			});
+			mEtPort.setOnFocusChangeListener(new OnFocusChangeListener(){
+				@Override
+				public void onFocusChange(View v,boolean hasFocus){
+					port = ((EditText) v).getText().toString();
+				}
+			});
 		}
 
 		public String getHost() {
-			return mEtHost.getText().toString();
+			Log.d(SetupConnectionFragment.TAG, "CARDHOST = " + host);
+			return host;
 		}
 
 		public String getPort() {
-			return mEtPort.getText().toString();
+			Log.d(SetupConnectionFragment.TAG, "CARDPORT = " + port);
+			return port;
 		}
 
 		public boolean doAlways() {

@@ -64,24 +64,23 @@
                 android:layout_centerInParent="true"
                 />
 
-            <it.gmariotti.cardslib.library.view.CardView
-                android:id="@+id/cvHostHolder"
+            <it.gmariotti.cardslib.library.view.CardListView
+                android:id="@+id/clCardList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="40dp"
                 android:layout_marginRight="40dp"
                 android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
-                android:layout_below="@id/emptyView"
-                android:visibility="visible"/>
+                android:layout_marginBottom="60dp"
+                android:layout_alignParentBottom="true"/>
 
             <TextView
                 android:id="@+id/tvStatusDisplay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/cvHostHolder"
+                android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="40dip"
+                android:layout_marginBottom="30dip"
                 android:text="Some TEXT"
                 android:textAppearance="?android:attr/textAppearanceMedium"/>
 

@@ -15,7 +15,7 @@
  * for more details.
  *
  * You should have received a copy of the GNU General Public License along 
- * with pilightfor android.
+ * with pilight for android.
  * If not, see <http://www.gnu.org/licenses/>
  *
  * Copyright (c) 2013 pilight project
@@ -59,6 +59,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -82,9 +83,9 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 
 	private static final String TAG = "Zatta::MainActivity";
 	private static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
+	private static String[] groups;
 	private final Messenger mMessenger = new Messenger(new IncomingMessageHandler());
 	boolean mIsBound;
-	private Map<String, String> allLocations = new LinkedHashMap<String, String>();
 	private BaseFragment mBaseFragment;
 	private ServiceConnection mConnection = this;
 	private String mCurrentTitle;
@@ -223,7 +224,7 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 		Log.v(TAG, "calling initMenu");
 		mDrawerList = (ListView) findViewById(R.id.drawer);
 		if (mDrawerList != null) {
-			mDrawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, makeLocationList()));
+			mDrawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, makeLocationArray()));
 			mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 		}
 
@@ -236,19 +237,20 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 		closeDialogFragments();
 	}
 
-	private String[] makeLocationList() {
-		allLocations.clear();
+	private String[] makeLocationArray() {
+		Map<String, String> allLocations = new LinkedHashMap<String, String>();
 		if (mDevices != null) {
 			for (DeviceEntry dentry : mDevices) {
 				for (SettingEntry sentry : dentry.getSettings()) {
 					if ((sentry.getKey().equals("group")) && (!allLocations.containsValue(sentry.getValue())))
-						allLocations.put(sentry.getValue(), sentry.getValue());//dentry.getLocationID());
+						allLocations.put(sentry.getValue(), sentry.getValue());
 				}
 			}
 		}
-		String[] locationNames = new String[allLocations.size()];
-		locationNames = allLocations.keySet().toArray(locationNames);
-		return locationNames;
+		groups = new String[allLocations.size()];
+		groups = allLocations.keySet().toArray(groups);
+		Arrays.sort(groups);
+		return groups;
 	}
 
 	@Override
@@ -279,34 +281,6 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 		}
 		automaticBind();
 		Log.v(TAG, "onCreate done");
-	}
-
-	/**
-	 * Check if the service is running. If the service is running when the activity starts, we want to automatically bind to it.
-	 */
-	private void automaticBind() {
-		startService(new Intent(MainActivity.this, ConnectionService.class));
-		if (isConnectionServiceActive()) {
-			doBindService();
-		}
-	}
-
-	boolean isConnectionServiceActive() {
-		ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-			if (ConnectionService.class.getName().equals(service.service.getClassName())) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Bind this Activity to MyService
-	 */
-	private void doBindService() {
-		bindService(new Intent(this, ConnectionService.class), mConnection, Context.BIND_ADJUST_WITH_ACTIVITY);
-		mIsBound = true;
 	}
 
 	@Override
@@ -436,6 +410,47 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 		}
 	}
 
+	private void openSetupConnectionFragment(BaseFragment mBaseFragment) {
+		FragmentManager fm = getFragmentManager();
+		FragmentTransaction ft = fm.beginTransaction();
+
+		Fragment pref = fm.findFragmentByTag("SetupConnectionFragment");
+		if (pref == null) {
+			fm.popBackStack();
+			ft.replace(R.id.fragment_main, mBaseFragment, "SetupConnectionFragment");
+			//ft.addToBackStack(null);
+			ft.commit();
+		}
+	}
+
+	/**
+	 * Check if the service is running. If the service is running when the activity starts, we want to automatically bind to it.
+	 */
+	private void automaticBind() {
+		startService(new Intent(MainActivity.this, ConnectionService.class));
+		if (isConnectionServiceActive()) {
+			doBindService();
+		}
+	}
+
+	boolean isConnectionServiceActive() {
+		ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+			if (ConnectionService.class.getName().equals(service.service.getClassName())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Bind this Activity to MyService
+	 */
+	private void doBindService() {
+		bindService(new Intent(this, ConnectionService.class), mConnection, Context.BIND_ADJUST_WITH_ACTIVITY);
+		mIsBound = true;
+	}
+
 	@Override
 	public void onServiceConnected(ComponentName name, IBinder service) {
 		mServiceMessenger = new Messenger(service);
@@ -454,7 +469,6 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 		// This is called when the connection with the service has been
 		// unexpectedly disconnected - process crashed.
 		mServiceMessenger = null;
-		// textStatus.setText("Disconnected.");
 	}
 
 	public String myAppVersion() {
@@ -469,11 +483,9 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 	}
 
 	private void startInitialFragment() {
-		int menuStart = 0;
-		String location = allLocations.values().toArray(new String[allLocations.size()])[menuStart];
-		mCurrentTitle = allLocations.keySet().toArray(new String[allLocations.size()])[menuStart];
-		getActionBar().setTitle(mCurrentTitle);
-		mBaseFragment = DeviceListFragment.newInstance(mDevices, location);
+		mCurrentTitle = groups[0];
+		getActionBar().setTitle(groups[0]);
+		mBaseFragment = DeviceListFragment.newInstance(mDevices, groups[0]);
 		openFragment(mBaseFragment);
 	}
 
@@ -484,18 +496,6 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 			FragmentTransaction ft = fm.beginTransaction();
 			fm.popBackStack();
 			ft.replace(R.id.fragment_main, mBaseFragment2, mBaseFragment2.getName());
-			ft.commit();
-		}
-	}
-	private void openSetupConnectionFragment(BaseFragment mBaseFragment) {
-		FragmentManager fm = getFragmentManager();
-		FragmentTransaction ft = fm.beginTransaction();
-
-		Fragment pref = fm.findFragmentByTag("SetupConnectionFragment");
-		if (pref == null) {
-			fm.popBackStack();
-			ft.replace(R.id.fragment_main, mBaseFragment, "SetupConnectionFragment");
-			//ft.addToBackStack(null);
 			ft.commit();
 		}
 	}
@@ -526,10 +526,9 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 			// drawer
 			// update selected item and title, then close the drawer
 			mDrawerList.setItemChecked(position, true);
-			String location = allLocations.values().toArray(new String[allLocations.size()])[position];
-			mBaseFragment = DeviceListFragment.newInstance(mDevices, location);
+			mBaseFragment = DeviceListFragment.newInstance(mDevices, groups[0]);
 			openFragment(mBaseFragment);
-			mCurrentTitle = allLocations.keySet().toArray(new String[allLocations.size()])[position];
+			mCurrentTitle = groups[0];
 			mDrawer.closeDrawer(mDrawerList);
 		}
 	}
@@ -575,7 +574,7 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 				case ConnectionService.MSG_SET_BUNDLE:
 					mDevices = bundle.getParcelableArrayList("config");
 					try {
-						if (allLocations.isEmpty()) {
+						if (groups == null) {
 							initMenu();
 							startInitialFragment();
 						}

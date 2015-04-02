@@ -113,7 +113,6 @@ public class WeatherCard extends DeviceCardAbstract {
 	private String makeTimeString(String time) throws ParseException {
 		DecimalFormat timeDigit = new DecimalFormat("#0000.###");
 		timeDigit.setDecimalSeparatorAlwaysShown(false);
-		Log.e(TAG, time);
 		String[] timeArr = time.split("[^0-9]");
 		if (timeArr.length==2){
 			if (timeArr[0].length() < 2) timeArr[0] = "0" + timeArr[0];

@@ -32,35 +32,39 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import by.zatta.pilight.R;
+import by.zatta.pilight.model.ConnectionEntry;
 import by.zatta.pilight.views.CustomHeaderInnerCard;
 import by.zatta.pilight.views.FloatingActionButton;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.view.CardListView;
-import it.gmariotti.cardslib.library.view.CardView;
 
 public class SetupConnectionFragment extends BaseFragment implements View.OnClickListener {
 
 	public final static int DISMISS = 1187639657;
 	public final static int FINISH = 1432084755;
 	public final static int RECONNECT = 1873475293;
-	public final static int CUSTOM_SERVER = 98273234;
 	private static final String TAG = "SetupConnectionFragment";
 	static OnChangedStatusListener changedStatusListener;
+	static ArrayList<Card> cards;
 	private static FloatingActionButton mBtnFAB;
 	private static Context aCtx;
+	private static boolean prefUseSSDP;
 	private static ProgressBar pbConnecting;
 	private static String mStatus;
 	private static TextView tv;
 	private static CardArrayAdapter mCardArrayAdapter;
-	static ArrayList<Card> cards;
 	CardListView listView;
 
 	public static SetupConnectionFragment newInstance(String status) {
@@ -95,32 +99,46 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 		mBtnFAB = (FloatingActionButton) v.findViewById(R.id.btnFAB);
 		mBtnFAB.setOnClickListener(this);
 		listView = (CardListView) v.findViewById(R.id.clCardList);
-
-
-
 		return v;
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+		aCtx = getActivity().getApplicationContext();
 		if (mStatus == null)
 			mStatus = getArguments().getString("status");
-		aCtx = getActivity().getApplicationContext();
+
+		SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
+		prefUseSSDP = prefs.getBoolean("useSSDP", true);
 
 		cards = new ArrayList<Card>();
 
-		HostHolderCard card = new HostHolderCard(aCtx);
-		cards.add(card);
-		HostHolderCard card2 = new HostHolderCard(aCtx);
-		cards.add(card2);
-		mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
+		if (prefUseSSDP) {
+			HostHolderCard ssdpCard = new HostHolderCard(aCtx, null);
+			cards.add(ssdpCard);
+		}
 
+		getConnectionsFromPrefs();
+
+		mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
 		if (listView != null) {
 			listView.setAdapter(mCardArrayAdapter);
 		}
-
 		setChangedStatus(mStatus);
+	}
+
+	private void getConnectionsFromPrefs() {
+		SharedPreferences prefs = getActivity().getApplicationContext().getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
+		Set<String> connections = prefs.getStringSet("know_connections", new HashSet<String>());
+		Iterator<?> connIt = connections.iterator();
+		while (connIt.hasNext()) {
+			String aConnection = (String) connIt.next();
+			ConnectionEntry entry = new ConnectionEntry(aConnection);
+			if (!entry.isSSDP()) {
+				cards.add(new HostHolderCard(aCtx, entry));
+			}
+		}
 	}
 
 	public static void setChangedStatus(String status) {
@@ -128,6 +146,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 		Log.d(TAG, status);
 		// TODO check for correctness
 		pbConnecting.setVisibility(View.GONE);
+
 		mBtnFAB.hide(false);
 		mBtnFAB.setDrawable(aCtx.getResources().getDrawable(R.drawable.ic_av_play));
 		if (status.equals("CONNECTED")) {
@@ -147,17 +166,16 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 			mBtnFAB.hide(false);
 		} else if (status.equals("NO_SERVER")) {
 			tv.setText(status);
+			int max;
+			//TODO we need to have a list of possible servers, now we actually get a list if multiple times a connection has been
+			//TODO made but it sucks big time. The last succesfull connection will be the one tried when pressing the button.
+			if (prefUseSSDP) max = 2; else max = 1;
+			if (cards.size() < max) {
+				cards.add(new HostHolderCard(aCtx, new ConnectionEntry(null, null, null, false)));
+				mCardArrayAdapter.notifyDataSetChanged();
+			}
 			mBtnFAB.setDrawable(aCtx.getResources().getDrawable(R.drawable.ic_av_play));
 			mBtnFAB.hide(false);
-
-			//TODO Make this behavior a preference
-			HostHolderCard card = (HostHolderCard) cards.get(0);
-			String host = card.getHost();
-			String port = card.getPort();
-			if (!(host == null) && !(port == null) && !(host.equals("")) && !(port.equals(""))) {
-				String adress = host + ":" + port;
-				changedStatusListener.onChangedStatusListener(CUSTOM_SERVER, adress);
-			}
 		} else if (status.equals("LOST_CONNECTION")) {
 			tv.setText(R.string.status_lost);
 			mBtnFAB.setDrawable(aCtx.getResources().getDrawable(R.drawable.ic_av_play));
@@ -177,55 +195,49 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 
 	@Override
 	public void onClick(View v) {
+		tv.requestFocus();
+
 		switch (v.getId()) {
 			case R.id.btnCancelStart:
 				changedStatusListener.onChangedStatusListener(FINISH, null);
 				break;
 			case R.id.btnFAB:
-				mBtnFAB.hide(true);
-				HostHolderCard card = (HostHolderCard) cards.get(0);
-				Log.d(TAG, "CARD = " + card.toString());
-
-				String host = card.getHost();
-				Log.d(TAG, "HOST = "+ host);
-				String port = card.getPort();
-				Log.d(TAG, "PORT = " + port);
-
-				if (!(host == null) && !(port == null) && !(host.equals("")) && !(port.equals(""))) {
-					SharedPreferences prefs = getActivity().getApplicationContext().getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
-					SharedPreferences.Editor edit = prefs.edit();
-					edit.putString("known_host", host);
-					edit.putString("known_port", port);
-					edit.commit();
-					String adress = host + ":" + port;
-					changedStatusListener.onChangedStatusListener(CUSTOM_SERVER, adress);
+				HostHolderCard card = (HostHolderCard) cards.get(cards.size()-1);
+				if (!(card.getConnEntry().isSSDP())) {
+					changedStatusListener.onChangedStatusListener(RECONNECT, card.getConnEntry());
 				} else {
-					changedStatusListener.onChangedStatusListener(RECONNECT, null);
+					changedStatusListener.onChangedStatusListener(RECONNECT, card.getConnEntry());
 				}
 				break;
 		}
 	}
 
 	public interface OnChangedStatusListener {
-		public void onChangedStatusListener(int what, String adress);
+		public void onChangedStatusListener(int what, ConnectionEntry connectionEntry);
 	}
 
 	/*
-	 * RESULTCARD ****************************************************************************************************
+	 * HostHolderCard ****************************************************************************************************
 	 */
-	public static class HostHolderCard extends Card {
+	private static class HostHolderCard extends Card {
 
-		CustomHeaderInnerCard header;
+		private ConnectionEntry mConEntry;
+		private CustomHeaderInnerCard header;
 		private EditText mEtHost;
 		private EditText mEtPort;
-		private String host = "";
-		private String port = "";
 
-		public HostHolderCard(Context context) {
+		public HostHolderCard(Context context, ConnectionEntry conEntry) {
 			//TODO make the card look pretty
 			super(context, R.layout.hostholdercard_inner);
-			header = new CustomHeaderInnerCard(context, "Server", null);
-			addCardHeader(header);
+			if (conEntry != null) {
+				mConEntry = conEntry;
+				header = new CustomHeaderInnerCard(context, "Server", null);
+				addCardHeader(header);
+			} else {
+				header = new CustomHeaderInnerCard(context, "Searching", null);
+				addCardHeader(header);
+				mConEntry = new ConnectionEntry("ssdp;404;home;true");
+			}
 		}
 
 		@Override
@@ -233,44 +245,42 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 			header.showAlwaysCB(true);
 			mEtHost = (EditText) view.findViewById(R.id.etHost);
 			mEtPort = (EditText) view.findViewById(R.id.etPort);
+			TextView mTvColon = (TextView) view.findViewById(R.id.colon);
 
-			SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
-			String known_host = prefs.getString("known_host", null);
-			String known_port = prefs.getString("known_port", null);
-			if (!(known_host == null) && !(known_port == null) && !(known_host.equals("")) && !(known_port.equals(""))) {
-				mEtHost.setText(known_host);
-				mEtPort.setText(known_port);
-				host = known_host;
-				port = known_port;
+			if (!mConEntry.isSSDP()) {
+				mEtHost.setVisibility(View.VISIBLE);
+				mEtPort.setVisibility(View.VISIBLE);
+				mEtHost.setText(mConEntry.getHost());
+				mEtPort.setText(mConEntry.getPort());
+				mEtHost.setOnFocusChangeListener(new OnFocusChangeListener() {
+					@Override
+					public void onFocusChange(View v, boolean hasFocus) {
+						mConEntry.setHost(((EditText) v).getText().toString());
+						Log.d(SetupConnectionFragment.TAG, "HOST FOCUS CHANGED to: " + hasFocus);
+					}
+				});
+				mEtPort.setOnFocusChangeListener(new OnFocusChangeListener() {
+					@Override
+					public void onFocusChange(View v, boolean hasFocus) {
+						mConEntry.setPort(((EditText) v).getText().toString());
+						Log.d(SetupConnectionFragment.TAG, "PORT FOCUS CHANGED to: " + hasFocus);
+					}
+				});
+				mTvColon.setText(aCtx.getResources().getString(R.string.colon));
+			} else {
+				mEtHost.setVisibility(View.GONE);
+				mEtPort.setVisibility(View.GONE);
+				mTvColon.setText("Searching your server via SSDP");
 			}
-			mEtHost.setOnFocusChangeListener(new OnFocusChangeListener(){
-				@Override
-				public void onFocusChange(View v,boolean hasFocus){
-					host = ((EditText) v).getText().toString();
-				}
-			});
-			mEtPort.setOnFocusChangeListener(new OnFocusChangeListener(){
-				@Override
-				public void onFocusChange(View v,boolean hasFocus){
-					port = ((EditText) v).getText().toString();
-				}
-			});
 		}
 
-		public String getHost() {
-			Log.d(SetupConnectionFragment.TAG, "CARDHOST = " + host);
-			return host;
-		}
-
-		public String getPort() {
-			Log.d(SetupConnectionFragment.TAG, "CARDPORT = " + port);
-			return port;
+		public ConnectionEntry getConnEntry() {
+			return mConEntry;
 		}
 
 		public boolean doAlways() {
 			return header.doAlways();
 		}
-
 
 	}
 

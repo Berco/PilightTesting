@@ -30,6 +30,7 @@ import by.zatta.pilight.fragments.SetupConnectionFragment;
 import by.zatta.pilight.fragments.SetupConnectionFragment.OnChangedStatusListener;
 import by.zatta.pilight.fragments.TaskerActionFragment;
 import by.zatta.pilight.fragments.TaskerActionFragment.ActionReadyListener;
+import by.zatta.pilight.model.ConnectionEntry;
 import by.zatta.pilight.model.DeviceEntry;
 
 public class ActionActivity extends Activity implements ServiceConnection, OnChangedStatusListener, ActionReadyListener {
@@ -200,7 +201,7 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 	}
 
 	@Override
-	public void onChangedStatusListener(int what, String adress) {
+	public void onChangedStatusListener(int what, ConnectionEntry connectionEntry) {
 		switch (what) {
 			case SetupConnectionFragment.DISMISS:
 				closeDialogFragments();
@@ -220,12 +221,11 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 				finish();
 				break;
 			case SetupConnectionFragment.RECONNECT:
-				this.sendBroadcast(new Intent("pilight-reconnect"));
-				break;
-			case SetupConnectionFragment.CUSTOM_SERVER:
-				Intent custom = new Intent("pilight-reconnect");
-				custom.putExtra("server", adress);
-				this.sendBroadcast(custom);
+				Intent intent = new Intent("pilight-reconnect");
+				Bundle bundle = new Bundle();
+				bundle.putParcelable("connectionEntry", connectionEntry);
+				intent.putExtras(bundle);
+				this.sendBroadcast(intent);
 				break;
 		}
 	}

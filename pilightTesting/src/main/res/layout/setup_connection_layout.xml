@@ -82,6 +82,8 @@
                 android:layout_centerHorizontal="true"
                 android:layout_marginBottom="30dip"
                 android:text="Some TEXT"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
                 android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         </RelativeLayout>
@@ -91,6 +93,7 @@
 
     <by.zatta.pilight.views.FloatingActionButton
         android:id="@+id/btnFAB"
+        android:focusable="true"
         android:layout_width="72dp"
         android:layout_height="72dp"
         android:layout_gravity="bottom|end"

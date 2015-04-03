@@ -36,6 +36,8 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import by.zatta.pilight.model.ConnectionEntry;
+
 public enum Server {
 	CONNECTION;
 	private static final String TAG = "Zatta::Server";
@@ -51,13 +53,13 @@ public enum Server {
 	private ArrayBlockingQueue<String> command;
 	private transient SetUp setupThread;
 
-	public synchronized String setup(String hostandport) {
+	public synchronized String setup(ConnectionEntry connEntry) {
 		disconnect();
-		if (!(hostandport == null)) {
-			String[] myAdressArray = hostandport.split(":");
-			host = myAdressArray[0];
-			port = Integer.valueOf(myAdressArray[1]);
+		if (!connEntry.isSSDP()){
+			host = connEntry.getHost();
+			port = Integer.valueOf(connEntry.getPort());
 		}
+
 		String toBeReturned = "";
 		output = new ArrayBlockingQueue<String>(1);
 		setupThread = new SetUp(output);
@@ -211,7 +213,7 @@ public enum Server {
 							String identify = "{\"action\": \"identify\",\"options\": {\"core\": 0,\"stats\": 0,\"receiver\": 0,\"config\": 1,\"forward\": 0},\"uuid\": \"0000-d0-63-00-000000\",\"media\": \"mobile\"}";
 							printStream.print(identify);
 							printStream.flush();
-							Thread.sleep(1000);
+							Thread.sleep(500);
 						} catch (Exception e) {
 							Log.w(TAG, e);
 						}
@@ -242,7 +244,7 @@ public enum Server {
 							String request = "{\"action\": \"request config\"}\n";
 							printStream.print(request);
 							printStream.flush();
-							Thread.sleep(1000);
+							Thread.sleep(500);
 						} catch (Exception e) {
 							Log.w(TAG, e);
 						}
@@ -272,7 +274,7 @@ public enum Server {
 							String request = "{\"action\": \"request values\"}\n";
 							printStream.print(request);
 							printStream.flush();
-							Thread.sleep(1000);
+							Thread.sleep(500);
 						} catch (Exception e) {
 							Log.w(TAG, e);
 						}

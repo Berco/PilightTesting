@@ -54,6 +54,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -75,6 +76,7 @@ import by.zatta.pilight.fragments.PrefFragment.OnLanguageListener;
 import by.zatta.pilight.fragments.PrefFragment.OnViewChangeListener;
 import by.zatta.pilight.fragments.SetupConnectionFragment;
 import by.zatta.pilight.fragments.SetupConnectionFragment.OnChangedStatusListener;
+import by.zatta.pilight.model.ConnectionEntry;
 import by.zatta.pilight.model.DeviceEntry;
 import by.zatta.pilight.model.SettingEntry;
 
@@ -127,7 +129,8 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 	}
 
 	@Override
-	public void onChangedStatusListener(int what, String adress) {
+	public void onChangedStatusListener(int what, ConnectionEntry connectionEntry) {
+		hideKeyboardAndDoItNow();
 		switch (what) {
 			case SetupConnectionFragment.DISMISS:
 				closeDialogFragments();
@@ -147,13 +150,11 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 				finish();
 				break;
 			case SetupConnectionFragment.RECONNECT:
-				this.sendBroadcast(new Intent("pilight-reconnect"));
-				break;
-
-			case SetupConnectionFragment.CUSTOM_SERVER:
-				Intent custom = new Intent("pilight-reconnect");
-				custom.putExtra("server", adress);
-				this.sendBroadcast(custom);
+				Intent intent = new Intent("pilight-reconnect");
+				Bundle bundle = new Bundle();
+				bundle.putParcelable("connectionEntry", connectionEntry);
+				intent.putExtras(bundle);
+				this.sendBroadcast(intent);
 				break;
 		}
 	}
@@ -479,7 +480,13 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 		} catch (NameNotFoundException e) {
 			return " ";
 		}
+	}
 
+	public void hideKeyboardAndDoItNow() {
+		InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+		View view = getCurrentFocus();
+		if (view == null) view = new View(this);
+		imm.hideSoftInputFromWindow(view.getWindowToken(),0);
 	}
 
 	private void startInitialFragment() {
@@ -543,6 +550,7 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 			// Log.v(TAG, "receiving a message");
 			Bundle bundle = msg.getData();
 			bundle.setClassLoader(getApplicationContext().getClassLoader());
+			FragmentManager fm = getFragmentManager();
 
 			switch (msg.what) {
 				case ConnectionService.MSG_SET_STATUS:
@@ -550,15 +558,14 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 					// Log.v(TAG, "status received in activity: " + status);
 					if (status.equals("UPDATE")) break;
 
-					FragmentManager fm = getFragmentManager();
-					Fragment prev = fm.findFragmentByTag("SetupConnectionFragment");
+					Fragment prevCon = fm.findFragmentByTag("SetupConnectionFragment");
 
 					try {
-						if (prev == null) {
+						if (prevCon == null) {
 							// Log.v(TAG, "there was not a fragment with tag dialog");
 							openSetupConnectionFragment(SetupConnectionFragment.newInstance(status));
 							break;
-						} else if (!(prev.getClass().equals(SetupConnectionFragment.class))) {
+						} else if (!(prevCon.getClass().equals(SetupConnectionFragment.class))) {
 							// Log.v(TAG, "there was fragment with tag SetupConnectionFragment not being StatusDialog");
 							openSetupConnectionFragment(SetupConnectionFragment.newInstance(status));
 							break;
@@ -576,9 +583,21 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 					try {
 						if (groups == null) {
 							initMenu();
-							startInitialFragment();
 						}
-						DeviceListFragment.updateUI(mDevices);
+						fm = getFragmentManager();
+						Fragment prevList = fm.findFragmentByTag("DeviceList");
+
+							if (prevList == null) {
+								// Log.v(TAG, "there was not a fragment with tag dialog");
+								startInitialFragment();
+								break;
+							} else {
+								// Log.v(TAG, "there was a SetupConnectionFragment running");
+								DeviceListFragment.updateUI(mDevices);
+								break;
+							}
+
+
 					} catch (Exception e) {
 						//Log.w(TAG, "ListBaseFragment isn't made yet or something wrong inside the fragment");
 					}

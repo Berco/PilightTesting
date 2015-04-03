@@ -57,13 +57,16 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import by.zatta.pilight.MainActivity;
 import by.zatta.pilight.R;
 import by.zatta.pilight.model.Config;
+import by.zatta.pilight.model.ConnectionEntry;
 import by.zatta.pilight.model.DeviceEntry;
 import by.zatta.pilight.model.Origin;
 import by.zatta.pilight.model.OriginEntry;
@@ -76,13 +79,12 @@ public class ConnectionService extends Service {
 	public static final int MSG_SWITCH_DEVICE = 1755547587;
 	public static final int MSG_UNREGISTER_CLIENT = 1873487903;
 	private static final String TAG = "Zatta::ConnectionService";
-	private static String hostandport;
 	public static NotificationType mCurrentNotif = NotificationType.DESTROYED;
 	public static List<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track of all current registered clients (activities,
 	private static Context aCtx;
 	private static Context ctx;
-	// widget:))
 	private static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
+	private static ConnectionEntry mCurrentConnection;
 	private static NotificationManager mNotMan;
 	private static Notification.Builder builder;
 	private static HeartBeat mHB = null;
@@ -101,17 +103,16 @@ public class ConnectionService extends Service {
 				// Log.v(TAG, "kill recieved");
 				stopSelf();
 			} else if (action.equals("pilight-reconnect")) {
-				if (intent.hasExtra("server")) {
-					hostandport = intent.getStringExtra("server");
-					if (hostandport != null)
-						if (hostandport.equals(":")) hostandport = null;
+				ConnectionEntry connEntry = null;
+				if (!(intent.getExtras()==null)) {
+					connEntry = intent.getExtras().getParcelable("connectionEntry");
 				}
-				Log.v(TAG, "pilight-reconnect: " + hostandport);
+				Log.v(TAG, "pilight-reconnect");
 				stopForeground(false);
 				makeNotification(NotificationType.CONNECTING, aCtx.getString(R.string.noti_reconnect));
 				if (isConnectionUp)
 					dropConnection();
-				else isConnectionUp = makeConnection(hostandport);
+				else isConnectionUp = makeConnection(connEntry);
 			} else if (action.equals("pilight-switch-device")) {
 				if (isConnectionUp) Log.v(TAG, "broadcastReceiver: " + intent.getStringExtra("command"));
 				Server.CONNECTION.sentCommand(intent.getStringExtra("command"));
@@ -165,7 +166,12 @@ public class ConnectionService extends Service {
 		} else if (update.contains("LOST_CONNECTION") && !isDestroying) {
 			makeNotification(NotificationType.LOST_CONNECTION, aCtx.getString(R.string.noti_lost));
 			dropConnection();
-			ctx.sendBroadcast(new Intent("pilight-reconnect").putExtra("server", hostandport));
+			Intent custom = new Intent("pilight-reconnect");
+			Bundle bundle = new Bundle();
+			bundle.putParcelable("connectionEntry", mCurrentConnection);
+			custom.putExtras(bundle);
+			mCurrentConnection = null;
+			ctx.sendBroadcast(custom);
 		}
 	}
 
@@ -371,7 +377,7 @@ public class ConnectionService extends Service {
 		this.registerReceiver(mMessageReceiver, filter);
 
 		mNotMan = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		isConnectionUp = makeConnection(null);
+		isConnectionUp = makeConnection(new ConnectionEntry(null,null,null,true));
 		isDestroying = false;
 		Log.v(TAG, "onCreate done");
 
@@ -421,27 +427,27 @@ public class ConnectionService extends Service {
 				getBaseContext().getResources().getDisplayMetrics());
 	}
 
-	private boolean makeConnection(String server) {
+	private boolean makeConnection(ConnectionEntry connEntry) {
+		if (connEntry == null) connEntry = new ConnectionEntry(null,null,null,true);
+
 		if (mCurrentNotif == NotificationType.DESTROYED)
 			makeNotification(NotificationType.CONNECTING, aCtx.getString(R.string.noti_connecting));
 
 		SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
 		boolean useSSDP = prefs.getBoolean("useSSDP", true);
 
-		if (server == null) server = "null:0";
-
 		String serverString;
-		if ((!useSSDP) && (server.equals("null:0")))
+		if ((!useSSDP) && connEntry.isSSDP())
 			serverString = "ADRESS";
 		else
-			serverString = Server.CONNECTION.setup(server);
+			serverString = Server.CONNECTION.setup(connEntry);
 
 		String goodConfig = "{\"gui\":{";
 		if (serverString.contains(goodConfig)) {
 			try {
 				mDevices = Config.getDevices(new JSONObject(serverString));
 				Collections.sort(mDevices);
-				addedToPreferences();
+				addedToPreferences(connEntry);
 				makeNotification(NotificationType.CONNECTED, aCtx.getString(R.string.noti_connected));
 				sendMessageToUI(MSG_SET_BUNDLE, null);
 				startForeground(35, builder.build());
@@ -458,52 +464,60 @@ public class ConnectionService extends Service {
 			}
 		} else if (serverString.contains("ADRESS")) {
 			//TODO create notification ADRESS for setup connection purposes
-			makeNotification(NotificationType.NO_SERVER, serverString);
+			makeNotification(NotificationType.NO_SERVER, null);
 			return false;
 		} else {
-			makeNotification(NotificationType.FAILED, serverString);
+			makeNotification(NotificationType.FAILED, null);
 			return false;
 		}
 	}
 
-	private String retrieveHostAndServer() {
-
+	private boolean addedToPreferences(ConnectionEntry connEntry) {
+		mCurrentConnection = connEntry;
 		SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
-		String known_host = prefs.getString("known_host", null);
-		String known_port = prefs.getString("known_port", "0");
+		if (connEntry.isSSDP()) {
+			String currentNetwork = null;
+			ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+			NetworkInfo info = cm.getActiveNetworkInfo();
+			if (!(info == null))
+				if (!(info.getType() == ConnectivityManager.TYPE_WIFI)) return false;
 
-		String adress = known_host + ":" + known_port;
-		if (adress.equals(":0")) adress = null;
-		return adress;
-	}
+			WifiManager wifiManager = (WifiManager) ctx.getSystemService(Context.WIFI_SERVICE);
+			WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+			if (!(wifiInfo == null)) {
+				currentNetwork = wifiInfo.getSSID();
+			}
+			if (currentNetwork == null) return false;
 
-	private boolean addedToPreferences() {
-		String currentNetwork = null;
-		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo info = cm.getActiveNetworkInfo();
-		if (!(info == null))
-			if (!(info.getType() == ConnectivityManager.TYPE_WIFI)) return false;
+			String previous = prefs.getString("networks_known", "");
+			currentNetwork = currentNetwork.replace("\"", "");
 
-		WifiManager wifiManager = (WifiManager) ctx.getSystemService(Context.WIFI_SERVICE);
-		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-		if (!(wifiInfo == null)) {
-			currentNetwork = wifiInfo.getSSID();
-		}
-		if (currentNetwork == null) return false;
+			if (previous.contains(currentNetwork)) {
+				return false;
+			} else {
+				previous = previous + "|&|" + currentNetwork;
+				SharedPreferences.Editor edit = prefs.edit();
+				edit.putString("networks_known", previous);
+				edit.commit();
+				return true;
+			}
+		}else{
+			Set<String> connections = prefs.getStringSet("know_connections", new HashSet<String>());
+			if (!connections.contains(connEntry.toString())) {
+//				Iterator<?> connIt = connections.iterator();
+//				while (connIt.hasNext()) {
+//					String aConnection = (String) connIt.next();
+//					if (aConnection.equals(connEntry.toString())) return false;
+//				}
 
-		SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
+				connections.add(connEntry.toString());
 
-		String previous = prefs.getString("networks_known", "");
-		currentNetwork = currentNetwork.replace("\"", "");
-
-		if (previous.contains(currentNetwork)) {
+				SharedPreferences.Editor edit = prefs.edit();
+				edit.putStringSet("know_connections", connections);
+				edit.commit();
+				return true;
+			}
 			return false;
-		} else {
-			previous = previous + "|&|" + currentNetwork;
-			Editor edit = prefs.edit();
-			edit.putString("networks_known", previous);
-			edit.commit();
-			return true;
 		}
 	}
 

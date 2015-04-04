@@ -17,7 +17,7 @@
   ~  * for more details.
   ~  * 
   ~  * You should have received a copy of the GNU General Public License along 
-  ~  * with pilightfor android.
+  ~  * with pilight for android.
   ~  * If not, see <http://www.gnu.org/licenses/>
   ~  * 
   ~  * Copyright (c) 2013 pilight project
@@ -25,7 +25,7 @@
 -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
@@ -62,45 +62,33 @@
                 android:layout_width="0dip"
                 android:layout_height="0dip"
                 android:layout_centerInParent="true"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
                 />
 
             <it.gmariotti.cardslib.library.view.CardListView
                 android:id="@+id/clCardList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="60dp"
                 android:layout_marginLeft="40dp"
                 android:layout_marginRight="40dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="60dp"
-                android:layout_alignParentBottom="true"/>
-
-            <TextView
-                android:id="@+id/tvStatusDisplay"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-                android:layout_marginBottom="30dip"
-                android:text="Some TEXT"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:textAppearance="?android:attr/textAppearanceMedium"/>
+                android:layout_marginTop="10dp"/>
 
         </RelativeLayout>
 
-
     </LinearLayout>
 
-    <by.zatta.pilight.views.FloatingActionButton
+    <com.melnykov.fab.FloatingActionButton
         android:id="@+id/btnFAB"
-        android:focusable="true"
-        android:layout_width="72dp"
-        android:layout_height="72dp"
-        android:layout_gravity="bottom|end"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        app:color="#FF81D4FA"
-        app:drawable="@drawable/ic_av_play"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_margin="25dp"
+        android:src="@drawable/ic_av_play"
+        fab:fab_colorPressed="@color/demo_title_section_textcolor"
+        fab:fab_colorNormal="@color/pressed_carddemo"
+        fab:fab_colorRipple="@color/demo_title_section_textcolor"/>
 
 </FrameLayout>

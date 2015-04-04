@@ -32,10 +32,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.melnykov.fab.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -45,7 +46,6 @@ import java.util.Set;
 import by.zatta.pilight.R;
 import by.zatta.pilight.model.ConnectionEntry;
 import by.zatta.pilight.views.CustomHeaderInnerCard;
-import by.zatta.pilight.views.FloatingActionButton;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.view.CardListView;
@@ -63,7 +63,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 	private static boolean prefUseSSDP;
 	private static ProgressBar pbConnecting;
 	private static String mStatus;
-	private static TextView tv;
+	private static View mEv;
 	private static CardArrayAdapter mCardArrayAdapter;
 	CardListView listView;
 
@@ -94,7 +94,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.setup_connection_layout, container, false);
-		tv = (TextView) v.findViewById(R.id.tvStatusDisplay);
+		mEv = (View) v.findViewById(R.id.emptyView);
 		pbConnecting = (ProgressBar) v.findViewById(R.id.pbConnecting);
 		mBtnFAB = (FloatingActionButton) v.findViewById(R.id.btnFAB);
 		mBtnFAB.setOnClickListener(this);
@@ -145,41 +145,26 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 		mStatus = status;
 		Log.d(TAG, status);
 		// TODO check for correctness
-		pbConnecting.setVisibility(View.GONE);
 
-		mBtnFAB.hide(false);
-		mBtnFAB.setDrawable(aCtx.getResources().getDrawable(R.drawable.ic_av_play));
 		if (status.equals("CONNECTED")) {
 			mStatus = null;
 			changedStatusListener.onChangedStatusListener(DISMISS, null);
 		} else if (status.equals("CONNECTING")) {
 			pbConnecting.setVisibility(View.VISIBLE);
-			tv.setText(R.string.status_connecting);
 			mBtnFAB.hide(true);
-		} else if (status.equals("DESTROYED")) {
-			tv.setText(R.string.status_destroyed);
-			mBtnFAB.setDrawable(aCtx.getResources().getDrawable(R.drawable.ic_av_play));
-			mBtnFAB.hide(false);
-		} else if (status.equals("FAILED")) {
-			tv.setText(R.string.status_failed);
-			mBtnFAB.setDrawable(aCtx.getResources().getDrawable(R.drawable.ic_av_play));
-			mBtnFAB.hide(false);
-		} else if (status.equals("NO_SERVER")) {
-			tv.setText(status);
+		} else {
+			//if "LOST_CONNECTION", "FAILED", "DESTROYED", "NO_SERVER"
 			int max;
 			//TODO we need to have a list of possible servers, now we actually get a list if multiple times a connection has been
 			//TODO made but it sucks big time. The last succesfull connection will be the one tried when pressing the button.
-			if (prefUseSSDP) max = 2; else max = 1;
+			if (prefUseSSDP) max = 2;
+			else max = 1;
 			if (cards.size() < max) {
 				cards.add(new HostHolderCard(aCtx, new ConnectionEntry(null, null, null, false)));
 				mCardArrayAdapter.notifyDataSetChanged();
 			}
-			mBtnFAB.setDrawable(aCtx.getResources().getDrawable(R.drawable.ic_av_play));
-			mBtnFAB.hide(false);
-		} else if (status.equals("LOST_CONNECTION")) {
-			tv.setText(R.string.status_lost);
-			mBtnFAB.setDrawable(aCtx.getResources().getDrawable(R.drawable.ic_av_play));
-			mBtnFAB.hide(false);
+			pbConnecting.setVisibility(View.GONE);
+			mBtnFAB.show(true);
 		}
 	}
 
@@ -195,14 +180,14 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 
 	@Override
 	public void onClick(View v) {
-		tv.requestFocus();
+		mEv.requestFocus();
 
 		switch (v.getId()) {
 			case R.id.btnCancelStart:
 				changedStatusListener.onChangedStatusListener(FINISH, null);
 				break;
 			case R.id.btnFAB:
-				HostHolderCard card = (HostHolderCard) cards.get(cards.size()-1);
+				HostHolderCard card = (HostHolderCard) cards.get(cards.size() - 1);
 				if (!(card.getConnEntry().isSSDP())) {
 					changedStatusListener.onChangedStatusListener(RECONNECT, card.getConnEntry());
 				} else {
@@ -252,6 +237,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 				mEtPort.setVisibility(View.VISIBLE);
 				mEtHost.setText(mConEntry.getHost());
 				mEtPort.setText(mConEntry.getPort());
+				mTvColon.setText(aCtx.getResources().getString(R.string.colon));
 				mEtHost.setOnFocusChangeListener(new OnFocusChangeListener() {
 					@Override
 					public void onFocusChange(View v, boolean hasFocus) {
@@ -266,7 +252,6 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 						Log.d(SetupConnectionFragment.TAG, "PORT FOCUS CHANGED to: " + hasFocus);
 					}
 				});
-				mTvColon.setText(aCtx.getResources().getString(R.string.colon));
 			} else {
 				mEtHost.setVisibility(View.GONE);
 				mEtPort.setVisibility(View.GONE);

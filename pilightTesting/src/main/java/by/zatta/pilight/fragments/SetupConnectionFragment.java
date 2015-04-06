@@ -26,6 +26,7 @@ package by.zatta.pilight.fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,12 +34,14 @@ import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.melnykov.fab.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -141,9 +144,26 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 		}
 	}
 
+	private static int stringToColor(String inString){
+		String date = java.text.DateFormat.getTimeInstance().format(Calendar.getInstance().getTime());
+		int i = (inString + date).hashCode();
+		String colorString = "#" +
+				//Integer.toHexString(((i>>24)&0xFF))+ //Could use this string for some alpha
+				Integer.toHexString(((i>>16)&0xFF))+
+				Integer.toHexString(((i>>8)&0xFF))+
+				Integer.toHexString((i&0xFF));
+		try {
+			i = Color.parseColor(colorString);
+		} catch (Exception e) {
+			i = Color.MAGENTA;
+		}
+		return i;
+	}
+
 	public static void setChangedStatus(String status) {
 		mStatus = status;
 		Log.d(TAG, status);
+		mBtnFAB.setBackgroundColor(stringToColor(mStatus));
 		// TODO check for correctness
 
 		if (status.equals("CONNECTED")) {
@@ -231,6 +251,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 			mEtHost = (EditText) view.findViewById(R.id.etHost);
 			mEtPort = (EditText) view.findViewById(R.id.etPort);
 			TextView mTvColon = (TextView) view.findViewById(R.id.colon);
+			ImageView mImageView = (ImageView) view.findViewById(R.id.colorBorder);
 
 			if (!mConEntry.isSSDP()) {
 				mEtHost.setVisibility(View.VISIBLE);
@@ -252,10 +273,12 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 						Log.d(SetupConnectionFragment.TAG, "PORT FOCUS CHANGED to: " + hasFocus);
 					}
 				});
+				mImageView.setBackgroundColor(SetupConnectionFragment.stringToColor("blahblah"));
 			} else {
 				mEtHost.setVisibility(View.GONE);
 				mEtPort.setVisibility(View.GONE);
 				mTvColon.setText("Searching your server via SSDP");
+				mImageView.setBackgroundColor(SetupConnectionFragment.stringToColor("joetoetet"));
 			}
 		}
 

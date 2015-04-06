@@ -28,6 +28,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -118,6 +119,8 @@ public class DimmerCard extends DeviceCardAbstract {
 		mValueView = (TextView) parent.findViewById(R.id.card_main_inner_simple_title);
 		mSeekBar = (CircularSeekBar) parent.findViewById(R.id.circularSeekBar1);
 		mToggle = (ToggleButton) parent.findViewById(R.id.card_inner_tb);
+		ImageView mImage = (ImageView)parent.findViewById(R.id.colorBorder);
+		mImage.setBackgroundColor(mColor);
 
 		if (mValueView != null) mValueView.setText("");
 

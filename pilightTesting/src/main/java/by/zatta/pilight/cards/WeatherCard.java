@@ -137,6 +137,8 @@ public class WeatherCard extends DeviceCardAbstract {
 		mSunriseView = (TextView) parent.findViewById(R.id.card_main_inner_sunrise);
 		mSunsetView = (TextView) parent.findViewById(R.id.card_main_inner_sunset);
 		mBatteryView = (ImageView) parent.findViewById(R.id.card_main_inner_battery);
+		ImageView mImage = (ImageView)parent.findViewById(R.id.colorBorder);
+		mImage.setBackgroundColor(mColor);
 
 		if (mTemperatureView != null && mTemperature != null && showTemperature) mTemperatureView.setVisibility(View.VISIBLE);
 		mTemperatureView.setText(mTemperature);

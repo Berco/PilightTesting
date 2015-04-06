@@ -28,6 +28,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.ToggleButton;
 
 import org.json.JSONException;
@@ -78,6 +79,8 @@ public class PendingSwitchCard extends DeviceCardAbstract {
 	public void setupInnerViewElements(ViewGroup parent, View view) {
 		// Retrieve elements
 		mToggle = (ToggleButton) parent.findViewById(R.id.card_inner_tb);
+		ImageView mImage = (ImageView)parent.findViewById(R.id.colorBorder);
+		mImage.setBackgroundColor(mColor);
 
 		if (mToggle != null) {
 			mToggle.setChecked(mState);

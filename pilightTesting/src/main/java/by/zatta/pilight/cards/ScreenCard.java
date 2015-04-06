@@ -28,6 +28,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -78,6 +79,8 @@ public class ScreenCard extends DeviceCardAbstract {
 		mBtnDown.setOnClickListener(clickListener);
 		mBtnDown.setClickable(readwrite);
 		mBtnUp.setClickable(readwrite);
+		ImageView mImage = (ImageView)parent.findViewById(R.id.colorBorder);
+		mImage.setBackgroundColor(mColor);
 	}
 
 	@Override

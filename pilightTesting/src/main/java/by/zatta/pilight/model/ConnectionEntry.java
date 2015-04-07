@@ -1,6 +1,6 @@
 /******************************************************************************************
  *
- * Copyright (C) 2013 Zatta
+ * Copyright (C) 2015 Zatta
  *
  * This file is part of pilight for android.
  *
@@ -18,7 +18,7 @@
  * with pilight for android.
  * If not, see <http://www.gnu.org/licenses/>
  *
- * Copyright (c) 2013 pilight project
+ * Copyright (c) 2015 pilight project
  ********************************************************************************************/
 
 package by.zatta.pilight.model;
@@ -45,7 +45,7 @@ public class ConnectionEntry implements Parcelable {
 	};
 
 	private boolean isSSDP;
-	private String networkName;
+	private boolean isAuto;
 	private String host;
 	private String port;
 
@@ -56,29 +56,17 @@ public class ConnectionEntry implements Parcelable {
 		String[] gotFromPrefs = fromPrefs.split(";");
 		this.host = gotFromPrefs[0];
 		this.port = gotFromPrefs[1];
-		this.networkName = gotFromPrefs[2];
+		if (gotFromPrefs[2].equals("true")) this.isAuto = true;
+		else this.isAuto = false;
 		if (gotFromPrefs[3].equals("true")) this.isSSDP = true;
 		else this.isSSDP = false;
 	}
 
-	public ConnectionEntry(String in_host, String in_port, String in_network, boolean isSSDP){
+	public ConnectionEntry(String in_host, String in_port, boolean auto, boolean isSSDP){
 		this.host = in_host;
 		this.port = in_port;
-		this.networkName = in_network;
+		this.isAuto = auto;
 		this.isSSDP = isSSDP;
-	}
-
-	public ConnectionEntry(String in_host, String in_port){
-		host = in_host;
-		port = in_port;
-		isSSDP = false;
-	}
-
-	public ConnectionEntry(boolean wasSSDP, String networkName){
-		this.host = "ssdp";
-		this.port = "at " + networkName;
-		this.networkName = networkName;
-		this.isSSDP = true;
 	}
 
 	public ConnectionEntry(Parcel in) {
@@ -102,17 +90,21 @@ public class ConnectionEntry implements Parcelable {
 		this.port = in_port;
 	}
 
-	public boolean isSSDP() { return isSSDP; }
+	public boolean isSSDP() { return this.isSSDP; }
 
 	public void wasSSDP(boolean wasSSDP) { this.isSSDP = wasSSDP; }
 
-	public String getNetworkName() { return networkName; }
+	public boolean isAuto() { return this.isAuto; }
 
-	public void setNetworkName(String in_networkName) { this.networkName = in_networkName; }
+	public void setIsAuto(boolean isAuto) { this.isAuto = isAuto; }
 
 	@Override
 	public String toString() {
-		return host + ";" + port + ";" + networkName + ";" + isSSDP;
+		return host + ";" + port + ";" + isAuto + ";" + isSSDP;
+	}
+
+	public String toStringNegative() {
+		return host + ";" + port + ";" + !isAuto + ";" + isSSDP;
 	}
 
 	@Override
@@ -124,15 +116,17 @@ public class ConnectionEntry implements Parcelable {
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(this.host);
 		dest.writeString(this.port);
-		dest.writeString(this.networkName);
-		dest.writeInt(isSSDP ? 1 : 0);
+		dest.writeInt(this.isAuto ? 1 : 0);
+		dest.writeInt(this.isSSDP ? 1 : 0);
 	}
 
 	@SuppressWarnings("unchecked")
 	private void readFromParcel(Parcel in) {
 		this.host = in.readString();
 		this.port = in.readString();
-		this.networkName = in.readString();
+
+		int autoInt = in.readInt();
+		if (autoInt == 1) this.isAuto = true; else this.isAuto = false;
 
 		int ssdpInt = in.readInt();
 		if (ssdpInt == 1) this.isSSDP = true; else this.isSSDP = false;

@@ -377,7 +377,7 @@ public class ConnectionService extends Service {
 		this.registerReceiver(mMessageReceiver, filter);
 
 		mNotMan = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		isConnectionUp = makeConnection(new ConnectionEntry(null,null,null,true));
+		isConnectionUp = makeConnection(new ConnectionEntry(null,null,true,true));
 		isDestroying = false;
 		Log.v(TAG, "onCreate done");
 
@@ -428,7 +428,7 @@ public class ConnectionService extends Service {
 	}
 
 	private boolean makeConnection(ConnectionEntry connEntry) {
-		if (connEntry == null) connEntry = new ConnectionEntry(null,null,null,true);
+		if (connEntry == null) connEntry = new ConnectionEntry(null,null,true,true);
 
 		if (mCurrentNotif == NotificationType.DESTROYED)
 			makeNotification(NotificationType.CONNECTING, aCtx.getString(R.string.noti_connecting));
@@ -503,21 +503,25 @@ public class ConnectionService extends Service {
 			}
 		}else{
 			Set<String> connections = prefs.getStringSet("know_connections", new HashSet<String>());
-			if (!connections.contains(connEntry.toString())) {
-//				Iterator<?> connIt = connections.iterator();
-//				while (connIt.hasNext()) {
-//					String aConnection = (String) connIt.next();
-//					if (aConnection.equals(connEntry.toString())) return false;
-//				}
-
+			boolean adding = false;
+			SharedPreferences.Editor edit = prefs.edit();
+			if (!connections.contains(connEntry.toString())){
 				connections.add(connEntry.toString());
-
-				SharedPreferences.Editor edit = prefs.edit();
-				edit.putStringSet("know_connections", connections);
-				edit.commit();
-				return true;
+				Log.e(TAG, "ADDED!!!");
+				adding = true;
 			}
-			return false;
+			if (connections.contains(connEntry.toStringNegative())){
+				connections.remove(connEntry.toStringNegative());
+				Log.e(TAG, "REMOVED!!");
+				adding = true;
+			}
+			if (adding) {
+				edit.remove("know_connections");
+				edit.apply(); // NO IDEA WHY I NEED TO DO THIS..
+				edit.putStringSet("know_connections", connections);
+				edit.apply();
+			}
+			return adding;
 		}
 	}
 

@@ -118,7 +118,11 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 		cards = new ArrayList<Card>();
 
 		if (prefUseSSDP) {
-			HostHolderCard ssdpCard = new HostHolderCard(aCtx, null);
+			HostHolderCard ssdpCard = new HostHolderCard(aCtx, new ConnectionEntry("", "", true, true));
+			cards.add(ssdpCard);
+		}
+		else{
+			HostHolderCard ssdpCard = new HostHolderCard( aCtx, new ConnectionEntry("", "", false, true));
 			cards.add(ssdpCard);
 		}
 
@@ -180,7 +184,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 			if (prefUseSSDP) max = 2;
 			else max = 1;
 			if (cards.size() < max) {
-				cards.add(new HostHolderCard(aCtx, new ConnectionEntry(null, null, null, false)));
+				cards.add(new HostHolderCard(aCtx, new ConnectionEntry(null, null, true, false)));
 				mCardArrayAdapter.notifyDataSetChanged();
 			}
 			pbConnecting.setVisibility(View.GONE);
@@ -234,14 +238,19 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 		public HostHolderCard(Context context, ConnectionEntry conEntry) {
 			//TODO make the card look pretty
 			super(context, R.layout.hostholdercard_inner);
+			Log.e(SetupConnectionFragment.TAG, conEntry.toString());
 			if (conEntry != null) {
 				mConEntry = conEntry;
-				header = new CustomHeaderInnerCard(context, "Server", null);
+				if (mConEntry.isSSDP()) {
+					header = new CustomHeaderInnerCard(context, "Searching", "auto");
+				}else {
+					header = new CustomHeaderInnerCard(context, "Server", "auto");
+				}
 				addCardHeader(header);
 			} else {
-				header = new CustomHeaderInnerCard(context, "Searching", null);
+				header = new CustomHeaderInnerCard(context, "Searching", "auto");
 				addCardHeader(header);
-				mConEntry = new ConnectionEntry("ssdp;404;home;true");
+				mConEntry = new ConnectionEntry("ssdp;404;true;true");
 			}
 		}
 
@@ -280,16 +289,12 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 				mTvColon.setText("Searching your server via SSDP");
 				mImageView.setBackgroundColor(SetupConnectionFragment.stringToColor("joetoetet"));
 			}
+			header.setAlways(mConEntry.isAuto());
 		}
 
 		public ConnectionEntry getConnEntry() {
+			mConEntry.setIsAuto(header.doAlways());
 			return mConEntry;
 		}
-
-		public boolean doAlways() {
-			return header.doAlways();
-		}
-
 	}
-
 }

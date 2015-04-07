@@ -19,12 +19,15 @@
 package by.zatta.pilight.views;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import by.zatta.pilight.R;
+import by.zatta.pilight.fragments.SetupConnectionFragment;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 
 public class CustomHeaderInnerCard extends CardHeader {
@@ -32,6 +35,7 @@ public class CustomHeaderInnerCard extends CardHeader {
 	String device;
 	String location;
 	CheckBox mCbAlways;
+	boolean mDoAlways;
 
 	public CustomHeaderInnerCard(Context context, String deviceName, String locationName) {
 		super(context, R.layout.header_inner);
@@ -51,6 +55,12 @@ public class CustomHeaderInnerCard extends CardHeader {
 				t2.setText(location);
 
 			mCbAlways = (CheckBox) view.findViewById((R.id.cbAlways));
+			mCbAlways.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+				@Override
+				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+					mDoAlways = isChecked;
+				}
+			});
 		}
 	}
 
@@ -59,7 +69,11 @@ public class CustomHeaderInnerCard extends CardHeader {
 	}
 
 	public boolean doAlways(){
-		if (mCbAlways.isChecked()) return true;
-		else return false;
+		return mDoAlways;
+	}
+
+	public void setAlways(boolean always){
+		mDoAlways = always;
+		mCbAlways.setChecked(always);
 	}
 }

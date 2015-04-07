@@ -238,7 +238,6 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 		public HostHolderCard(Context context, ConnectionEntry conEntry) {
 			//TODO make the card look pretty
 			super(context, R.layout.hostholdercard_inner);
-			Log.e(SetupConnectionFragment.TAG, conEntry.toString());
 			if (conEntry != null) {
 				mConEntry = conEntry;
 				if (mConEntry.isSSDP()) {

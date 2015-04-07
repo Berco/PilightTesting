@@ -31,15 +31,6 @@
     android:layout_height="wrap_content" >
 
     <TextView
-        android:id="@+id/tvHeaderLocation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:maxLines="1"
-        android:textColor="#BBB"
-        android:textSize="14sp" />
-
-    <TextView
         android:id="@+id/tvHeaderDevice"
         style="@style/AppTheme.HeaderTitle"
         android:maxLines="1"
@@ -54,5 +45,14 @@
         android:layout_alignParentRight="true"
         android:visibility="gone"
         />
+
+    <TextView
+        android:id="@+id/tvHeaderLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@id/cbAlways"
+        android:maxLines="1"
+        android:textColor="#BBB"
+        android:textSize="14sp" />
 
 </RelativeLayout>

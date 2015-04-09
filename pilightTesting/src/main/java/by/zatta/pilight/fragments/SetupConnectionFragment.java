@@ -121,10 +121,10 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 			HostHolderCard ssdpCard = new HostHolderCard(aCtx, new ConnectionEntry("", "", true, true));
 			cards.add(ssdpCard);
 		}
-		else{
-			HostHolderCard ssdpCard = new HostHolderCard( aCtx, new ConnectionEntry("", "", false, true));
-			cards.add(ssdpCard);
-		}
+//		else{
+//			HostHolderCard ssdpCard = new HostHolderCard( aCtx, new ConnectionEntry("", "", false, true));
+//			cards.add(ssdpCard);
+//		}
 
 		getConnectionsFromPrefs();
 
@@ -247,7 +247,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 				}
 				addCardHeader(header);
 			} else {
-				header = new CustomHeaderInnerCard(context, "Searching", "auto");
+				header = new CustomHeaderInnerCard(context, "SSDP", "auto");
 				addCardHeader(header);
 				mConEntry = new ConnectionEntry("ssdp;404;true;true");
 			}

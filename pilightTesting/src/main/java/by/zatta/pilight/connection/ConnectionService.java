@@ -33,7 +33,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -104,7 +103,7 @@ public class ConnectionService extends Service {
 				stopSelf();
 			} else if (action.equals("pilight-reconnect")) {
 				ConnectionEntry connEntry = null;
-				if (!(intent.getExtras()==null)) {
+				if (!(intent.getExtras() == null)) {
 					connEntry = intent.getExtras().getParcelable("connectionEntry");
 				}
 				Log.v(TAG, "pilight-reconnect");
@@ -349,7 +348,6 @@ public class ConnectionService extends Service {
 		super.onUnbind(intent);
 		SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
 		boolean useService = prefs.getBoolean("useService", true);
-		Log.e(TAG, "useService: " + useService);
 		if (!useService) {
 			if (mKD == null || !mKD.isAlive()) {
 				mKD = new KillDelay();
@@ -377,7 +375,7 @@ public class ConnectionService extends Service {
 		this.registerReceiver(mMessageReceiver, filter);
 
 		mNotMan = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		isConnectionUp = makeConnection(new ConnectionEntry(null,null,true,true));
+		autoConnect(null);
 		isDestroying = false;
 		Log.v(TAG, "onCreate done");
 
@@ -398,7 +396,7 @@ public class ConnectionService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		//??
-
+		Log.v(TAG, "onStartCommmand start");
 		sendMessageToUI(MSG_SET_STATUS, mCurrentNotif.name());
 		if (!(intent == null)) {
 			if (intent.hasExtra("command") && isConnectionUp) {
@@ -414,6 +412,7 @@ public class ConnectionService extends Service {
 				}
 			}
 		}
+		Log.v(TAG, "onStartCommand done");
 		return START_STICKY;
 	}
 
@@ -427,20 +426,39 @@ public class ConnectionService extends Service {
 				getBaseContext().getResources().getDisplayMetrics());
 	}
 
+	private void autoConnect(List<ConnectionEntry> list) {
+		if (list == null) {
+
+			SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
+			boolean useSSDP = prefs.getBoolean("useSSDP", true);
+
+			list = new ArrayList<ConnectionEntry>();
+			if (useSSDP) list.add(new ConnectionEntry(null, null, true, true));
+
+			Set<String> connections = prefs.getStringSet("know_connections", new HashSet<String>());
+			Iterator<?> connIt = connections.iterator();
+			while (connIt.hasNext()) {
+				String aConnection = (String) connIt.next();
+				ConnectionEntry entry = new ConnectionEntry(aConnection);
+				if (entry.isAuto())
+					list.add(entry);
+			}
+		}
+
+		for (ConnectionEntry entry : list) {
+			if (!isConnectionUp) isConnectionUp = makeConnection(entry);
+		}
+
+	}
+
 	private boolean makeConnection(ConnectionEntry connEntry) {
-		if (connEntry == null) connEntry = new ConnectionEntry(null,null,true,true);
+		if (connEntry == null) connEntry = new ConnectionEntry(null, null, true, true);
 
 		if (mCurrentNotif == NotificationType.DESTROYED)
 			makeNotification(NotificationType.CONNECTING, aCtx.getString(R.string.noti_connecting));
 
-		SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
-		boolean useSSDP = prefs.getBoolean("useSSDP", true);
 
-		String serverString;
-		if ((!useSSDP) && connEntry.isSSDP())
-			serverString = "ADRESS";
-		else
-			serverString = Server.CONNECTION.setup(connEntry);
+		String serverString = Server.CONNECTION.setup(connEntry);
 
 		String goodConfig = "{\"gui\":{";
 		if (serverString.contains(goodConfig)) {
@@ -501,18 +519,16 @@ public class ConnectionService extends Service {
 				edit.commit();
 				return true;
 			}
-		}else{
+		} else {
 			Set<String> connections = prefs.getStringSet("know_connections", new HashSet<String>());
 			boolean adding = false;
 			SharedPreferences.Editor edit = prefs.edit();
-			if (!connections.contains(connEntry.toString())){
+			if (!connections.contains(connEntry.toString())) {
 				connections.add(connEntry.toString());
-				Log.e(TAG, "ADDED!!!");
 				adding = true;
 			}
-			if (connections.contains(connEntry.toStringNegative())){
+			if (connections.contains(connEntry.toStringNegative())) {
 				connections.remove(connEntry.toStringNegative());
-				Log.e(TAG, "REMOVED!!");
 				adding = true;
 			}
 			if (adding) {

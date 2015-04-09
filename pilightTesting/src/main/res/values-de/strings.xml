@@ -29,6 +29,7 @@
     
     <!-- Titles -->
     <string name="title_settings">Einstellungen</string>
+    <string name="title_disconnect">Disconnect</string>
     <string name="title_list_base">Ger&#228;teliste</string> 
     <string name="title_about">&#220;ber</string>
     <string name="title_status_dialog">Status</string>

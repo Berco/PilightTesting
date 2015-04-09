@@ -17,7 +17,7 @@
   ~  * for more details.
   ~  * 
   ~  * You should have received a copy of the GNU General Public License along 
-  ~  * with pilightfor android.
+  ~  * with pilight for android.
   ~  * If not, see <http://www.gnu.org/licenses/>
   ~  * 
   ~  * Copyright (c) 2013 pilight project
@@ -28,6 +28,11 @@
         android:id="@+id/menu_settings"
         android:title="@string/title_settings"
         android:orderInCategory="1"
+        android:showAsAction="never"/>
+    <item
+        android:id="@+id/menu_disconnect"
+        android:title="@string/title_disconnect"
+        android:orderInCategory="2"
         android:showAsAction="never"/>
     <item
         android:id="@+id/menu_about"

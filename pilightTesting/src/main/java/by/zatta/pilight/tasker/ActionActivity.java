@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -201,7 +202,7 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 	}
 
 	@Override
-	public void onChangedStatusListener(int what, ConnectionEntry connectionEntry) {
+	public void onChangedStatusListener(int what, List<ConnectionEntry> connectionEntryList) {
 		switch (what) {
 			case SetupConnectionFragment.DISMISS:
 				closeDialogFragments();
@@ -223,7 +224,7 @@ public class ActionActivity extends Activity implements ServiceConnection, OnCha
 			case SetupConnectionFragment.RECONNECT:
 				Intent intent = new Intent("pilight-reconnect");
 				Bundle bundle = new Bundle();
-				bundle.putParcelable("connectionEntry", connectionEntry);
+				bundle.putParcelableArrayList("connectionsList", (ArrayList<? extends Parcelable>) connectionEntryList);
 				intent.putExtras(bundle);
 				this.sendBroadcast(intent);
 				break;

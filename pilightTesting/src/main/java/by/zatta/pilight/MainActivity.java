@@ -74,6 +74,7 @@ import by.zatta.pilight.fragments.DeviceListFragment.DeviceListListener;
 import by.zatta.pilight.fragments.PrefFragment;
 import by.zatta.pilight.fragments.PrefFragment.OnLanguageListener;
 import by.zatta.pilight.fragments.PrefFragment.OnViewChangeListener;
+import by.zatta.pilight.fragments.PrefFragment.OnConnectionChangeListener;
 import by.zatta.pilight.fragments.SetupConnectionFragment;
 import by.zatta.pilight.fragments.SetupConnectionFragment.OnChangedStatusListener;
 import by.zatta.pilight.model.ConnectionEntry;
@@ -81,7 +82,7 @@ import by.zatta.pilight.model.DeviceEntry;
 import by.zatta.pilight.model.SettingEntry;
 
 public class MainActivity extends Activity implements ServiceConnection, DeviceListListener,
-		OnChangedStatusListener, OnViewChangeListener, OnLanguageListener {
+		OnChangedStatusListener, OnViewChangeListener, OnLanguageListener, OnConnectionChangeListener {
 
 	private static final String TAG = "Zatta::MainActivity";
 	private static List<DeviceEntry> mDevices = new ArrayList<DeviceEntry>();
@@ -108,6 +109,11 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 		}
 	}
 
+	@Override
+	public void onConnectionChangeListener() {
+		this.sendBroadcast(new Intent("pilight-disconnect"));
+	}
+
 	/**
 	 * Send data to the service
 	 */
@@ -129,7 +135,7 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 	}
 
 	@Override
-	public void onChangedStatusListener(int what, ConnectionEntry connectionEntry) {
+	public void onChangedStatusListener(int what, List<ConnectionEntry> connectionEntryList) {
 		hideKeyboardAndDoItNow();
 		switch (what) {
 			case SetupConnectionFragment.DISMISS:
@@ -152,7 +158,7 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 			case SetupConnectionFragment.RECONNECT:
 				Intent intent = new Intent("pilight-reconnect");
 				Bundle bundle = new Bundle();
-				bundle.putParcelable("connectionEntry", connectionEntry);
+				bundle.putParcelableArrayList("connectionsList", (ArrayList<? extends Parcelable>) connectionEntryList);
 				intent.putExtras(bundle);
 				this.sendBroadcast(intent);
 				break;
@@ -386,6 +392,9 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 					ft.commit();
 					fm.popBackStack();
 				}
+				return true;
+			case R.id.menu_disconnect:
+				this.sendBroadcast(new Intent("pilight-disconnect"));
 				return true;
 			default:
 				break;

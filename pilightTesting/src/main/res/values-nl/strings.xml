@@ -17,7 +17,7 @@
   ~  * for more details.
   ~  * 
   ~  * You should have received a copy of the GNU General Public License along 
-  ~  * with pilightfor android.
+  ~  * with pilight for android.
   ~  * If not, see <http://www.gnu.org/licenses/>
   ~  * 
   ~  * Copyright (c) 2013 pilight project
@@ -28,6 +28,7 @@
     
     <!-- Titles -->
     <string name="title_settings">Instellingen</string>
+    <string name="title_disconnect">Verbreken</string>
     <string name="title_list_base">DeviceList</string> 
     <string name="title_about">Over</string>
     <string name="title_status_dialog">Status</string>

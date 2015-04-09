@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import by.zatta.pilight.R;
@@ -211,18 +212,19 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 				changedStatusListener.onChangedStatusListener(FINISH, null);
 				break;
 			case R.id.btnFAB:
-				HostHolderCard card = (HostHolderCard) cards.get(cards.size() - 1);
-				if (!(card.getConnEntry().isSSDP())) {
-					changedStatusListener.onChangedStatusListener(RECONNECT, card.getConnEntry());
-				} else {
-					changedStatusListener.onChangedStatusListener(RECONNECT, card.getConnEntry());
+				List<ConnectionEntry> connectionEntryList = new ArrayList<ConnectionEntry>();
+				for (Card c : cards){
+					if (c instanceof HostHolderCard){
+						connectionEntryList.add(((HostHolderCard) c).getConnEntry());
+					}
 				}
+				changedStatusListener.onChangedStatusListener(RECONNECT, connectionEntryList);
 				break;
 		}
 	}
 
 	public interface OnChangedStatusListener {
-		public void onChangedStatusListener(int what, ConnectionEntry connectionEntry);
+		public void onChangedStatusListener(int what, List<ConnectionEntry> connectionEntryList);
 	}
 
 	/*

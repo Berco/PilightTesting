@@ -50,6 +50,7 @@ public class PrefFragment extends BasePreferenceFragment {
 	static final String TAG = "PrefFragment";
 	OnLanguageListener languageListener;
 	OnViewChangeListener viewChangeListener;
+	OnConnectionChangeListener connectionChangeListener;
 	PreferenceManager manager;
 
 	// OnResetListener resetListener;
@@ -60,6 +61,7 @@ public class PrefFragment extends BasePreferenceFragment {
 		try {
 			languageListener = (OnLanguageListener) activity;
 			viewChangeListener = (OnViewChangeListener) activity;
+			connectionChangeListener = (OnConnectionChangeListener) activity;
 		} catch (ClassCastException e) {
 			throw new ClassCastException(activity.toString() + " must implement correct Listener");
 		}
@@ -188,9 +190,10 @@ public class PrefFragment extends BasePreferenceFragment {
 
 		if (pref.getKey().contentEquals("remove_all_nets")) {
 			Toast.makeText(getActivity().getApplicationContext(), "forgot all known networks", Toast.LENGTH_LONG).show();
-			pref.getEditor().putString("networks_known", "").commit();
-			pref.getEditor().putString("known_host", "").commit();
-			pref.getEditor().putString("known_port", "").commit();
+			pref.getEditor().remove("networks_known")
+							.remove("know_connections")
+							.commit();
+			connectionChangeListener.onConnectionChangeListener();
 			return true;
 		}
 
@@ -217,6 +220,10 @@ public class PrefFragment extends BasePreferenceFragment {
 
 	public interface OnViewChangeListener {
 		public void onViewChangeListener(Boolean forceList);
+	}
+
+	public interface OnConnectionChangeListener {
+		public void onConnectionChangeListener();
 	}
 
 }

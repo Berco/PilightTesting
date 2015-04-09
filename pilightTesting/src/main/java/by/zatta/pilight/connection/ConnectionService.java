@@ -15,7 +15,7 @@
  * for more details.
  *
  * You should have received a copy of the GNU General Public License along 
- * with pilightfor android.
+ * with pilight for android.
  * If not, see <http://www.gnu.org/licenses/>
  *
  * Copyright (c) 2013 pilight project
@@ -102,19 +102,23 @@ public class ConnectionService extends Service {
 				// Log.v(TAG, "kill recieved");
 				stopSelf();
 			} else if (action.equals("pilight-reconnect")) {
-				ConnectionEntry connEntry = null;
+				List<ConnectionEntry> connectionEntryList = new ArrayList<ConnectionEntry>();
+
 				if (!(intent.getExtras() == null)) {
-					connEntry = intent.getExtras().getParcelable("connectionEntry");
+					connectionEntryList = intent.getExtras().getParcelableArrayList("connectionsList");
 				}
 				Log.v(TAG, "pilight-reconnect");
 				stopForeground(false);
+
 				makeNotification(NotificationType.CONNECTING, aCtx.getString(R.string.noti_reconnect));
-				if (isConnectionUp)
-					dropConnection();
-				else isConnectionUp = makeConnection(connEntry);
+				autoConnect(connectionEntryList);
+
 			} else if (action.equals("pilight-switch-device")) {
 				if (isConnectionUp) Log.v(TAG, "broadcastReceiver: " + intent.getStringExtra("command"));
 				Server.CONNECTION.sentCommand(intent.getStringExtra("command"));
+			} else if (action.equals("pilight-disconnect")){
+				mCurrentConnection = null;
+				dropConnection();
 			}
 		}
 	};
@@ -167,10 +171,14 @@ public class ConnectionService extends Service {
 			dropConnection();
 			Intent custom = new Intent("pilight-reconnect");
 			Bundle bundle = new Bundle();
-			bundle.putParcelable("connectionEntry", mCurrentConnection);
+			List<ConnectionEntry> connectionEntryList = new ArrayList<ConnectionEntry>();
+			connectionEntryList.add(mCurrentConnection);
+			bundle.putParcelableArrayList("connectionsList", (ArrayList<? extends Parcelable>) connectionEntryList);
 			custom.putExtras(bundle);
-			mCurrentConnection = null;
-			ctx.sendBroadcast(custom);
+			if (mCurrentConnection != null) {
+				mCurrentConnection = null;
+				ctx.sendBroadcast(custom);
+			}
 		}
 	}
 
@@ -372,6 +380,7 @@ public class ConnectionService extends Service {
 		filter.addAction("pilight-reconnect");
 		filter.addAction("pilight-kill-service");
 		filter.addAction("pilight-switch-device");
+		filter.addAction("pilight-disconnect");
 		this.registerReceiver(mMessageReceiver, filter);
 
 		mNotMan = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

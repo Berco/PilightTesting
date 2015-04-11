@@ -44,6 +44,7 @@ public class ConnectionEntry implements Parcelable {
 		}
 	};
 
+	private boolean isPassive = false;
 	private boolean isSSDP;
 	private boolean isAuto;
 	private String host;
@@ -92,11 +93,13 @@ public class ConnectionEntry implements Parcelable {
 
 	public boolean isSSDP() { return this.isSSDP; }
 
-	public void wasSSDP(boolean wasSSDP) { this.isSSDP = wasSSDP; }
-
 	public boolean isAuto() { return this.isAuto; }
 
 	public void setIsAuto(boolean isAuto) { this.isAuto = isAuto; }
+
+	public boolean isPassive() { return this.isPassive; }
+
+	public void setPassive(boolean isPassive) {this.isPassive = isPassive; }
 
 	@Override
 	public String toString() {
@@ -118,6 +121,7 @@ public class ConnectionEntry implements Parcelable {
 		dest.writeString(this.port);
 		dest.writeInt(this.isAuto ? 1 : 0);
 		dest.writeInt(this.isSSDP ? 1 : 0);
+		dest.writeInt(this.isPassive ? 1 : 0);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -130,5 +134,8 @@ public class ConnectionEntry implements Parcelable {
 
 		int ssdpInt = in.readInt();
 		if (ssdpInt == 1) this.isSSDP = true; else this.isSSDP = false;
+
+		int passiveInt = in.readInt();
+		if (passiveInt == 1) this.isPassive = true; else this.isPassive = false;
 	}
 }

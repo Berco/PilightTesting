@@ -449,25 +449,27 @@ public class ConnectionService extends Service {
 			while (connIt.hasNext()) {
 				String aConnection = (String) connIt.next();
 				ConnectionEntry entry = new ConnectionEntry(aConnection);
-				if (entry.isAuto())
+				if (entry.isAuto() )
 					list.add(entry);
 			}
 		}
 
 		for (ConnectionEntry entry : list) {
+			if (entry.getPort() == null) entry.setPort("0"); //WORKAROUND FOR EMPTY CARD
 			if (!isConnectionUp) isConnectionUp = makeConnection(entry);
 		}
 
 	}
 
 	private boolean makeConnection(ConnectionEntry connEntry) {
-		if (connEntry == null) connEntry = new ConnectionEntry(null, null, true, true);
+		if (connEntry == null) connEntry = new ConnectionEntry(null, "0", true, true);
 
 		if (mCurrentNotif == NotificationType.DESTROYED)
 			makeNotification(NotificationType.CONNECTING, aCtx.getString(R.string.noti_connecting));
 
-
-		String serverString = Server.CONNECTION.setup(connEntry);
+		String serverString = "";
+		if (!connEntry.isPassive())
+			serverString = Server.CONNECTION.setup(connEntry);
 
 		String goodConfig = "{\"gui\":{";
 		if (serverString.contains(goodConfig)) {

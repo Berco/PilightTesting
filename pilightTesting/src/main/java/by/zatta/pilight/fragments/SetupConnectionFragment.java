@@ -62,6 +62,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 	private static final String TAG = "SetupConnectionFragment";
 	static OnChangedStatusListener changedStatusListener;
 	static ArrayList<Card> cards;
+	static List<ConnectionEntry> connectionEntryList;
 	private static FloatingActionButton mBtnFAB;
 	private static Context aCtx;
 	private static boolean prefUseSSDP;
@@ -120,6 +121,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 
 		if (prefUseSSDP) {
 			HostHolderCard ssdpCard = new HostHolderCard(aCtx, new ConnectionEntry("", "", true, true));
+			ssdpCard.addPartialOnClickListener(Card.CLICK_LISTENER_ALL_VIEW, cardClickListener);
 			cards.add(ssdpCard);
 		}
 //		else{
@@ -144,7 +146,9 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 			String aConnection = (String) connIt.next();
 			ConnectionEntry entry = new ConnectionEntry(aConnection);
 			if (!entry.isSSDP()) {
-				cards.add(new HostHolderCard(aCtx, entry));
+				HostHolderCard newCard = new HostHolderCard(aCtx, entry);
+				newCard.addPartialOnClickListener(Card.CLICK_LISTENER_ALL_VIEW, cardClickListener);
+				cards.add(newCard);
 			}
 		}
 	}
@@ -185,12 +189,23 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 			if (prefUseSSDP) max = 2;
 			else max = 1;
 			if (cards.size() < max) {
-				cards.add(new HostHolderCard(aCtx, new ConnectionEntry(null, null, true, false)));
+				HostHolderCard newCard = new HostHolderCard(aCtx, new ConnectionEntry(null, null, true, false));
+				cards.add(newCard);
 				mCardArrayAdapter.notifyDataSetChanged();
 			}
 			pbConnecting.setVisibility(View.GONE);
 			mBtnFAB.show(true);
 		}
+	}
+
+	public List<ConnectionEntry> refreshList(){
+		connectionEntryList = new ArrayList<ConnectionEntry>();
+		for (Card c : cards){
+			if (c instanceof HostHolderCard){
+				connectionEntryList.add(((HostHolderCard) c).getConnEntry());
+			}
+		}
+		return connectionEntryList;
 	}
 
 	@Override
@@ -206,26 +221,29 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 	@Override
 	public void onClick(View v) {
 		mEv.requestFocus();
-
-		switch (v.getId()) {
-			case R.id.btnCancelStart:
-				changedStatusListener.onChangedStatusListener(FINISH, null);
-				break;
-			case R.id.btnFAB:
-				List<ConnectionEntry> connectionEntryList = new ArrayList<ConnectionEntry>();
-				for (Card c : cards){
-					if (c instanceof HostHolderCard){
-						connectionEntryList.add(((HostHolderCard) c).getConnEntry());
-					}
-				}
-				changedStatusListener.onChangedStatusListener(RECONNECT, connectionEntryList);
-				break;
-		}
+		changedStatusListener.onChangedStatusListener(RECONNECT, refreshList());
 	}
 
 	public interface OnChangedStatusListener {
 		public void onChangedStatusListener(int what, List<ConnectionEntry> connectionEntryList);
 	}
+
+	Card.OnCardClickListener cardClickListener = new Card.OnCardClickListener() {
+		@Override
+		public void onClick(Card card, View view) {
+			if (card instanceof HostHolderCard) {
+				((HostHolderCard) card).togglePassive();
+				refreshList();
+				cards.clear();
+				for (ConnectionEntry entry : connectionEntryList){
+					HostHolderCard freshCard = new HostHolderCard(aCtx, entry);
+					freshCard.addPartialOnClickListener(Card.CLICK_LISTENER_ALL_VIEW, cardClickListener);
+					cards.add(freshCard);
+				}
+			}
+			mCardArrayAdapter.notifyDataSetChanged();
+		}
+	};
 
 	/*
 	 * HostHolderCard ****************************************************************************************************
@@ -291,11 +309,23 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 				mImageView.setBackgroundColor(SetupConnectionFragment.stringToColor("joetoetet"));
 			}
 			header.setAlways(mConEntry.isAuto());
+
+			if (mConEntry.isPassive()){
+				mEtHost.setVisibility(View.GONE);
+				mEtPort.setVisibility(View.GONE);
+				mTvColon.setText("Passive");
+				header.setTitle("Passive");
+				mImageView.setBackgroundColor(Color.LTGRAY);
+			}
 		}
 
 		public ConnectionEntry getConnEntry() {
 			mConEntry.setIsAuto(header.doAlways());
 			return mConEntry;
+		}
+
+		public void togglePassive(){
+			mConEntry.setPassive(!mConEntry.isPassive());
 		}
 	}
 }

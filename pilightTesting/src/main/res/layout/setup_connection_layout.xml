@@ -66,6 +66,7 @@
                 android:focusableInTouchMode="true"
                 />
 
+
             <it.gmariotti.cardslib.library.view.CardListView
                 android:id="@+id/clCardList"
                 android:layout_width="match_parent"
@@ -74,7 +75,9 @@
                 android:layout_marginBottom="60dp"
                 android:layout_marginLeft="40dp"
                 android:layout_marginRight="40dp"
-                android:layout_marginTop="10dp"/>
+                android:layout_marginTop="10dp"
+                android:descendantFocusability="beforeDescendants"/>
+
 
         </RelativeLayout>
 
@@ -87,8 +90,8 @@
         android:layout_gravity="bottom|right"
         android:layout_margin="25dp"
         android:src="@drawable/ic_av_play"
-        fab:fab_colorPressed="@color/demo_title_section_textcolor"
         fab:fab_colorNormal="@color/pressed_carddemo"
+        fab:fab_colorPressed="@color/demo_title_section_textcolor"
         fab:fab_colorRipple="@color/demo_title_section_textcolor"/>
 
 </FrameLayout>

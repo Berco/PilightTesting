@@ -117,19 +117,24 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 		SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
 		prefUseSSDP = prefs.getBoolean("useSSDP", true);
 
-		cards = new ArrayList<Card>();
+		if (cards == null) {
+			cards = new ArrayList<Card>();
 
-		if (prefUseSSDP) {
-			HostHolderCard ssdpCard = new HostHolderCard(aCtx, new ConnectionEntry("", "", true, true));
-			ssdpCard.addPartialOnClickListener(Card.CLICK_LISTENER_ALL_VIEW, cardClickListener);
-			cards.add(ssdpCard);
+			if (prefUseSSDP) {
+				HostHolderCard ssdpCard = new HostHolderCard(aCtx, new ConnectionEntry("", "", true, true));
+				ssdpCard.addPartialOnClickListener(Card.CLICK_LISTENER_ALL_VIEW, cardClickListener);
+				cards.add(ssdpCard);
+			}
+			else{
+				ConnectionEntry passiveSSDP = new ConnectionEntry("","", false, true);
+				passiveSSDP.setPassive(true);
+				HostHolderCard ssdpCard = new HostHolderCard( aCtx, passiveSSDP);
+				ssdpCard.addPartialOnClickListener(Card.CLICK_LISTENER_ALL_VIEW, cardClickListener);
+				cards.add(ssdpCard);
+			}
+
+			getConnectionsFromPrefs();
 		}
-//		else{
-//			HostHolderCard ssdpCard = new HostHolderCard( aCtx, new ConnectionEntry("", "", false, true));
-//			cards.add(ssdpCard);
-//		}
-
-		getConnectionsFromPrefs();
 
 		mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
 		if (listView != null) {
@@ -181,18 +186,18 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 		} else if (status.equals("CONNECTING")) {
 			pbConnecting.setVisibility(View.VISIBLE);
 			mBtnFAB.hide(true);
-		} else {
+		} else if (status.equals("NO_SERVER")){
 			//if "LOST_CONNECTION", "FAILED", "DESTROYED", "NO_SERVER"
-			int max;
-			//TODO we need to have a list of possible servers, now we actually get a list if multiple times a connection has been
-			//TODO made but it sucks big time. The last succesfull connection will be the one tried when pressing the button.
-			if (prefUseSSDP) max = 2;
-			else max = 1;
-			if (cards.size() < max) {
-				HostHolderCard newCard = new HostHolderCard(aCtx, new ConnectionEntry(null, null, true, false));
-				cards.add(newCard);
-				mCardArrayAdapter.notifyDataSetChanged();
-			}
+				int max = 3;
+				if (cards.size() < max) {
+					HostHolderCard newCard = new HostHolderCard(aCtx, new ConnectionEntry(null, null, true, false));
+					cards.add(newCard);
+					mCardArrayAdapter.notifyDataSetChanged();
+				}
+
+			pbConnecting.setVisibility(View.GONE);
+			mBtnFAB.show(true);
+		} else{
 			pbConnecting.setVisibility(View.GONE);
 			mBtnFAB.show(true);
 		}
@@ -261,7 +266,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 			if (conEntry != null) {
 				mConEntry = conEntry;
 				if (mConEntry.isSSDP()) {
-					header = new CustomHeaderInnerCard(context, "Searching", "auto");
+					header = new CustomHeaderInnerCard(context, "SSDP", "auto");
 				}else {
 					header = new CustomHeaderInnerCard(context, "Server", "auto");
 				}
@@ -305,7 +310,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 			} else {
 				mEtHost.setVisibility(View.GONE);
 				mEtPort.setVisibility(View.GONE);
-				mTvColon.setText("Searching your server via SSDP");
+				mTvColon.setText("Auto connect to your server");
 				mImageView.setBackgroundColor(SetupConnectionFragment.stringToColor("joetoetet"));
 			}
 			header.setAlways(mConEntry.isAuto());
@@ -314,8 +319,12 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 				mEtHost.setVisibility(View.GONE);
 				mEtPort.setVisibility(View.GONE);
 				mTvColon.setText("Passive");
-				header.setTitle("Passive");
+				mTvColon.setTextColor(Color.GRAY);
 				mImageView.setBackgroundColor(Color.LTGRAY);
+				//this.setBackgroundResourceId(R.color.light_grey);
+			}else{
+				mTvColon.setTextColor(Color.BLACK);
+				this.setBackgroundResourceId(R.color.card_background);
 			}
 		}
 

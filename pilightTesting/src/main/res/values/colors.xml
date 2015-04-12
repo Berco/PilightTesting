@@ -23,5 +23,6 @@
     <color name="pressed_carddemo">#BB2A84A5</color>
 	<!-- color for the inner cards texts-->    
     <color name="demo_title_section_textcolor">#2a84a5</color>
+    <color name="light_grey">#eeeeee</color>
 
 </resources>

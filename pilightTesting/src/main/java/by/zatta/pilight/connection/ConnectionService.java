@@ -464,10 +464,10 @@ public class ConnectionService extends Service {
 	private boolean makeConnection(ConnectionEntry connEntry) {
 		if (connEntry == null) connEntry = new ConnectionEntry(null, "0", true, true);
 
-		if (mCurrentNotif == NotificationType.DESTROYED)
+		//if (mCurrentNotif == NotificationType.DESTROYED)
 			makeNotification(NotificationType.CONNECTING, aCtx.getString(R.string.noti_connecting));
 
-		String serverString = "";
+		String serverString = "ADRESS";
 		if (!connEntry.isPassive())
 			serverString = Server.CONNECTION.setup(connEntry);
 

@@ -43,6 +43,12 @@
         android:layout_alignParentRight="true"
         android:gravity="center" >
 
+        <ProgressBar
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"/>
+
         <ToggleButton
             android:id="@+id/card_inner_tb"
             style="@style/ToggleButton.Pending"
@@ -51,11 +57,6 @@
             android:layout_centerInParent="true"
             android:textOff=""
             android:textOn="" />
-        <ProgressBar
-            style="?android:attr/progressBarStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"/>
 
     </RelativeLayout>
 

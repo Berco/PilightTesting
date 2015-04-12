@@ -539,12 +539,11 @@ public class MainActivity extends Activity implements ServiceConnection, DeviceL
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 			// Highlight the selected item, update the title, and close the
-			// drawer
-			// update selected item and title, then close the drawer
+			// drawer update selected item and title, then close the drawer
 			mDrawerList.setItemChecked(position, true);
-			mBaseFragment = DeviceListFragment.newInstance(mDevices, groups[0]);
+			mBaseFragment = DeviceListFragment.newInstance(mDevices, groups[position]);
 			openFragment(mBaseFragment);
-			mCurrentTitle = groups[0];
+			mCurrentTitle = groups[position];
 			mDrawer.closeDrawer(mDrawerList);
 		}
 	}

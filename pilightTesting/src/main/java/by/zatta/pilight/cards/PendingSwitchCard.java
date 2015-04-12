@@ -45,9 +45,11 @@ public class PendingSwitchCard extends DeviceCardAbstract {
 	protected ToggleButton mToggle;
 	protected boolean mState;
 
+	//TODO improve the button images, these come from illumia and don't really fit.
 	protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 		@Override
 		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+			buttonView.setVisibility(View.GONE);
 			JSONObject actionJSON = null;
 			try {
 				if (isChecked) codeJSON.put("state", "running");
@@ -65,12 +67,12 @@ public class PendingSwitchCard extends DeviceCardAbstract {
 
 	public PendingSwitchCard(Context context, DeviceEntry entry) {
 		// reuse the switch card
-		super(context, entry, R.layout.switchcard_inner);
+		super(context, entry, R.layout.pendingcard_inner);
 		for (SettingEntry sentry : entry.getSettings()) {
 			if (sentry.getKey().equals("state")) {
-				if (sentry.getValue().equals("running")) mState = true;
-				if (sentry.getValue().equals("pending")) mState = true;
-				if (sentry.getValue().equals("stopped")) mState = false;
+				if (sentry.getValue().equals("running")) { mState = true;  }
+				if (sentry.getValue().equals("pending")) { mState = true;  }
+				if (sentry.getValue().equals("stopped")) { mState = false; }
 			}
 		}
 	}
@@ -95,9 +97,9 @@ public class PendingSwitchCard extends DeviceCardAbstract {
 		mToggle.setOnCheckedChangeListener(null);
 		for (SettingEntry sentry : entry.getSettings()) {
 			if (sentry.getKey().equals("state")) {
-				if (sentry.getValue().equals("running")) mState = true;
-				if (sentry.getValue().equals("pending")) mState = true;
-				if (sentry.getValue().equals("stopped")) mState = false;
+				if (sentry.getValue().equals("running")) { mState = true; mToggle.setVisibility(View.VISIBLE);}
+				if (sentry.getValue().equals("pending")) { mState = true; mToggle.setVisibility(View.GONE);}
+				if (sentry.getValue().equals("stopped")) { mState = false; mToggle.setVisibility(View.VISIBLE);}
 				mToggle.setChecked(mState);
 			}
 		}

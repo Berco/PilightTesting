@@ -33,6 +33,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -314,6 +315,19 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 				mImageView.setBackgroundColor(SetupConnectionFragment.stringToColor("joetoetet"));
 			}
 			header.setAlways(mConEntry.isAuto());
+			CompoundButton.OnCheckedChangeListener listener = new CompoundButton.OnCheckedChangeListener() {
+				@Override
+				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+					mConEntry.setIsAuto(isChecked);
+					if (mConEntry.isSSDP()){
+						SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
+						SharedPreferences.Editor edit = prefs.edit();
+						edit.putBoolean("useSSDP", isChecked);
+						edit.commit();
+					}
+				}
+			};
+			header.setCheckListener(listener);
 
 			if (mConEntry.isPassive()){
 				mEtHost.setVisibility(View.GONE);
@@ -329,7 +343,6 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 		}
 
 		public ConnectionEntry getConnEntry() {
-			mConEntry.setIsAuto(header.doAlways());
 			return mConEntry;
 		}
 

@@ -35,7 +35,6 @@ public class CustomHeaderInnerCard extends CardHeader {
 	String device;
 	String location;
 	CheckBox mCbAlways;
-	boolean mDoAlways;
 
 	public CustomHeaderInnerCard(Context context, String deviceName, String locationName) {
 		super(context, R.layout.header_inner);
@@ -55,12 +54,6 @@ public class CustomHeaderInnerCard extends CardHeader {
 				t2.setText(location);
 
 			mCbAlways = (CheckBox) view.findViewById((R.id.cbAlways));
-			mCbAlways.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-				@Override
-				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-					mDoAlways = isChecked;
-				}
-			});
 		}
 	}
 
@@ -68,12 +61,11 @@ public class CustomHeaderInnerCard extends CardHeader {
 		if (show) mCbAlways.setVisibility(View.VISIBLE);
 	}
 
-	public boolean doAlways(){
-		return mDoAlways;
+	public void setAlways(boolean always){
+		mCbAlways.setChecked(always);
 	}
 
-	public void setAlways(boolean always){
-		mDoAlways = always;
-		mCbAlways.setChecked(always);
+	public void setCheckListener(CompoundButton.OnCheckedChangeListener listener){
+		mCbAlways.setOnCheckedChangeListener(listener);
 	}
 }

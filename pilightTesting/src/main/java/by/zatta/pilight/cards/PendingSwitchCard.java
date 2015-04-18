@@ -47,7 +47,6 @@ public class PendingSwitchCard extends DeviceCardAbstract {
 	protected ProgressBar mPb;
 	protected boolean mState;
 
-	//TODO improve the button images, these come from illumia and don't really fit.
 	protected CompoundButton.OnCheckedChangeListener toggleListener = new CompoundButton.OnCheckedChangeListener() {
 		@Override
 		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {

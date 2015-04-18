@@ -318,13 +318,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 			CompoundButton.OnCheckedChangeListener listener = new CompoundButton.OnCheckedChangeListener() {
 				@Override
 				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-					mConEntry.setIsAuto(isChecked);
-					if (mConEntry.isSSDP()){
-						SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
-						SharedPreferences.Editor edit = prefs.edit();
-						edit.putBoolean("useSSDP", isChecked);
-						edit.commit();
-					}
+					setAutoToPrefs(isChecked);
 				}
 			};
 			header.setCheckListener(listener);
@@ -348,6 +342,26 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 
 		public void togglePassive(){
 			mConEntry.setPassive(!mConEntry.isPassive());
+		}
+
+		private void setAutoToPrefs(boolean makeAuto){
+			mConEntry.setIsAuto(makeAuto);
+			SharedPreferences prefs = aCtx.getSharedPreferences("ZattaPrefs", Context.MODE_MULTI_PROCESS);
+			SharedPreferences.Editor edit = prefs.edit();
+			if (mConEntry.isSSDP()){
+				edit.putBoolean("useSSDP", makeAuto);
+				edit.commit();
+			} else {
+				Set<String> connections = prefs.getStringSet("know_connections", new HashSet<String>());
+				if (connections.contains(mConEntry.toStringNegative())) {
+					connections.remove(mConEntry.toStringNegative());
+					connections.add(mConEntry.toString());
+					edit.remove("know_connections");
+					edit.apply();
+					edit.putStringSet("know_connections", connections);
+					edit.apply();
+				}
+			}
 		}
 	}
 }

@@ -183,6 +183,7 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 
 		if (status.equals("CONNECTED")) {
 			mStatus = null;
+			cards = null;
 			changedStatusListener.onChangedStatusListener(DISMISS, null);
 		} else if (status.equals("CONNECTING")) {
 			pbConnecting.setVisibility(View.VISIBLE);

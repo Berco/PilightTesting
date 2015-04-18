@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.ToggleButton;
 
 import org.json.JSONException;
@@ -43,6 +44,7 @@ import by.zatta.pilight.model.SettingEntry;
 public class PendingSwitchCard extends DeviceCardAbstract {
 
 	protected ToggleButton mToggle;
+	protected ProgressBar mPb;
 	protected boolean mState;
 
 	//TODO improve the button images, these come from illumia and don't really fit.
@@ -50,6 +52,7 @@ public class PendingSwitchCard extends DeviceCardAbstract {
 		@Override
 		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 			buttonView.setVisibility(View.GONE);
+			mPb.setVisibility(View.VISIBLE);
 			JSONObject actionJSON = null;
 			try {
 				if (isChecked) codeJSON.put("state", "running");
@@ -81,6 +84,7 @@ public class PendingSwitchCard extends DeviceCardAbstract {
 	public void setupInnerViewElements(ViewGroup parent, View view) {
 		// Retrieve elements
 		mToggle = (ToggleButton) parent.findViewById(R.id.card_inner_tb);
+		mPb = (ProgressBar) parent.findViewById(R.id.pbPending);
 		ImageView mImage = (ImageView)parent.findViewById(R.id.colorBorder);
 		mImage.setBackgroundColor(mColor);
 
@@ -97,9 +101,9 @@ public class PendingSwitchCard extends DeviceCardAbstract {
 		mToggle.setOnCheckedChangeListener(null);
 		for (SettingEntry sentry : entry.getSettings()) {
 			if (sentry.getKey().equals("state")) {
-				if (sentry.getValue().equals("running")) { mState = true; mToggle.setVisibility(View.VISIBLE);}
-				if (sentry.getValue().equals("pending")) { mState = true; mToggle.setVisibility(View.GONE);}
-				if (sentry.getValue().equals("stopped")) { mState = false; mToggle.setVisibility(View.VISIBLE);}
+				if (sentry.getValue().equals("running")) { mState = true; mToggle.setVisibility(View.VISIBLE); mPb.setVisibility(View.GONE);}
+				if (sentry.getValue().equals("pending")) { mState = true; mToggle.setVisibility(View.GONE); mPb.setVisibility(View.VISIBLE);}
+				if (sentry.getValue().equals("stopped")) { mState = false; mToggle.setVisibility(View.VISIBLE); mPb.setVisibility(View.GONE);}
 				mToggle.setChecked(mState);
 			}
 		}

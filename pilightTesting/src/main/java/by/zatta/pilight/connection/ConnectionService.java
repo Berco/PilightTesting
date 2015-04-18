@@ -407,6 +407,7 @@ public class ConnectionService extends Service {
 		//??
 		Log.v(TAG, "onStartCommmand start");
 		sendMessageToUI(MSG_SET_STATUS, mCurrentNotif.name());
+		sendMessageToUI(MSG_SET_BUNDLE, null);
 		if (!(intent == null)) {
 			if (intent.hasExtra("command") && isConnectionUp) {
 				Server.CONNECTION.sentCommand(intent.getStringExtra("command"));

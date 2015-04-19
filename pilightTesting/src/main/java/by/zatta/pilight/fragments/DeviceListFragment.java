@@ -116,8 +116,7 @@ public class DeviceListFragment extends BaseFragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		mDevices = getArguments().getParcelableArrayList("config");
-		if (mFilter == null)
-			mFilter = getArguments().getString("filter", null);
+		mFilter = getArguments().getString("filter", null);
 		initCards();
 	}
 

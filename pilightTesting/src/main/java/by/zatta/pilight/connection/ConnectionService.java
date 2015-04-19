@@ -463,7 +463,10 @@ public class ConnectionService extends Service {
 	}
 
 	private boolean makeConnection(ConnectionEntry connEntry) {
-		if (connEntry == null) connEntry = new ConnectionEntry(null, "0", true, true);
+		if (connEntry == null) {
+			makeNotification(NotificationType.FAILED, null);
+			return false;
+		}
 
 		//if (mCurrentNotif == NotificationType.DESTROYED)
 			makeNotification(NotificationType.CONNECTING, aCtx.getString(R.string.noti_connecting));

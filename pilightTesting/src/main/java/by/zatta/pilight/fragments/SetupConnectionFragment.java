@@ -319,7 +319,8 @@ public class SetupConnectionFragment extends BaseFragment implements View.OnClic
 			CompoundButton.OnCheckedChangeListener listener = new CompoundButton.OnCheckedChangeListener() {
 				@Override
 				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-					setAutoToPrefs(isChecked);
+					if (buttonView.isPressed())
+						setAutoToPrefs(isChecked);
 				}
 			};
 			header.setCheckListener(listener);

@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.text.DecimalFormat;
@@ -132,6 +133,10 @@ public class WeatherCard extends DeviceCardAbstract {
 	@Override
 	public void setupInnerViewElements(ViewGroup parent, View view) {
 		// Retrieve elements
+		LinearLayout mLlTemperatureView = (LinearLayout) parent.findViewById(R.id.llCardInnerTemperature);
+		LinearLayout mLlHumidityView = (LinearLayout) parent.findViewById(R.id.llCardInnerHumidity);
+		LinearLayout mLlSunriseView = (LinearLayout) parent.findViewById(R.id.llCardInnerSunrise);
+		LinearLayout mLlSunsetView = (LinearLayout) parent.findViewById(R.id.llCardInnerSunset);
 		mTemperatureView = (TextView) parent.findViewById(R.id.card_main_inner_temperature);
 		mHumidityView = (TextView) parent.findViewById(R.id.card_main_inner_humidity);
 		mSunriseView = (TextView) parent.findViewById(R.id.card_main_inner_sunrise);
@@ -140,13 +145,13 @@ public class WeatherCard extends DeviceCardAbstract {
 		ImageView mImage = (ImageView)parent.findViewById(R.id.colorBorder);
 		mImage.setBackgroundColor(mColor);
 
-		if (mTemperatureView != null && mTemperature != null && showTemperature) mTemperatureView.setVisibility(View.VISIBLE);
+		if (mTemperature != null && showTemperature) mLlTemperatureView.setVisibility(View.VISIBLE);
 		mTemperatureView.setText(mTemperature);
-		if (mHumidityView != null && mHumidity != null && showHumidity) mHumidityView.setVisibility(View.VISIBLE);
+		if (mHumidity != null && showHumidity) mLlHumidityView.setVisibility(View.VISIBLE);
 		mHumidityView.setText(mHumidity);
-		if (mSunriseView != null && mSunriseTime != null) mSunriseView.setVisibility(View.VISIBLE);
+		if (mSunriseTime != null) mLlSunriseView.setVisibility(View.VISIBLE);
 		mSunriseView.setText(mSunriseTime);
-		if (mSunsetView != null && mSunsetTime != null) mSunsetView.setVisibility(View.VISIBLE);
+		if (mSunsetTime != null) mLlSunsetView.setVisibility(View.VISIBLE);
 		mSunsetView.setText(mSunsetTime);
 
 		if (mBatteryView != null && showBattery) {

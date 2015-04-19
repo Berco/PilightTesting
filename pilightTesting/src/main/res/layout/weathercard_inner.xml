@@ -25,66 +25,125 @@
 -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    tools:context=".fragments.DeviceListFragment$ListWeatherCard" >
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:context=".fragments.DeviceListFragment$ListWeatherCard">
 
     <ImageView
         android:id="@+id/colorBorder"
         android:layout_width="10dp"
         android:layout_height="@dimen/card_base_empty_height"
         android:layout_marginTop="2dp"
-        android:background="@drawable/rectangle" />
+        android:background="@drawable/rectangle"/>
 
     <!-- Use same ID to use built-in features -->
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/card_main_inner_simple_title"
         android:layout_alignParentRight="true"
+        android:layout_below="@id/card_main_inner_simple_title"
         android:layout_centerInParent="true"
         android:layout_marginRight="15dp"
-        android:gravity="center" >
+        android:gravity="center">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/card_main_inner_temperature"
-                style="@style/AppTheme.TitleText"
+            <LinearLayout
+                android:id="@+id/llCardInnerTemperature"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="0dp"
-                android:visibility="gone" />
+                android:orientation="horizontal"
+                android:visibility="gone">
+                <TextView
+                    android:id="@+id/card_main_inner_temperature"
+                    style="@style/AppTheme.TitleText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="0dp"/>
+                <ImageView
+                    android:layout_width="@dimen/demo_title_section_textsize"
+                    android:layout_height="@dimen/demo_title_section_textsize"
+                    android:layout_marginTop="@dimen/demo_title_section_margin_top"
+                    android:layout_marginBottom="@dimen/demo_title_section_margin_bottom"
+                    android:src="@drawable/thermometer"
+                    android:layout_alignBottom="@id/card_main_inner_temperature"
+                    android:layout_alignTop="@id/card_main_inner_temperature"
+                    />
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/card_main_inner_humidity"
-                style="@style/AppTheme.TitleText"
+            <LinearLayout
+                android:id="@+id/llCardInnerHumidity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="0dp"
-                android:visibility="gone" />
-            
-            <TextView
-                android:id="@+id/card_main_inner_sunrise"
-                style="@style/AppTheme.TitleText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="0dp"
-                android:visibility="gone" />
+                android:orientation="horizontal"
+                android:visibility="gone">
+                <TextView
+                    android:id="@+id/card_main_inner_humidity"
+                    style="@style/AppTheme.TitleText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="0dp"/>
+                <ImageView
+                    android:layout_width="@dimen/demo_title_section_textsize"
+                    android:layout_height="@dimen/demo_title_section_textsize"
+                    android:layout_marginTop="@dimen/demo_title_section_margin_top"
+                    android:layout_marginBottom="@dimen/demo_title_section_margin_bottom"
+                    android:src="@drawable/humidity"
+                    android:layout_alignBottom="@id/card_main_inner_humidity"
+                    android:layout_alignTop="@id/card_main_inner_humidity"
+                    />
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/card_main_inner_sunset"
-                style="@style/AppTheme.TitleText"
+            <LinearLayout
+                android:id="@+id/llCardInnerSunrise"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="0dp"
-                android:text="xx %"
-                android:visibility="gone" />
+                android:orientation="horizontal"
+                android:visibility="gone">
+                <TextView
+                    android:id="@+id/card_main_inner_sunrise"
+                    style="@style/AppTheme.TitleText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="0dp"/>
+                <ImageView
+                    android:layout_width="@dimen/demo_title_section_textsize"
+                    android:layout_height="@dimen/demo_title_section_textsize"
+                    android:layout_marginTop="@dimen/demo_title_section_margin_top"
+                    android:layout_marginBottom="@dimen/demo_title_section_margin_bottom"
+                    android:src="@drawable/sunrise"
+                    android:layout_alignBottom="@id/card_main_inner_sunrise"
+                    android:layout_alignTop="@id/card_main_inner_sunrise"
+                    />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llCardInnerSunset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone">
+                <TextView
+                    android:id="@+id/card_main_inner_sunset"
+                    style="@style/AppTheme.TitleText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="0dp"/>
+                <ImageView
+                    android:layout_width="@dimen/demo_title_section_textsize"
+                    android:layout_height="@dimen/demo_title_section_textsize"
+                    android:layout_marginTop="@dimen/demo_title_section_margin_top"
+                    android:layout_marginBottom="@dimen/demo_title_section_margin_bottom"
+                    android:src="@drawable/sunset"
+                    android:layout_alignBottom="@id/card_main_inner_sunset"
+                    android:layout_alignTop="@id/card_main_inner_sunset"
+                    />
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -94,7 +153,7 @@
             android:layout_height="match_parent"
             android:layout_marginTop="2dp"
             android:src="@drawable/batt_full"
-            android:visibility="gone" />
+            android:visibility="gone"/>
     </LinearLayout>
 
 </RelativeLayout>

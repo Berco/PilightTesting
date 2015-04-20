@@ -467,6 +467,10 @@ public class ConnectionService extends Service {
 			makeNotification(NotificationType.FAILED, null);
 			return false;
 		}
+		if (connEntry.getPort().equals("0") || connEntry.getHost().equals("null")) {
+			makeNotification(NotificationType.FAILED, null);
+			return false;
+		}
 
 		//if (mCurrentNotif == NotificationType.DESTROYED)
 			makeNotification(NotificationType.CONNECTING, aCtx.getString(R.string.noti_connecting));

@@ -17,7 +17,7 @@
   ~  * for more details.
   ~  * 
   ~  * You should have received a copy of the GNU General Public License along 
-  ~  * with pilightfor android.
+  ~  * with pilight for android.
   ~  * If not, see <http://www.gnu.org/licenses/>
   ~  * 
   ~  * Copyright (c) 2013 pilight project
@@ -48,112 +48,126 @@
         android:layout_marginRight="15dp"
         android:gravity="center">
 
+        <ImageView
+            android:id="@+id/card_main_inner_battery"
+            android:layout_width="30dp"
+            android:layout_height="match_parent"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="2dp"
+            android:src="@drawable/batt_full"
+            android:visibility="gone"/>
+
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/llCardInnerTemperature"
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:id="@+id/RlCardInnerTemperature"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:visibility="gone">
+
                 <TextView
                     android:id="@+id/card_main_inner_temperature"
                     style="@style/AppTheme.TitleText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
                     android:layout_marginTop="0dp"/>
+
                 <ImageView
                     android:layout_width="@dimen/demo_title_section_textsize"
                     android:layout_height="@dimen/demo_title_section_textsize"
-                    android:layout_marginTop="@dimen/demo_title_section_margin_top"
-                    android:layout_marginBottom="@dimen/demo_title_section_margin_bottom"
-                    android:src="@drawable/thermometer"
                     android:layout_alignBottom="@id/card_main_inner_temperature"
+                    android:layout_alignParentRight="true"
                     android:layout_alignTop="@id/card_main_inner_temperature"
+                    android:layout_marginBottom="@dimen/demo_title_section_margin_bottom"
+                    android:layout_marginTop="@dimen/demo_title_section_margin_top"
+                    android:src="@drawable/thermometer"
                     />
-            </LinearLayout>
+            </RelativeLayout>
 
-            <LinearLayout
-                android:id="@+id/llCardInnerHumidity"
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:id="@+id/RlCardInnerHumidity"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:visibility="gone">
+
                 <TextView
                     android:id="@+id/card_main_inner_humidity"
                     style="@style/AppTheme.TitleText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
                     android:layout_marginTop="0dp"/>
+
                 <ImageView
                     android:layout_width="@dimen/demo_title_section_textsize"
                     android:layout_height="@dimen/demo_title_section_textsize"
-                    android:layout_marginTop="@dimen/demo_title_section_margin_top"
-                    android:layout_marginBottom="@dimen/demo_title_section_margin_bottom"
-                    android:src="@drawable/humidity"
                     android:layout_alignBottom="@id/card_main_inner_humidity"
+                    android:layout_alignParentRight="true"
                     android:layout_alignTop="@id/card_main_inner_humidity"
+                    android:layout_marginBottom="@dimen/demo_title_section_margin_bottom"
+                    android:layout_marginTop="@dimen/demo_title_section_margin_top"
+                    android:src="@drawable/humidity"
                     />
-            </LinearLayout>
+            </RelativeLayout>
 
-            <LinearLayout
-                android:id="@+id/llCardInnerSunrise"
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:id="@+id/RlCardInnerSunrise"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:visibility="gone">
+
                 <TextView
                     android:id="@+id/card_main_inner_sunrise"
                     style="@style/AppTheme.TitleText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
                     android:layout_marginTop="0dp"/>
+
                 <ImageView
                     android:layout_width="@dimen/demo_title_section_textsize"
                     android:layout_height="@dimen/demo_title_section_textsize"
-                    android:layout_marginTop="@dimen/demo_title_section_margin_top"
-                    android:layout_marginBottom="@dimen/demo_title_section_margin_bottom"
-                    android:src="@drawable/sunrise"
                     android:layout_alignBottom="@id/card_main_inner_sunrise"
+                    android:layout_alignParentRight="true"
                     android:layout_alignTop="@id/card_main_inner_sunrise"
+                    android:layout_marginBottom="@dimen/demo_title_section_margin_bottom"
+                    android:layout_marginTop="@dimen/demo_title_section_margin_top"
+                    android:src="@drawable/sunrise"
                     />
-            </LinearLayout>
+            </RelativeLayout>
 
-            <LinearLayout
-                android:id="@+id/llCardInnerSunset"
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:id="@+id/RlCardInnerSunset"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:visibility="gone">
+
                 <TextView
                     android:id="@+id/card_main_inner_sunset"
                     style="@style/AppTheme.TitleText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
                     android:layout_marginTop="0dp"/>
+
                 <ImageView
                     android:layout_width="@dimen/demo_title_section_textsize"
                     android:layout_height="@dimen/demo_title_section_textsize"
-                    android:layout_marginTop="@dimen/demo_title_section_margin_top"
-                    android:layout_marginBottom="@dimen/demo_title_section_margin_bottom"
-                    android:src="@drawable/sunset"
                     android:layout_alignBottom="@id/card_main_inner_sunset"
+                    android:layout_alignParentRight="true"
                     android:layout_alignTop="@id/card_main_inner_sunset"
+                    android:layout_marginBottom="@dimen/demo_title_section_margin_bottom"
+                    android:layout_marginTop="@dimen/demo_title_section_margin_top"
+                    android:src="@drawable/sunset"
                     />
-            </LinearLayout>
+            </RelativeLayout>
 
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/card_main_inner_battery"
-            android:layout_width="30dp"
-            android:layout_height="match_parent"
-            android:layout_marginTop="2dp"
-            android:src="@drawable/batt_full"
-            android:visibility="gone"/>
     </LinearLayout>
 
 </RelativeLayout>

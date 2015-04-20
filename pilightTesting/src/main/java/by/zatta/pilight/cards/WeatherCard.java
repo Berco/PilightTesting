@@ -25,11 +25,10 @@ package by.zatta.pilight.cards;
 
 import android.content.Context;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.text.DecimalFormat;
@@ -115,7 +114,7 @@ public class WeatherCard extends DeviceCardAbstract {
 		DecimalFormat timeDigit = new DecimalFormat("#0000.###");
 		timeDigit.setDecimalSeparatorAlwaysShown(false);
 		String[] timeArr = time.split("[^0-9]");
-		if (timeArr.length==2){
+		if (timeArr.length == 2) {
 			if (timeArr[0].length() < 2) timeArr[0] = "0" + timeArr[0];
 			if (timeArr[1].length() < 2) timeArr[1] = timeArr[1] + "0";
 			time = timeArr[0] + timeArr[1];
@@ -133,16 +132,16 @@ public class WeatherCard extends DeviceCardAbstract {
 	@Override
 	public void setupInnerViewElements(ViewGroup parent, View view) {
 		// Retrieve elements
-		LinearLayout mLlTemperatureView = (LinearLayout) parent.findViewById(R.id.llCardInnerTemperature);
-		LinearLayout mLlHumidityView = (LinearLayout) parent.findViewById(R.id.llCardInnerHumidity);
-		LinearLayout mLlSunriseView = (LinearLayout) parent.findViewById(R.id.llCardInnerSunrise);
-		LinearLayout mLlSunsetView = (LinearLayout) parent.findViewById(R.id.llCardInnerSunset);
+		RelativeLayout mLlTemperatureView = (RelativeLayout) parent.findViewById(R.id.RlCardInnerTemperature);
+		RelativeLayout mLlHumidityView = (RelativeLayout) parent.findViewById(R.id.RlCardInnerHumidity);
+		RelativeLayout mLlSunriseView = (RelativeLayout) parent.findViewById(R.id.RlCardInnerSunrise);
+		RelativeLayout mLlSunsetView = (RelativeLayout) parent.findViewById(R.id.RlCardInnerSunset);
 		mTemperatureView = (TextView) parent.findViewById(R.id.card_main_inner_temperature);
 		mHumidityView = (TextView) parent.findViewById(R.id.card_main_inner_humidity);
 		mSunriseView = (TextView) parent.findViewById(R.id.card_main_inner_sunrise);
 		mSunsetView = (TextView) parent.findViewById(R.id.card_main_inner_sunset);
 		mBatteryView = (ImageView) parent.findViewById(R.id.card_main_inner_battery);
-		ImageView mImage = (ImageView)parent.findViewById(R.id.colorBorder);
+		ImageView mImage = (ImageView) parent.findViewById(R.id.colorBorder);
 		mImage.setBackgroundColor(mColor);
 
 		if (mTemperature != null && showTemperature) mLlTemperatureView.setVisibility(View.VISIBLE);

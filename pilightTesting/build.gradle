@@ -41,4 +41,5 @@ dependencies {
     compile 'com.android.support:support-v4:19.1.0'
 	compile 'com.nineoldandroids:library:2.4.0'
     compile 'com.melnykov:floatingactionbutton:1.2.0'
+    wearApp project(':pilightWear')
 }

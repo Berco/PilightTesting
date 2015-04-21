@@ -443,7 +443,7 @@ public class ConnectionService extends Service {
 			boolean useSSDP = prefs.getBoolean("useSSDP", true);
 
 			list = new ArrayList<ConnectionEntry>();
-			if (useSSDP) list.add(new ConnectionEntry(null, null, true, true));
+			if (useSSDP) list.add(new ConnectionEntry("", "", true, true));
 
 			Set<String> connections = prefs.getStringSet("know_connections", new HashSet<String>());
 			Iterator<?> connIt = connections.iterator();
